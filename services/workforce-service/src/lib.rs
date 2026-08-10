@@ -1,0 +1,38 @@
+//! Library surface of the workforce service, exported for integration tests.
+
+pub mod audit_emit;
+pub mod documents;
+pub mod models;
+
+// Internal modules used only by the binary.
+#[doc(hidden)]
+pub mod handlers;
+#[doc(hidden)]
+pub mod openapi;
+#[doc(hidden)]
+pub mod routes;
+
+use std::sync::Arc;
+use aos_common::config::{Config, S3Config};
+use aws_sdk_s3::Client as S3Client;
+
+/// Shared application state — re-exported for tests that instantiate handlers.
+#[derive(Clone)]
+pub struct AppState {
+    pub config: Arc<Config>,
+    pub s3_client: Arc<S3Client>,
+    pub s3_cfg: S3Config,
+}
+
+impl AppState {
+    pub fn placeholder() -> Self {
+        let cfg = Config::default();
+        let s3_cfg = cfg.s3.clone();
+        let client = aos_common::s3::build_s3_client(&s3_cfg);
+        Self {
+            config: Arc::new(cfg),
+            s3_client: Arc::new(client),
+            s3_cfg,
+        }
+    }
+}

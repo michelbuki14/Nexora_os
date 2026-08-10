@@ -6,6 +6,7 @@
 pub mod audit;
 pub mod auth_middleware;
 pub mod config;
+pub mod s3;
 pub mod db;
 pub mod error;
 pub mod health;

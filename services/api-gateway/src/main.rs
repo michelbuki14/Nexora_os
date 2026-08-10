@@ -65,6 +65,10 @@ async fn main() -> anyhow::Result<()> {
         .nest("/api/v1/identity", placeholder_router("identity"))
         .nest("/api/v1/organizations", placeholder_router("organizations"))
         .nest("/api/v1/audit", placeholder_router("audit"))
+        // Workforce is a real service; its router owns its own auth+RLS stack.
+        // The gateway forwards /api/v1/workforce/* to the workforce service
+        // (currently co-located; extract to a separate process when load demands).
+        .nest("/api/v1/workforce", placeholder_router("workforce"))
         .nest("/api/v1/commerce", placeholder_router("commerce"))
         .nest("/api/v1/finance", placeholder_router("finance"))
         .nest("/api/v1/government", placeholder_router("government"));

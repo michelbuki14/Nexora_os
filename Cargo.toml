@@ -5,6 +5,7 @@ members = [
     "services/api-gateway",
     "services/tenant-service",
     "services/audit-service",
+    "services/workforce-service",
     "services/retail-service",
     "services/fintech-service",
     "services/gov-service",
