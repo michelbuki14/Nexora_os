@@ -1,7 +1,7 @@
 //! Health check endpoints and readiness/liveness probes.
 
 use crate::Config;
-use axum::{routing::get, Router};
+use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use utoipa::ToSchema;
@@ -169,11 +169,12 @@ async fn health_handler(
 }
 
 /// Readiness endpoint - ready to serve traffic.
+/// Returns 200 when ready, 503 when not ready (so K8s readiness probe works).
 async fn readiness_handler(
     axum::extract::State(config): axum::extract::State<Arc<Config>>,
-) -> axum::Json<ReadinessResponse> {
+) -> impl IntoResponse {
     let ready = config.service.environment != crate::config::Environment::Development;
-    axum::Json(ReadinessResponse {
+    let resp = ReadinessResponse {
         ready,
         checks: vec![ReadinessCheck {
             name: "configuration".to_string(),
@@ -184,7 +185,12 @@ async fn readiness_handler(
                 Some("development mode".to_string())
             },
         }],
-    })
+    };
+    if ready {
+        (StatusCode::OK, axum::Json(resp)).into_response()
+    } else {
+        (StatusCode::SERVICE_UNAVAILABLE, axum::Json(resp)).into_response()
+    }
 }
 
 /// Liveness endpoint - process is alive.

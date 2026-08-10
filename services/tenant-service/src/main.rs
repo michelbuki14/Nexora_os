@@ -105,7 +105,7 @@ async fn main() -> anyhow::Result<()> {
         .layer(TraceLayer::new_for_http())
         .layer(cors);
 
-    let addr: SocketAddr = format!("{}:{}", config.server.host, config.server.port + 1).parse()?;
+    let addr: SocketAddr = format!("{}:{}", config.server.host, config.server.port).parse()?;
     info!(%addr, "AOS Tenant Service started");
 
     axum::serve(tokio::net::TcpListener::bind(addr).await?, app)

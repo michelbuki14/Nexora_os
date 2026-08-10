@@ -32,7 +32,7 @@ use sha2::{Digest, Sha256};
 
 use crate::models::{CreateDocumentMetadataRequest, DocumentResponse, DocumentRow};
 
-/// Context the handler passes to `upload_document`.
+/// Context the handler passes to `upload_to_storage`.
 pub struct UploadContext<'a> {
     pub tenant_ulid: &'a str,
     pub employee_ulid: &'a str,
@@ -43,12 +43,14 @@ pub struct UploadContext<'a> {
 
 /// Upload bytes to MinIO and return the object key + hex SHA-256.
 ///
+/// Consumes `ctx` so `bytes` are moved into the S3 body without cloning.
+///
 /// The INSERT into `wf_documents` is the caller's responsibility (it must be
 /// inside the rls_middleware transaction together with the audit_emit call).
 pub async fn upload_to_storage(
     s3: &S3Client,
     s3_cfg: &S3Config,
-    ctx: &UploadContext<'_>,
+    ctx: UploadContext<'_>,
 ) -> AosResult<(String, String)> {
     let object_key = document_object_key(ctx.tenant_ulid, ctx.employee_ulid, ctx.doc_ulid);
 
@@ -57,11 +59,12 @@ pub async fn upload_to_storage(
     hasher.update(&ctx.bytes);
     let sha256 = hex::encode(hasher.finalize());
 
+    // Move bytes into put_document — zero extra allocation.
     put_document(
         s3,
         &s3_cfg.bucket,
         &object_key,
-        ctx.bytes.clone(),
+        ctx.bytes,
         &ctx.request.mime_type,
     )
     .await?;
@@ -70,6 +73,9 @@ pub async fn upload_to_storage(
 }
 
 /// Generate a presigned GET URL. Only called after RBAC+IDOR checks pass.
+///
+/// TTL is capped at 3600s regardless of config — presigned URLs should be
+/// short-lived; a config mistake shouldn't produce day-long document URLs.
 pub async fn presigned_url_for_doc(
     s3: &S3Client,
     s3_cfg: &S3Config,
@@ -81,8 +87,9 @@ pub async fn presigned_url_for_doc(
             row.ulid
         )));
     }
-    let url = presign_get(s3, &s3_cfg.bucket, &row.object_key, s3_cfg.presign_ttl_secs).await?;
-    Ok((url, s3_cfg.presign_ttl_secs))
+    let ttl = s3_cfg.presign_ttl_secs.min(3600); // ponytail: cap; raise if clients need longer
+    let url = presign_get(s3, &s3_cfg.bucket, &row.object_key, ttl).await?;
+    Ok((url, ttl))
 }
 
 /// Deactivate a document in storage. Metadata row is soft-deleted by the caller.

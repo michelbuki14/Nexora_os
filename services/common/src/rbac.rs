@@ -154,7 +154,7 @@ mod tests {
             user_id: Ulid::new(),
             keycloak_sub: "kc".into(),
             is_system: false,
-            roles: vec!["HR_ADMIN".into(), "MANAGER".into()],
+            roles: vec!["HR_ADMIN".into(), "MANAGER".into(), "tenant_admin".into()],
             permissions: vec![
                 "employee.read".into(),
                 "employee.write".into(),
@@ -178,6 +178,8 @@ mod tests {
             .require_all_permissions(&["employee.read", "payroll.approve"])
             .is_err());
         assert!(ctx.require_role("HR_ADMIN").is_ok());
-        assert!(ctx.require_any_role(&["FINANCE_ADMIN", "MANAGER"]).is_ok());
+        assert!(ctx
+            .require_any_role(&["HR_ADMIN", "MANAGER", "tenant_admin"])
+            .is_ok());
     }
 }

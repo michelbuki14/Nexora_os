@@ -1,0 +1,44 @@
+# AOS Tenant Service — local development configuration.
+# Matches docker-compose.yml (aos-postgres / aos-redis / aos-keycloak).
+
+[service]
+name = "aos-tenant-service"
+version = "0.1.0"
+environment = "development"
+
+[server]
+host = "0.0.0.0"
+port = 3004
+request_timeout_secs = 30
+body_limit_bytes = 10485760
+graceful_shutdown_secs = 30
+
+[database]
+url = "postgresql://aos:aos_dev_password@localhost:5432/aos"
+max_connections = 10
+min_connections = 2
+connect_timeout_secs = 10
+idle_timeout_secs = 300
+max_lifetime_secs = 1800
+enable_logging = true
+
+[redis]
+url = "redis://:aos_dev_password@localhost:6379/0"
+max_connections = 10
+connection_timeout_secs = 5
+command_timeout_secs = 5
+
+[auth]
+jwks_url = "http://localhost:8080/realms/aos/protocol/openid-connect/certs"
+issuer = "http://localhost:8080/realms/aos"
+audience = "aos-api"
+jwks_cache_ttl_secs = 300
+require_https = false
+allowed_algorithms = ["RS256"]
+
+[tracing]
+enabled = false
+otlp_endpoint = "http://localhost:4317"
+service_name = "aos-tenant-service"
+sample_rate = 1.0
+export_timeout_secs = 10

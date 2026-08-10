@@ -8,15 +8,29 @@
 //! Object keys are namespaced `{tenant_ulid}/{employee_ulid}/{doc_ulid}` so that
 //! a key from another tenant is not merely unauthorized but unguessable.
 
-use aws_config::SdkConfig;
-use aws_credential_types::Credentials;
-use aws_sdk_s3::config::{Builder as S3Builder, Region};
+use aws_config::{BehaviorVersion, SdkConfig};
+use aws_credential_types::{provider::SharedCredentialsProvider, Credentials};
+use aws_sdk_s3::config::{AsyncSleep, Builder as S3Builder, Region};
 use aws_sdk_s3::presigning::PresigningConfig;
 use aws_sdk_s3::Client;
 use std::time::Duration;
+use tokio::time::sleep;
 
 use crate::config::S3Config;
 use crate::error::{AosError, AosResult};
+
+/// Wrapper to make `tokio::time::sleep` implement `AsyncSleep`.
+#[derive(Debug)]
+struct TokioSleep;
+
+impl AsyncSleep for TokioSleep {
+    fn sleep(&self, duration: Duration) -> aws_sdk_s3::config::Sleep {
+        let fut = async move {
+            sleep(duration).await;
+        };
+        aws_sdk_s3::config::Sleep::new(Box::pin(fut))
+    }
+}
 
 /// Build an S3 `Client` from our config. Call once at startup and clone the Arc.
 pub fn build_s3_client(cfg: &S3Config) -> Client {
@@ -29,8 +43,10 @@ pub fn build_s3_client(cfg: &S3Config) -> Client {
     );
     let sdk_config = SdkConfig::builder()
         .region(Region::new(cfg.region.clone()))
-        .credentials_provider(creds)
+        .credentials_provider(SharedCredentialsProvider::new(creds))
         .endpoint_url(&cfg.endpoint)
+        .sleep_impl(TokioSleep)
+        .behavior_version(BehaviorVersion::latest())
         .build();
 
     let s3_cfg = S3Builder::from(&sdk_config)

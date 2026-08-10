@@ -8,14 +8,8 @@
 use std::{net::SocketAddr, sync::Arc};
 
 use aos_common::{
-    auth_middleware::AuthState,
-    config::Config,
-    db::connect,
-    health::health_router,
-    jwt::JwtValidator,
-    logging::init_logging,
-    s3::build_s3_client,
-    tenant_context::RlsState,
+    auth_middleware::AuthState, config::Config, db::connect, health::health_router,
+    jwt::JwtValidator, logging::init_logging, s3::build_s3_client, tenant_context::RlsState,
 };
 use tower_http::{
     cors::{Any, CorsLayer},
@@ -37,11 +31,16 @@ async fn main() -> anyhow::Result<()> {
 
     let config = Arc::new(config);
     let pool = connect(&config.database).await?;
-    let jwt = JwtValidator::new(config.auth.clone());
+    let jwt = Arc::new(JwtValidator::new(config.auth.clone()));
     let s3_client = Arc::new(build_s3_client(&config.s3));
 
-    let rls_state = RlsState::new(pool.clone());
-    let auth_state = AuthState::new(jwt);
+    let rls_state = RlsState {
+        pool: pool.clone(),
+        config: config.clone(),
+    };
+    let auth_state = AuthState {
+        validator: jwt.clone(),
+    };
 
     let state = AppState {
         config: config.clone(),
@@ -61,10 +60,10 @@ async fn main() -> anyhow::Result<()> {
 
     let request_id = MakeRequestUuid;
     let health = health_router(config.clone());
-    let wf_routes: axum::Router = workforce_router(rls_state, auth_state).with_state(state);
+    let wf_routes: axum::Router<AppState> = workforce_router(rls_state, auth_state);
 
     let app = health
-        .merge(wf_routes)
+        .merge(wf_routes.with_state(state))
         .layer(SetRequestIdLayer::new(
             axum::http::HeaderName::from_static("x-request-id"),
             request_id,

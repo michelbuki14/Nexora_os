@@ -1,0 +1,132 @@
+# Shared defaults for an AOS service. Override per-service via values/*.yaml.
+# Config model (services/common/src/config.rs): figment merges config.*.toml
+# files with AOS_-prefixed env vars (double-underscore = nesting). In-cluster we
+# drive everything through env vars so no config file needs mounting.
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/michelbuki14/aos
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+# The service image name (Dockerfile builds each binary, one tag per service).
+# Per-service values set `image.repository` to the right image.
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: RuntimeDefault
+
+# AOS config. `service.name` is overridden per service.
+# External infra (Keycloak, MinIO, Tempo) is deployed OUTSIDE this chart — it
+# ships only the four AOS services. The env values below use short DNS names
+# that must resolve inside the cluster; override per-service (values/*.yaml)
+# with FQDNs if infra lives in another namespace.
+env:
+  AOS_SERVICE__ENVIRONMENT: production
+  AOS_SERVER__HOST: 0.0.0.0
+  AOS_SERVER__PORT: "3000"
+  AOS_DATABASE__MAX_CONNECTIONS: "20"
+  AOS_REDIS__MAX_CONNECTIONS: "50"
+  AOS_AUTH__JWKS_URL: http://keycloak:8080/realms/aos/protocol/openid-connect/certs
+  AOS_AUTH__ISSUER: http://keycloak:8080/realms/aos
+  AOS_AUTH__AUDIENCE: aos-api
+  AOS_AUTH__JWKS_CACHE_TTL_SECS: "300"
+  AOS_AUTH__REQUIRE_HTTPS: "false"
+  AOS_TRACING__ENABLED: "true"
+  AOS_TRACING__OTLP_ENDPOINT: http://aos-grafana-tempo:4317
+  AOS_TRACING__SAMPLE_RATE: "0.1"
+
+# Secret values (DB URL, Redis URL, S3 creds). Referenced via secretKeyRef so
+# they never land in the chart. ESO (External Secrets Operator) syncs
+# AWS Secrets Manager entries into a cluster Secret named `aos-runtime`.
+existingSecret: aos-runtime
+
+# Bootstrap fallback (DEV ONLY): used when externalSecret.enabled=false so a
+# fresh cluster actually starts. Override these in production or enable ESO.
+runtimeSecret:
+  AOS_DATABASE__URL: "postgres://aos:aos_dev_password@postgres:5432/aos"
+  AOS_REDIS__URL: "redis://:aos_dev_password@redis:6379/0"
+  AOS_S3__ACCESS_KEY_ID: "minioadmin"
+  AOS_S3__SECRET_ACCESS_KEY: "minioadmin"
+
+# External Secrets Operator source (opt-in; see templates/externalsecret.yaml).
+# The cluster Secret it targets must contain keys matching the env var names,
+# e.g. AOS_DATABASE__URL, AOS_REDIS__URL, AOS_S3__ACCESS_KEY_ID,
+# AOS_S3__SECRET_ACCESS_KEY.
+externalSecret:
+  enabled: false
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secretsmanager
+    kind: SecretStore
+  remoteKeys:
+    - secretKey: AOS_DATABASE__URL
+      remoteKey: aos/production/database-url
+    - secretKey: AOS_REDIS__URL
+      remoteKey: aos/production/redis-url
+    - secretKey: AOS_S3__ACCESS_KEY_ID
+      remoteKey: aos/production/s3-access-key-id
+    - secretKey: AOS_S3__SECRET_ACCESS_KEY
+      remoteKey: aos/production/s3-secret-access-key
+
+# Container port the app listens on (must match AOS_SERVER__PORT).
+service:
+  port: 3000
+  targetPort: http
+
+# HTTP probes. All AOS services expose /health, /health/live, /health/ready.
+probes:
+  enabled: true
+  path: /health/ready
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 6
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Ingress is managed by the ALB controller in prod; values/*.yaml sets
+# ingress.enabled + host + annotations per environment overlay.
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
+
+# Node selection / affinity for prod.
+nodeSelector: {}
+tolerations: []
+affinity: {}

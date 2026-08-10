@@ -6,7 +6,6 @@
 pub mod audit;
 pub mod auth_middleware;
 pub mod config;
-pub mod s3;
 pub mod db;
 pub mod error;
 pub mod health;
@@ -14,6 +13,7 @@ pub mod jwt;
 pub mod logging;
 pub mod money;
 pub mod rbac;
+pub mod s3;
 pub mod tenant;
 pub mod tenant_context;
 pub mod time;

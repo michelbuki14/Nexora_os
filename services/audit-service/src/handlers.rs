@@ -429,7 +429,7 @@ fn canonical_payload(
         "tenant_id": tenant_id.to_string(),
         "org_id": org_id.to_string(),
         "actor_type": req.actor_type.as_str(),
-        "actor_id": req.actor_id.map(|u| u.to_string()),
+        "actor_id": req.actor_id,
         "action": req.action,
         "resource_type": req.resource_type,
         "resource_id": req.resource_id.map(|u| u.to_string()),
@@ -453,7 +453,7 @@ fn canonical_payload_from_row(row: &AuditEventRow) -> String {
         "tenant_id": row.tenant_id.to_string(),
         "org_id": row.org_id.to_string(),
         "actor_type": row.actor_type,
-        "actor_id": row.actor_id.map(|u| u.to_string()),
+        "actor_id": row.actor_id,
         "action": row.action,
         "resource_type": row.resource_type,
         "resource_id": row.resource_id.map(|u| u.to_string()),
@@ -497,7 +497,7 @@ fn validate_result(s: &str) -> Result<(), AosError> {
 mod tests {
     use super::*;
     use crate::models::{ActorType, AuditEventRow, AuditResult};
-    use aos_common::{AuthContext, ulid::Ulid};
+    use aos_common::{ulid::Ulid, AuthContext};
     use chrono::Utc;
     use uuid::Uuid;
 
@@ -540,7 +540,7 @@ mod tests {
         // Create request matching what a handler would receive.
         let req = CreateAuditRequest {
             actor_type: ActorType::User,
-            actor_id: Some(Uuid::new_v4()),
+            actor_id: Some("01HXZ_ACTOR_ULID_TEST0001".into()),
             action: "tenant.create".into(),
             resource_type: "tenant".into(),
             resource_id: Some(Uuid::new_v4()),

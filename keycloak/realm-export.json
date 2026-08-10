@@ -96,12 +96,19 @@
     {
       "clientId": "aos-developer-portal",
       "name": "AOS Developer Portal",
-      "description": "Frontend application for developers",
+      "description": "Frontend application for developers (public SPA, PKCE)",
       "enabled": true,
-      "clientAuthenticatorType": "client-secret",
-      "secret": "aos-dev-secret-12345",
-      "redirectUris": ["https://developers.aos.example.com/callback", "http://localhost:3000/callback"],
-      "webOrigins": ["https://developers.aos.example.com", "http://localhost:3000"],
+      "publicClient": true,
+      "redirectUris": [
+        "https://developers.aos.example.com/callback",
+        "http://localhost:3000/callback",
+        "http://localhost:4000/callback"
+      ],
+      "webOrigins": [
+        "https://developers.aos.example.com",
+        "http://localhost:3000",
+        "http://localhost:4000"
+      ],
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
@@ -109,7 +116,6 @@
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
-      "authorizationServicesEnabled": true,
       "fullScopeAllowed": true,
       "protocolMappers": [
         {
@@ -157,6 +163,20 @@
             "access.token.claim": "true",
             "claim.name": "roles"
           }
+        },
+        {
+          "name": "permissions",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "config": {
+            "user.attribute": "permissions",
+            "claim.name": "permissions",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
         }
       ]
     }
@@ -165,6 +185,11 @@
     "realm": [
       { "name": "aos_admin", "description": "Platform administrator" },
       { "name": "aos_operator", "description": "Platform operator" },
+      { "name": "PLATFORM_ADMIN", "description": "Platform administrator (legacy)" },
+      { "name": "SUPER_ADMIN", "description": "Super administrator (legacy)" },
+      { "name": "HR_ADMIN", "description": "Human Resources administrator" },
+      { "name": "MANAGER", "description": "Team manager" },
+      { "name": "EMPLOYEE", "description": "Standard employee" },
       { "name": "tenant_admin", "description": "Tenant administrator", "composite": true },
       { "name": "tenant_user", "description": "Tenant user" },
       { "name": "tenant_viewer", "description": "Tenant viewer" }
@@ -175,23 +200,42 @@
   "components": {},
   "users": [
     {
-      "username": "dev-admin",
-      "email": "dev-admin@aos.local",
+      "username": "mkasongo@myyahoo.com",
+      "email": "mkasongo@myyahoo.com",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Dev",
-      "lastName": "Admin",
+      "firstName": "Miche",
+      "lastName": "Kasongo",
       "attributes": {
         "tenant_id": ["01ARZ3NDEKTSV4RRFFQ69G5FAW"],
-        "org_id":    ["01ARZ3NDEKTSV4RRFFQ69G5FAX"]
+        "org_id": ["01ARZ3NDEKTSV4RRFFQ69G5FAX"],
+        "permissions": [
+          "employee.read",
+          "employee.write",
+          "employee.terminate",
+          "employee.export",
+          "employee.compensation.read",
+          "employee.compensation.write",
+          "employee.documents.read",
+          "employee.documents.write",
+          "department.read",
+          "department.write",
+          "position.read",
+          "position.write",
+          "location.read",
+          "location.write",
+          "legal_entity.read",
+          "legal_entity.write",
+          "team.read",
+          "team.write"
+        ]
       },
-      "realmRoles": ["tenant_admin", "tenant_user"],
+      "realmRoles": ["tenant_admin", "tenant_user", "HR_ADMIN", "MANAGER"],
       "credentials": [
         {
           "type": "password",
           "temporary": false,
-          "secretData": "{\"value\":\"KjX6WVvhoIO0Qm70TEIChorvZxK2JpVb6Wxq3e7mKDsg7R/rlVkg1bmEIf1CSu+aveZxQnBNLz4dqKOfBz/RIg==\",\"salt\":\"YW9zX2Rldl9zYWx0MTIzNA==\",\"additionalParameters\":{}}",
-          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+          "value": "200300Bk@"
         }
       ]
     }

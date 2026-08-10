@@ -1,0 +1,49 @@
+# Workforce Service — live Phase 1 module. Connects to Postgres + S3 (MinIO).
+replicaCount: 2
+
+image:
+  repository: ghcr.io/michelbuki14/aos-workforce-service
+  tag: "0.1.0"
+
+env:
+  AOS_SERVICE__NAME: aos-workforce-service
+  AOS_SERVICE__ENVIRONMENT: production
+  AOS_SERVER__HOST: 0.0.0.0
+  AOS_SERVER__PORT: "3002"
+  AOS_DATABASE__MAX_CONNECTIONS: "20"
+  AOS_REDIS__MAX_CONNECTIONS: "50"
+  AOS_AUTH__JWKS_URL: http://keycloak:8080/realms/aos/protocol/openid-connect/certs
+  AOS_AUTH__ISSUER: http://keycloak:8080/realms/aos
+  AOS_AUTH__AUDIENCE: aos-api
+  AOS_AUTH__JWKS_CACHE_TTL_SECS: "300"
+  AOS_AUTH__REQUIRE_HTTPS: "false"
+  AOS_TRACING__ENABLED: "true"
+  AOS_TRACING__OTLP_ENDPOINT: http://aos-grafana-tempo:4317
+  AOS_TRACING__SAMPLE_RATE: "0.1"
+  # S3 / MinIO in-cluster. Access keys + database URL come from the
+  # `aos-runtime` secret synced by ESO.
+  AOS_S3__ENDPOINT: http://minio:9000
+  AOS_S3__REGION: us-east-1
+  AOS_S3__BUCKET: aos-workforce-documents
+  AOS_S3__PRESIGN_TTL_SECS: "60"
+  AOS_S3__FORCE_PATH_STYLE: "true"
+
+existingSecret: aos-runtime
+
+service:
+  port: 3002
+  targetPort: http
+
+resources:
+  limits:
+    cpu: 1
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70

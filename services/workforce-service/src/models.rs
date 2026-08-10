@@ -9,7 +9,7 @@
 
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -127,7 +127,7 @@ impl std::fmt::Display for DocType {
 // Pagination (mirrors audit-service pattern)
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Deserialize, ToSchema)]
+#[derive(Debug, Deserialize, ToSchema, IntoParams)]
 pub struct PageQuery {
     #[serde(default = "default_page")]
     pub page: i64,
@@ -135,8 +135,12 @@ pub struct PageQuery {
     pub page_size: i64,
 }
 
-fn default_page() -> i64 { 1 }
-fn default_page_size() -> i64 { 20 }
+fn default_page() -> i64 {
+    1
+}
+fn default_page_size() -> i64 {
+    20
+}
 
 impl PageQuery {
     pub fn sanitized(&self) -> Self {

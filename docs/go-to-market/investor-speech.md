@@ -33,15 +33,21 @@ Every fintech, retailer, and government service on this continent needs those pr
 
 So we are not a point product. We are a backbone, proven under the most demanding requirement — auditability — and now ready to carry verticals on top of it.
 
+And we didn't stop at the wedge. Today we have a second vertical live on the same core: **AOS Workforce**. Nine database tables — legal entities, departments, positions, the employee lifecycle from hire to termination, compensation history, and secure document management. Seventeen handlers. Every one of those tables sits behind the same Row-Level Security, the same Keycloak identity, and every lifecycle action writes into the same SHA-256 hash chain. When a salary changes, that is not just an HR update — it is a chained, forensically verifiable event plus a row in the transactional outbox that the future payroll dispatcher will consume. We built the pipe Phase 2 runs through before we built the engine.
+
+Money is stored as integer minor units, never floats. National IDs are SHA-256-hashed with only the last four characters exposed. Contracts and identity documents live in object storage under tenant-and-employee namespaced keys, served only through short-lived presigned URLs — never publicly accessible, never downloadable by another tenant. This is why two verticals matter more than one: the second one proves the primitives are reusable. The backbone carries weight.
+
 ---
 
 ## The Business Model: What We Sell Today
 
-Two things, both honest.
+Three things, all honest.
 
 First, the audit and compliance log as a standalone service — tamper-evident, tenant-isolated, hash-chained, OIDC-authenticated — target pricing in the range of two to five thousand dollars a month per tenant based on early conversations. The buyer is any fintech, payment service provider, or savings cooperative that needs a regulator-grade audit trail and doesn't want to build one. That revenue can start now, because the product exists now.
 
-Second, paid design-partner pilots — a target setup fee of fifteen to twenty-five thousand dollars to fund building one real vertical on the working core. We never sell slides. We sell the working backbone plus a committed build, behind a paying partner.
+Second, the workforce backend as a design-partner pilot — the Phase 1 backend runs today but carries two production gates before it can ship: database-level append-only revocation on the history and compensation tables, and a successful restore test. A target setup fee of fifteen to twenty-five thousand dollars funds closing those gates and building the portal frontend with one partner as the reference customer. The buyer is any regulated institution whose HR records need to live under the same auditable, tenant-isolated core as their financial logs.
+
+Third, paid design-partner pilots for the next verticals — the same fifteen-to-twenty-five thousand dollar setup fee to fund building one real fintech, retail, or government vertical on the working core. We never sell slides. We sell the working backbone plus a committed build, behind a paying partner.
 
 I want to be blunt about how we scale. It is *design partner to reference to scale* — not a five-year ARR projection made up on a flight. One signed partner proves one vertical. One reference closes the next. That is the only honest growth curve for infrastructure this early, and it is the curve the best African infrastructure companies have actually followed.
 
@@ -49,9 +55,9 @@ I want to be blunt about how we scale. It is *design partner to reference to sca
 
 ## The Roadmap — and the Honest Gate
 
-Finance, commerce, and government are *designed boundaries* in our architecture, not shipped products. I have to tell you plainly: today those services are three-line stubs that print "boundary reserved." That is intentional. We will build each one only inside a paid partner engagement, and only behind a compliance gate.
+Finance, commerce, and government are *designed boundaries* in our architecture, not shipped products. I have to tell you plainly: today those services are three-line stubs that print "boundary reserved." That is intentional. We will build each one only inside a paid partner engagement, and only behind a compliance gate. Workforce is the exception — it is built and compiling today, backend-only, and it enters the world through a paid hardening pilot rather than as a stub.
 
-That gate is non-negotiable. No moving money until reconciliation and settlement controls are reviewed. No citizen ID until data residency and retention are approved. No regulated decision leaves our hands without external compliance sign-off. Our production-readiness checklist is fully unchecked today — no pen test, no load test, no disaster-recovery run, no external sign-off — and I'm telling you that deliberately, because a founder who hides that from investors is one you shouldn't fund. We know exactly what is live and what is the road ahead.
+That gate is non-negotiable. No moving money until reconciliation and settlement controls are reviewed. No citizen ID until data residency and retention are approved. No regulated decision leaves our hands without external compliance sign-off. Our production-readiness checklist is fully unchecked today — no pen test, no load test, no disaster-recovery run, no external sign-off — and I'm telling you that deliberately, because a founder who hides that from investors is one you shouldn't fund. For workforce specifically, two gates sit in front of any production claim: database-level revocation of `UPDATE` and `DELETE` on the append-only history and compensation tables — today append-only is enforced in application code, not yet at the database — and a successful restore test, which we will run once migration 009 lands. We know exactly what is live and what is the road ahead.
 
 We start in Kinshasa, in the DRC, because that is home ground and because the BCC's audit expectations are a clean fit for what we have already proven.
 
@@ -61,7 +67,7 @@ We start in Kinshasa, in the DRC, because that is home ground and because the BC
 
 What we need now is specific and bounded. First, design-partner introductions — fintechs, PSPs, SACCOs, ideally in DRC or a neighboring francophone market — who feel the regulator-audit pain today and would fund one vertical build. Second, seed capital to convert the first paid pilot into a reference and harden the path to the compliance gate.
 
-Why now, not later? Because the proof that buys everything else — a real OIDC token, a 201, a verified hash chain, database-enforced isolation — already runs. The work that remains is gated by partners and capital, not by a research problem we haven't solved. The timing is now because the evidence is now. And on this continent, the regulator's question is not getting any softer — it is getting sharper every cycle.
+Why now, not later? Because the proof that buys everything else — a real OIDC token, a 201, a verified hash chain, database-enforced isolation — already runs, and now it runs across two verticals, not one. The work that remains is gated by partners and capital, not by a research problem we haven't solved. The timing is now because the evidence is now. And on this continent, the regulator's question is not getting any softer — it is getting sharper every cycle.
 
 We have built the connective tissue. We have proven the hardest part under the harshest requirement. Help us turn it into the infrastructure African commerce runs on.
 

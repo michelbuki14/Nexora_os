@@ -79,6 +79,8 @@ pub struct Config {
     #[serde(default)]
     pub s3: S3Config,
     #[serde(default)]
+    pub gateway: GatewayConfig,
+    #[serde(default)]
     pub features: HashMap<String, bool>,
 }
 
@@ -264,6 +266,24 @@ impl Default for TracingConfig {
             service_name: "aos-service".to_string(),
             sample_rate: 1.0,
             export_timeout_secs: 10,
+        }
+    }
+}
+
+/// Gateway proxy configuration for upstream service URLs.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct GatewayConfig {
+    pub workforce_base_url: String,
+    pub audit_base_url: String,
+    pub tenant_base_url: String,
+}
+
+impl Default for GatewayConfig {
+    fn default() -> Self {
+        Self {
+            workforce_base_url: "http://localhost:3001".to_string(),
+            audit_base_url: "http://localhost:3002".to_string(),
+            tenant_base_url: "http://localhost:3003".to_string(),
         }
     }
 }

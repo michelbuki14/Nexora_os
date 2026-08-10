@@ -1,9 +1,11 @@
 //! Audit service data models matching the `audit_events` schema.
 //!
-//! All API models use [`uuid::Uuid`] for the database-backed identifiers
-//! (actor_id, resource_id) and plain `String` for ULIDs (which are `CHAR(26)`
-//! in the database). IP addresses are exposed as strings on the API surface
-//! because `utoipa::ToSchema` is not implemented for `std::net::IpAddr`.
+//! API models use [`uuid::Uuid`] for the database-backed UUID identifiers
+//! (resource_id) and plain `String` for ULIDs (`CHAR(26)` in the database).
+//! `actor_id` is also a `String`: it holds the actor's synthetic ULID (hash of
+//! the Keycloak `sub`), which the workforce service writes as a 26-char ULID.
+//! IP addresses are exposed as strings on the API surface because
+//! `utoipa::ToSchema` is not implemented for `std::net::IpAddr`.
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -13,8 +15,9 @@ use uuid::Uuid;
 
 /// Database row for the `audit_events` table.
 ///
-/// `tenant_id`, `org_id`, `actor_id` and `resource_id` are PostgreSQL `UUID`
-/// columns; `ulid` and `resource_ulid` are `CHAR(26)`; `ip_address` is `INET`.
+/// `tenant_id`, `org_id` and `resource_id` are PostgreSQL `UUID` columns;
+/// `actor_id`, `ulid` and `resource_ulid` are text (`VARCHAR`/`CHAR(26)`);
+/// `ip_address` is `INET`.
 #[derive(Debug, Clone, FromRow)]
 pub struct AuditEventRow {
     pub id: i64,
@@ -22,7 +25,7 @@ pub struct AuditEventRow {
     pub tenant_id: Uuid,
     pub org_id: Uuid,
     pub actor_type: String,
-    pub actor_id: Option<Uuid>,
+    pub actor_id: Option<String>,
     pub action: String,
     pub resource_type: String,
     pub resource_id: Option<Uuid>,
@@ -129,8 +132,8 @@ impl std::str::FromStr for AuditResult {
 pub struct CreateAuditRequest {
     /// Type of actor performing the action.
     pub actor_type: ActorType,
-    /// Optional actor identifier (user/service UUID).
-    pub actor_id: Option<Uuid>,
+    /// Optional actor identifier (actor ULID, or user/service UUID string).
+    pub actor_id: Option<String>,
     /// Action performed (e.g. `tenant.create`, `user.delete`).
     pub action: String,
     /// Type of resource affected (e.g. `tenant`, `user`).
@@ -165,7 +168,7 @@ pub struct AuditEventResponse {
     pub tenant_id: Uuid,
     pub org_id: Uuid,
     pub actor_type: ActorType,
-    pub actor_id: Option<Uuid>,
+    pub actor_id: Option<String>,
     pub action: String,
     pub resource_type: String,
     pub resource_id: Option<Uuid>,

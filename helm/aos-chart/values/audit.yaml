@@ -1,0 +1,42 @@
+# Audit Service — writes hash-chained audit events. Connects to Postgres.
+replicaCount: 2
+
+image:
+  repository: ghcr.io/michelbuki14/aos-audit-service
+  tag: "0.1.0"
+
+env:
+  AOS_SERVICE__NAME: aos-audit-service
+  AOS_SERVICE__ENVIRONMENT: production
+  AOS_SERVER__HOST: 0.0.0.0
+  AOS_SERVER__PORT: "3001"
+  AOS_DATABASE__MAX_CONNECTIONS: "10"
+  AOS_REDIS__MAX_CONNECTIONS: "10"
+  AOS_AUTH__JWKS_URL: http://keycloak:8080/realms/aos/protocol/openid-connect/certs
+  AOS_AUTH__ISSUER: http://keycloak:8080/realms/aos
+  AOS_AUTH__AUDIENCE: aos-api
+  AOS_AUTH__JWKS_CACHE_TTL_SECS: "300"
+  AOS_AUTH__REQUIRE_HTTPS: "false"
+  AOS_TRACING__ENABLED: "true"
+  AOS_TRACING__OTLP_ENDPOINT: http://aos-grafana-tempo:4317
+  AOS_TRACING__SAMPLE_RATE: "0.1"
+
+existingSecret: aos-runtime
+
+service:
+  port: 3001
+  targetPort: http
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70

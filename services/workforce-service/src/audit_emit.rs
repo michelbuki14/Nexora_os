@@ -24,7 +24,6 @@ use aos_common::{
 };
 use serde_json::Value;
 use sqlx::PgConnection;
-use uuid::Uuid;
 
 /// Emit a workforce audit event + outbox event in `conn` (must be in a tx).
 ///
@@ -37,6 +36,10 @@ use uuid::Uuid;
 /// `resource_uuid`: the UUID primary key of the affected row, required for
 /// `outbox_events.aggregate_id` (UUID NOT NULL). Pass `uuid::Uuid::nil()` for
 /// virtual resources (e.g. bulk export events that have no single row UUID).
+// The signature is intentionally wide: it mirrors the audit_events row 1:1 and
+// every caller passes all fields. Bundling into a context struct would churn
+// ~10 call sites for no behavior change.
+#[allow(clippy::too_many_arguments)]
 pub async fn emit_workforce_event(
     conn: &mut PgConnection,
     auth: &AuthContext,
@@ -48,13 +51,22 @@ pub async fn emit_workforce_event(
     changes: Value,
 ) -> AosResult<()> {
     emit_workforce_event_with_uuid(
-        conn, auth, tenant_uuid, org_uuid,
-        resource_type, resource_ulid, uuid::Uuid::nil(), action, changes,
-    ).await
+        conn,
+        auth,
+        tenant_uuid,
+        org_uuid,
+        resource_type,
+        resource_ulid,
+        uuid::Uuid::nil(),
+        action,
+        changes,
+    )
+    .await
 }
 
 /// Like `emit_workforce_event` but with an explicit `resource_uuid` for the
 /// outbox `aggregate_id` column.
+#[allow(clippy::too_many_arguments)]
 pub async fn emit_workforce_event_with_uuid(
     conn: &mut PgConnection,
     auth: &AuthContext,
@@ -75,7 +87,7 @@ pub async fn emit_workforce_event_with_uuid(
         "SELECT hash FROM audit_events WHERE tenant_id = $1 ORDER BY id DESC LIMIT 1",
     )
     .bind(tenant_uuid)
-    .fetch_optional(conn)
+    .fetch_optional(&mut *conn)
     .await?
     .unwrap_or_else(|| GENESIS_HASH.to_string());
 
@@ -110,7 +122,7 @@ pub async fn emit_workforce_event_with_uuid(
     .bind(resource_ulid)
     .bind(&changes)
     .bind(&hash)
-    .execute(conn)
+    .execute(&mut *conn)
     .await?;
 
     // --- 3. Insert outbox_events row -----------------------------------
@@ -125,13 +137,13 @@ pub async fn emit_workforce_event_with_uuid(
                 $5, $6, $7)"#,
     )
     .bind(&outbox_ulid)
-    .bind(resource_uuid)        // aggregate_id UUID NOT NULL
-    .bind(resource_ulid)        // aggregate_ulid CHAR(26)
+    .bind(resource_uuid) // aggregate_id UUID NOT NULL
+    .bind(resource_ulid) // aggregate_ulid CHAR(26)
     .bind(action)
     .bind(&changes)
     .bind(tenant_uuid)
     .bind(org_uuid)
-    .execute(conn)
+    .execute(&mut *conn)
     .await?;
 
     Ok(())

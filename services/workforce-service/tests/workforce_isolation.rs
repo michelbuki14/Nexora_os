@@ -18,18 +18,9 @@
 //! MUST run against a real PostgreSQL — vacuous passes are a false-green security risk.
 
 use aos_common::{
-    config::Config,
-    tenant_context::{rls_middleware, AuthContext, DbConn, RlsState},
+    tenant_context::AuthContext,
     ulid::{new_ulid, Ulid},
-    AosError,
-};
-use axum::{
-    body::Body,
-    extract::Request,
-    http::StatusCode,
-    middleware,
-    routing::get,
-    Json, Router,
+    AuthContextExt,
 };
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
@@ -121,9 +112,7 @@ async fn cluster() -> Arc<Cluster> {
 
 /// Seed two tenants with minimal data (orgs, users, employees).
 /// Returns `(tenant_a_ulid, tenant_b_ulid, employee_a_ulid, employee_b_ulid)`.
-async fn seed_two_tenants(
-    super_pool: &PgPool,
-) -> (String, String, String, String) {
+async fn seed_two_tenants(super_pool: &PgPool) -> (String, String, String, String) {
     let ta = new_ulid();
     let tb = new_ulid();
     let org_a = new_ulid();
@@ -146,9 +135,15 @@ async fn seed_two_tenants(
 
     // Insert orgs.
     let (tid_a,): (uuid::Uuid,) = sqlx::query_as("SELECT id FROM tenants WHERE ulid = $1")
-        .bind(&ta).fetch_one(super_pool).await.unwrap();
+        .bind(&ta)
+        .fetch_one(super_pool)
+        .await
+        .unwrap();
     let (tid_b,): (uuid::Uuid,) = sqlx::query_as("SELECT id FROM tenants WHERE ulid = $1")
-        .bind(&tb).fetch_one(super_pool).await.unwrap();
+        .bind(&tb)
+        .fetch_one(super_pool)
+        .await
+        .unwrap();
 
     sqlx::query(
         "INSERT INTO organizations (ulid, tenant_id, name, slug, status) VALUES ($1, $2, $3, $4, 'active') ON CONFLICT DO NOTHING",
@@ -163,9 +158,15 @@ async fn seed_two_tenants(
     .execute(super_pool).await.unwrap();
 
     let (oid_a,): (uuid::Uuid,) = sqlx::query_as("SELECT id FROM organizations WHERE ulid = $1")
-        .bind(&org_a).fetch_one(super_pool).await.unwrap();
+        .bind(&org_a)
+        .fetch_one(super_pool)
+        .await
+        .unwrap();
     let (oid_b,): (uuid::Uuid,) = sqlx::query_as("SELECT id FROM organizations WHERE ulid = $1")
-        .bind(&org_b).fetch_one(super_pool).await.unwrap();
+        .bind(&org_b)
+        .fetch_one(super_pool)
+        .await
+        .unwrap();
 
     // Insert employees directly as superuser (bypasses RLS for seeding).
     sqlx::query(
@@ -187,7 +188,12 @@ async fn seed_two_tenants(
     (ta, tb, emp_a, emp_b)
 }
 
-fn make_auth(tenant_ulid: &str, org_ulid: &str, roles: Vec<String>, permissions: Vec<String>) -> AuthContext {
+fn make_auth(
+    tenant_ulid: &str,
+    org_ulid: &str,
+    roles: Vec<String>,
+    permissions: Vec<String>,
+) -> AuthContext {
     AuthContext {
         tenant_id: tenant_ulid.parse::<Ulid>().unwrap(),
         org_id: org_ulid.parse::<Ulid>().unwrap(),
@@ -211,22 +217,34 @@ async fn test_cross_tenant_employee_read_returns_empty() {
 
     // Connect as aos_app with tenant_b's GUC → should see 0 employees even
     // though emp_a belongs to tenant_a.
-    let auth_b = make_auth(&ta, &ta, vec!["HR_ADMIN".to_string()], vec!["employee.read".to_string()]);
+    let auth_b = make_auth(
+        &ta,
+        &ta,
+        vec!["HR_ADMIN".to_string()],
+        vec!["employee.read".to_string()],
+    );
 
     // Manually set the GUC for tenant_b, then query.
     let tb_fake = new_ulid(); // a non-existent tenant ULID
     sqlx::query(&format!(
         "SET SESSION aos.current_tenant_id = '{tb_fake}'; SET SESSION aos.is_system = 'false';"
     ))
-    .execute(&cl.app_pool).await.unwrap_or_default();
+    .execute(&cl.app_pool)
+    .await
+    .unwrap_or_default();
 
     // With tenant_b's GUC set, querying wf_employees should return 0 rows
     // (both emp_a and emp_b are in different tenants).
     let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM wf_employees")
-        .fetch_one(&cl.app_pool).await.unwrap_or(0);
+        .fetch_one(&cl.app_pool)
+        .await
+        .unwrap_or(0);
 
     // RLS: fake tenant sees nothing.
-    assert_eq!(count, 0, "RLS should hide all employees for an unknown tenant ULID");
+    assert_eq!(
+        count, 0,
+        "RLS should hide all employees for an unknown tenant ULID"
+    );
     drop(auth_b); // suppress unused warning
 }
 
@@ -254,7 +272,10 @@ async fn test_mass_assignment_struct_protection() {
         serde_json::from_value(payload);
 
     // Must parse without error (unknown fields are silently ignored by serde default).
-    assert!(req.is_ok(), "deserialization should succeed ignoring unknown fields");
+    assert!(
+        req.is_ok(),
+        "deserialization should succeed ignoring unknown fields"
+    );
     // The struct MUST NOT have a tenant_id field — it simply doesn't exist.
     // Compensation fields are also absent from the request struct.
 }
@@ -271,12 +292,13 @@ async fn test_guc_does_not_leak_between_queries() {
     // Use a single-connection pool to guarantee the same connection is reused.
     let port: u16 = {
         let row: (String,) = sqlx::query_as("SELECT inet_server_port()::text")
-            .fetch_one(&cl.app_pool).await.unwrap();
+            .fetch_one(&cl.app_pool)
+            .await
+            .unwrap();
         row.0.parse().unwrap()
     };
-    let single_conn_url = format!(
-        "postgres://{APP_ROLE}:{APP_ROLE_PASSWORD}@localhost:{port}/aos_test"
-    );
+    let single_conn_url =
+        format!("postgres://{APP_ROLE}:{APP_ROLE_PASSWORD}@localhost:{port}/aos_test");
     let single_pool = PgPoolOptions::new()
         .max_connections(1)
         .connect(&single_conn_url)
@@ -285,8 +307,12 @@ async fn test_guc_does_not_leak_between_queries() {
 
     // Set GUC for a fake tenant.
     let fake_tenant = new_ulid();
-    sqlx::query(&format!("SET LOCAL aos.current_tenant_id = '{fake_tenant}'"))
-        .execute(&single_pool).await.unwrap_or_default();
+    sqlx::query(&format!(
+        "SET LOCAL aos.current_tenant_id = '{fake_tenant}'"
+    ))
+    .execute(&single_pool)
+    .await
+    .unwrap_or_default();
 
     // Immediately query — GUC is SET LOCAL so it only applies within a transaction.
     // Outside a transaction, SET LOCAL is equivalent to SET SESSION for that statement.
@@ -311,7 +337,9 @@ async fn test_guc_does_not_leak_between_queries() {
     // The actionable check: after the SET LOCAL (no BEGIN), select count for the
     // fake tenant. RLS will see aos.current_tenant_id = ''. Should return 0.
     let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM wf_employees")
-        .fetch_one(&single_pool).await.unwrap_or(0);
+        .fetch_one(&single_pool)
+        .await
+        .unwrap_or(0);
 
     assert_eq!(count, 0, "GUC-isolated query must see no cross-tenant rows");
 }
@@ -325,7 +353,8 @@ async fn test_guc_does_not_leak_between_queries() {
 async fn test_employee_role_cannot_write_employees() {
     // An AuthContext with only "employee.read" (EMPLOYEE role).
     let auth = make_auth(
-        &new_ulid(), &new_ulid(),
+        &new_ulid(),
+        &new_ulid(),
         vec!["EMPLOYEE".to_string()],
         vec!["employee.read".to_string()],
     );
@@ -346,7 +375,8 @@ async fn test_employee_role_cannot_write_employees() {
 #[ignore = "requires testcontainers docker socket; broken on Windows npipe (see module docs)"]
 async fn test_employee_read_does_not_grant_compensation_read() {
     let auth = make_auth(
-        &new_ulid(), &new_ulid(),
+        &new_ulid(),
+        &new_ulid(),
         vec!["MANAGER".to_string()],
         vec!["employee.read".to_string()],
     );
@@ -394,8 +424,16 @@ fn test_audit_emit_canonical_payload_stable() {
     assert_eq!(a, b, "canonical serialization must be deterministic");
     // Keys must be sorted — "action" < "actor_id" < "resource_type" < "resource_ulid" < "tenant_id" < "ulid"
     let parsed: serde_json::Value = serde_json::from_str(&a).unwrap();
-    let keys: Vec<&str> = parsed.as_object().unwrap().keys().map(|s| s.as_str()).collect();
+    let keys: Vec<&str> = parsed
+        .as_object()
+        .unwrap()
+        .keys()
+        .map(|s| s.as_str())
+        .collect();
     let mut sorted = keys.clone();
     sorted.sort_unstable();
-    assert_eq!(keys, sorted, "canonical JSON keys must be lexicographically sorted");
+    assert_eq!(
+        keys, sorted,
+        "canonical JSON keys must be lexicographically sorted"
+    );
 }

@@ -8,11 +8,10 @@
 use crate::models::{
     CompensationFrequency, CompensationResponse, CreateCompensationRequest,
     CreateDepartmentRequest, CreateDocumentMetadataRequest, CreateEmployeeRequest,
-    CreateLegalEntityRequest, CreateLocationRequest, CreatePositionRequest,
-    CreateTeamRequest, DocType, DepartmentResponse, DocumentResponse, DocumentUrlResponse,
-    EmployeeResponse, EmployeeStatus, EmploymentType, LegalEntityResponse, LocationResponse,
-    PageQuery, PositionResponse, TeamResponse, UpdateEmployeeStatusRequest,
-    UpdateEmploymentRequest,
+    CreateLegalEntityRequest, CreateLocationRequest, CreatePositionRequest, CreateTeamRequest,
+    DepartmentResponse, DocType, DocumentResponse, DocumentUrlResponse, EmployeeResponse,
+    EmployeeStatus, EmploymentType, LegalEntityResponse, LocationResponse, PageQuery,
+    PositionResponse, TeamResponse, UpdateEmployeeStatusRequest, UpdateEmploymentRequest,
 };
 use utoipa::OpenApi;
 

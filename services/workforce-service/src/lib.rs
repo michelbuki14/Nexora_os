@@ -12,9 +12,9 @@ pub mod openapi;
 #[doc(hidden)]
 pub mod routes;
 
-use std::sync::Arc;
 use aos_common::config::{Config, S3Config};
 use aws_sdk_s3::Client as S3Client;
+use std::sync::Arc;
 
 /// Shared application state — re-exported for tests that instantiate handlers.
 #[derive(Clone)]
