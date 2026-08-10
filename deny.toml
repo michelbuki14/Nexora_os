@@ -1,0 +1,136 @@
+# cargo-deny policy for the AOS workspace.
+#
+# Gates: cargo deny check  (CI job "deny")
+# The policy is strict-by-default: any license outside the allow-list or any
+# dependency source outside crates.io fails the build. Advisory findings are
+# surfaced as errors (never silently ignored); revisit `ignore` if a false
+# positive is confirmed and add a comment citing the advisory + reason.
+
+# Root options
+[graph]
+# Only the crates actually compiled into the workspace are checked, matching
+# what `cargo build --workspace` ships.
+targets = []
+all-features = false
+no-default-features = false
+
+[output]
+feature-depth = 1
+
+# This section is considered when running `cargo deny check advisories`
+[advisories]
+# A list of advisory IDs to ignore. Note that ignored advisories will still
+# output a note when they are encountered. Nothing is ignored without an
+# explicit, commented entry here.
+#
+# The following advisories are reachable only via bollard → rustls 0.22 →
+# rustls-webpki 0.102.8, which is pulled exclusively by the
+# `testcontainers` *dev*-dependency used by the tenant-isolation integration
+# tests. They are not reachable from any production service binary
+# (aos-api-gateway / aos-tenant-service / aos-audit-service / aos-migrate /
+# domain services). The bollard 0.16.1 → rustls 0.22.4 → rustls-webpki
+# ^0.102.1 SemVer constraint prevents a clean upgrade; the permanent fix is
+# to bump testcontainers (and therefore bollard) once a release ships that
+# depends on rustls ≥ 0.23. Until then the advisories are documented here
+# rather than left as silent CI failures that block the supply-chain gate
+# without a reachable production path.
+ignore = [
+    # RUSTSEC-2026-0049 — rustls-webpki 0.102.x CRL DP matching. Dev-only
+    # (testcontainers → bollard → rustls 0.22 → rustls-webpki 0.102.8).
+    # Impact: limited; requires a compromised CA to exploit. Fixed in
+    # rustls-webpki ≥ 0.103.10, blocked by bollard 0.16.1's rustls 0.22 pin.
+    { id = "RUSTSEC-2026-0049", reason = "dev-only via testcontainers/bollard; blocked by rustls 0.22 pin; no production binary path" },
+    # RUSTSEC-2026-0098 — rustls-webpki URI name constraints. Same path.
+    # Fixed in ≥ 0.103.12. Requires certificate misissuance to exploit.
+    { id = "RUSTSEC-2026-0098", reason = "dev-only via testcontainers/bollard; blocked by rustls 0.22 pin; no production binary path" },
+    # RUSTSEC-2026-0099 — rustls-webpki wildcard name constraints. Same path.
+    # Fixed in ≥ 0.103.12. Requires certificate misissuance to exploit.
+    { id = "RUSTSEC-2026-0099", reason = "dev-only via testcontainers/bollard; blocked by rustls 0.22 pin; no production binary path" },
+    # RUSTSEC-2026-0104 — rustls-webpki CRL parsing panic. Same path.
+    # Fixed in ≥ 0.103.13. Only reachable when applications parse CRLs;
+    # testcontainers does not parse CRLs.
+    { id = "RUSTSEC-2026-0104", reason = "dev-only via testcontainers/bollard; blocked by rustls 0.22 pin; no production binary path; testcontainers does not parse CRLs" },
+    # RUSTSEC-2025-0134 — rustls-pemfile is unmaintained (archived Aug 2025).
+    # Dev-only (testcontainers → bollard 0.16.1 → rustls-native-certs/hyper-rustls
+    # → rustls-pemfile). The advisory reports "No safe upgrade is available": the
+    # only remediation is migrating off bollard 0.16.1, which is blocked by the
+    # same testcontainers/bollard rustls-0.22 pin as the webpki entries above.
+    # No production service binary links rustls-pemfile.
+    { id = "RUSTSEC-2025-0134", reason = "dev-only via testcontainers/bollard; no safe upgrade; blocked by rustls 0.22 pin; no production binary path" },
+]
+
+# This section is considered when running `cargo deny check licenses`
+[licenses]
+# The AOS workspace is Apache-2.0. Dependencies may use any permissive license
+# in this list. "deny" (the default) applies to anything not listed, so adding
+# a new dependency with an unusual license fails loudly in CI rather than
+# silently slipping through.
+allow = [
+    "Apache-2.0",
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unlicense",
+    "CC0-1.0",
+    "MPL-2.0",
+    "OpenSSL",
+    "Unicode-3.0",
+    "0BSD",
+    # Community Data License Agreement Permissive 2.0 — used by webpki-roots
+    # (Mozilla curated root CA bundle, pulled by sqlx's TLS stack). Permissive
+    # for data, analogous to MIT/Apache for code.
+    "CDLA-Permissive-2.0",
+]
+# Confidence floor for license-file detection. Below this the license is
+# reported as unlicensed and the build fails, forcing a human to adjudicate.
+confidence-threshold = 0.8
+
+[licenses.private]
+# Ignore workspace crates that aren't published.
+ignore = false
+registries = []
+
+# This section is considered when running `cargo deny check bans`
+[bans]
+# Multiple versions of the same crate are permitted but reported. Downgrade to
+# "deny" once the tree is consolidated; a warning is not a build failure.
+multiple-versions = "warn"
+# Wildcards can hide exact-version surprises (e.g. a local path dependency);
+# disallow them so every external dependency pins a concrete version. Workspace
+# members are exempt via `allow-workspace = true` below — path deps within the
+# same workspace use an implicit `version = "*"` which is not a supply-chain
+# risk (they're our own code).
+wildcards = "deny"
+# Workspace members are automatically allowed even when using deny-by-default
+# or when their path-dep version requirements look like wildcards.
+allow-workspace = true
+# External crates keep their default features. Denying all external default
+# features would flag tokio/axum/sqlx/serde/reqwest/etc. and produce ~150
+# false positives with no security benefit — those crates intentionally ship
+# useful defaults. Feature unification is still reported via multiple-versions.
+external-default-features = "allow"
+# Workspace members keep their default features (the build itself opts in).
+workspace-default-features = "allow"
+highlight = "all"
+allow = []
+deny = []
+skip = []
+skip-tree = []
+
+# This section is considered when running `cargo deny check sources`
+[sources]
+# crates.io only. Registries, git checkouts, and path deps outside the
+# workspace are disallowed; every non-workspace dependency must come from the
+# official registry with a checksummed version.
+unknown-registry = "deny"
+unknown-git = "deny"
+# Default to the crates.io index.
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []
+
+[sources.allow-org]
+github = []
+gitlab = []
+bitbucket = []

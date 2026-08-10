@@ -1,0 +1,41 @@
+[workspace]
+resolver = "2"
+members = [
+    "services/common",
+    "services/api-gateway",
+    "services/tenant-service",
+    "services/audit-service",
+    "services/retail-service",
+    "services/fintech-service",
+    "services/gov-service",
+    "services/migrate",
+]
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+license = "Apache-2.0"
+repository = "https://github.com/michelbuki14/AFRICA-OPERATING-SYSTEM-AOS-"
+
+[workspace.dependencies]
+# Pin a concrete version on the path dep. Cargo tolerates an implicit `*` here,
+# but `cargo deny`'s `wildcards = "deny"` treats an unversioned workspace path
+# dep as a wildcard and fails to resolve it (see deny.toml `[bans]`). The version
+# mirrors `aos-common`'s `[package] version` so the requirement always resolves.
+aos-common = { path = "services/common", version = "0.1.0" }
+anyhow = "1.0"
+async-trait = "0.1"
+axum = { version = "0.7", features = ["macros", "json", "tokio", "http1", "http2"] }
+tokio = { version = "1.40", features = ["macros", "rt-multi-thread", "signal", "net"] }
+tower-http = { version = "0.6", features = ["cors", "request-id", "trace", "timeout"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+jsonwebtoken = "9"
+reqwest = { version = "0.12", features = ["json"] }
+rust_decimal = { version = "1.35", features = ["serde"] }
+tracing = "0.1"
+tracing-appender = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+utoipa = { version = "5.0", features = ["axum_extras", "chrono", "uuid"] }
+utoipa-swagger-ui = { version = "8.0", features = ["axum"] }

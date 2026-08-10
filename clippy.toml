@@ -1,0 +1,2 @@
+# Workspace clippy configuration.
+# Lint levels are declared in Cargo.toml [workspace.lints.clippy].

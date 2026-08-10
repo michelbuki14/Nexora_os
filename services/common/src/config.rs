@@ -1,0 +1,281 @@
+//! Configuration management for AOS services.
+//!
+//! Uses Figment for multi-source configuration (files, environment variables, secrets).
+
+use crate::{AosError, AosResult};
+use figment::{
+    providers::{Env, Format, Toml},
+    Figment,
+};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::time::Duration;
+
+/// A secret string that is redacted in logs, debug output, and JSON.
+///
+/// Used for connection URLs and other secrets loaded from configuration. The
+/// cleartext is only accessible through [`RedactedSecret::expose`], keeping
+/// secrets out of structured log lines and serialized responses.
+#[derive(Clone, Default, PartialEq, Eq)]
+pub struct RedactedSecret(String);
+
+impl RedactedSecret {
+    /// Wrap a secret value.
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    /// Expose the cleartext value to the caller.
+    pub fn expose(&self) -> &str {
+        &self.0
+    }
+
+    /// Consume the wrapper, returning the cleartext value.
+    pub fn into_inner(self) -> String {
+        self.0
+    }
+}
+
+impl std::fmt::Debug for RedactedSecret {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "RedactedSecret([REDACTED])")
+    }
+}
+
+impl std::fmt::Display for RedactedSecret {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[REDACTED]")
+    }
+}
+
+impl Serialize for RedactedSecret {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str("[REDACTED]")
+    }
+}
+
+impl<'de> Deserialize<'de> for RedactedSecret {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let value = String::deserialize(deserializer)?;
+        Ok(Self(value))
+    }
+}
+
+/// Root configuration structure loaded from TOML + environment.
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+pub struct Config {
+    #[serde(default)]
+    pub service: ServiceConfig,
+    #[serde(default)]
+    pub server: ServerConfig,
+    #[serde(default)]
+    pub database: DatabaseConfig,
+    #[serde(default)]
+    pub redis: RedisConfig,
+    #[serde(default)]
+    pub auth: AuthConfig,
+    #[serde(default)]
+    pub tracing: TracingConfig,
+    #[serde(default)]
+    pub features: HashMap<String, bool>,
+}
+
+/// Service identification and metadata.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ServiceConfig {
+    pub name: String,
+    pub version: String,
+    pub environment: Environment,
+    /// Auto-generated per-process ULID; omit from config files.
+    #[serde(default = "crate::ulid::new_ulid")]
+    pub instance_id: String,
+}
+
+impl Default for ServiceConfig {
+    fn default() -> Self {
+        Self {
+            name: "aos-service".to_string(),
+            version: env!("CARGO_PKG_VERSION").to_string(),
+            environment: Environment::Development,
+            instance_id: crate::ulid::new_ulid(),
+        }
+    }
+}
+
+/// Deployment environment.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum Environment {
+    #[default]
+    Development,
+    Staging,
+    Production,
+}
+
+impl Environment {
+    pub fn is_production(&self) -> bool {
+        matches!(self, Environment::Production)
+    }
+}
+
+/// HTTP server configuration.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ServerConfig {
+    pub host: String,
+    pub port: u16,
+    pub workers: Option<usize>,
+    pub request_timeout_secs: u64,
+    pub body_limit_bytes: usize,
+    pub graceful_shutdown_secs: u64,
+}
+
+impl Default for ServerConfig {
+    fn default() -> Self {
+        Self {
+            host: "0.0.0.0".to_string(),
+            port: 3000,
+            workers: None,
+            request_timeout_secs: 30,
+            body_limit_bytes: 10 * 1024 * 1024,
+            graceful_shutdown_secs: 30,
+        }
+    }
+}
+
+/// Database connection configuration.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct DatabaseConfig {
+    pub url: RedactedSecret,
+    pub max_connections: u32,
+    pub min_connections: u32,
+    pub connect_timeout_secs: u64,
+    pub idle_timeout_secs: u64,
+    pub max_lifetime_secs: u64,
+    pub enable_logging: bool,
+}
+
+impl Default for DatabaseConfig {
+    fn default() -> Self {
+        Self {
+            url: RedactedSecret::new("postgres://aos:aos_dev_password@localhost:5432/aos"),
+            max_connections: 20,
+            min_connections: 5,
+            connect_timeout_secs: 10,
+            idle_timeout_secs: 300,
+            max_lifetime_secs: 1800,
+            enable_logging: false,
+        }
+    }
+}
+
+/// Redis configuration.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct RedisConfig {
+    pub url: RedactedSecret,
+    pub max_connections: u32,
+    pub connection_timeout_secs: u64,
+    pub command_timeout_secs: u64,
+}
+
+impl Default for RedisConfig {
+    fn default() -> Self {
+        Self {
+            url: RedactedSecret::new("redis://:aos_dev_password@localhost:6379/0"),
+            max_connections: 50,
+            connection_timeout_secs: 5,
+            command_timeout_secs: 5,
+        }
+    }
+}
+
+/// Authentication and authorization configuration.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct AuthConfig {
+    pub jwks_url: String,
+    pub issuer: String,
+    pub audience: String,
+    pub jwks_cache_ttl_secs: u64,
+    pub require_https: bool,
+    pub allowed_algorithms: Vec<String>,
+}
+
+impl Default for AuthConfig {
+    fn default() -> Self {
+        Self {
+            jwks_url: "http://localhost:8080/realms/aos/protocol/openid-connect/certs".to_string(),
+            issuer: "http://localhost:8080/realms/aos".to_string(),
+            audience: "aos-api".to_string(),
+            jwks_cache_ttl_secs: 300,
+            require_https: false,
+            allowed_algorithms: vec!["RS256".to_string()],
+        }
+    }
+}
+
+/// OpenTelemetry tracing configuration.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct TracingConfig {
+    pub enabled: bool,
+    pub otlp_endpoint: String,
+    pub service_name: String,
+    pub sample_rate: f64,
+    pub export_timeout_secs: u64,
+}
+
+impl Default for TracingConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            otlp_endpoint: "http://localhost:4317".to_string(),
+            service_name: "aos-service".to_string(),
+            sample_rate: 1.0,
+            export_timeout_secs: 10,
+        }
+    }
+}
+
+impl Config {
+    /// Load configuration from file and environment.
+    /// Priority: defaults < config.toml < environment variables < secrets
+    pub fn load() -> AosResult<Self> {
+        let env = std::env::var("AOS_ENV").unwrap_or_else(|_| "development".to_string());
+        let config_file = format!("config.{env}.toml");
+
+        let figment = Figment::new()
+            .merge(Toml::file("config.default.toml"))
+            .merge(Toml::file(&config_file))
+            .merge(Env::prefixed("AOS_").split("__"));
+
+        figment
+            .extract()
+            .map_err(|e| AosError::Config(e.to_string()))
+    }
+
+    /// Get the database URL as a plain string (for sqlx).
+    pub fn database_url(&self) -> String {
+        self.database.url.expose().to_string()
+    }
+
+    /// Get the Redis URL as a plain string.
+    pub fn redis_url(&self) -> String {
+        self.redis.url.expose().to_string()
+    }
+
+    /// Check if a feature flag is enabled.
+    pub fn is_feature_enabled(&self, feature: &str) -> bool {
+        self.features.get(feature).copied().unwrap_or(false)
+    }
+}
+
+/// Convert Duration to human-readable string.
+pub fn duration_to_string(d: Duration) -> String {
+    if d.as_secs() >= 86400 {
+        format!("{}d", d.as_secs() / 86400)
+    } else if d.as_secs() >= 3600 {
+        format!("{}h", d.as_secs() / 3600)
+    } else if d.as_secs() >= 60 {
+        format!("{}m", d.as_secs() / 60)
+    } else {
+        format!("{}s", d.as_secs())
+    }
+}

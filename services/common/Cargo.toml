@@ -1,0 +1,42 @@
+[package]
+name = "aos-common"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/michelbuki14/AFRICA-OPERATING-SYSTEM-AOS-"
+
+[dependencies]
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+axum = { workspace = true }
+chrono = { version = "0.4", features = ["serde"] }
+figment = { version = "0.10", features = ["toml", "env"] }
+hex = "0.4"
+jsonwebtoken = { workspace = true }
+opentelemetry = { version = "0.28", features = ["metrics", "trace"] }
+opentelemetry-otlp = { version = "0.28", features = ["grpc-tonic"] }
+opentelemetry_sdk = { version = "0.28", features = ["metrics", "trace", "rt-tokio-current-thread"] }
+rand = "0.8"
+redis = { version = "0.24", features = ["tokio-comp", "connection-manager"] }
+reqwest = { workspace = true }
+rust_decimal = { workspace = true }
+serde = { workspace = true }
+sha2 = "0.10"
+serde_json = { workspace = true }
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "rust_decimal", "migrate"] }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["sync"] }
+tower-http = { workspace = true }
+tracing = { workspace = true }
+tracing-appender = { workspace = true }
+tracing-opentelemetry = "0.29"
+tracing-subscriber = { workspace = true }
+ulid = { version = "1.1", features = ["serde"] }
+utoipa = { workspace = true }
+validator = { version = "0.20", features = ["derive"] }
+
+[dev-dependencies]
+testcontainers = { version = "0.17", features = [] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time"] }
+tokio-test = "0.4"
+tower = { version = "0.5", features = ["util"] }

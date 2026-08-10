@@ -1,0 +1,57 @@
+# AOS local environment
+.env
+.env.*
+!.env.example
+
+# Rust build output
+/target/
+**/target/
+
+# Secrets & keys (never commit)
+secrets/
+*.key
+*.pem
+*.crt
+*.p12
+*.jks
+
+# Node
+node_modules/
+.next/
+out/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Logs & runtime data
+logs/
+backups/
+data/
+*.log
+
+# Local config that varies per machine
+config.local.toml
+
+# Dev configs embed local passwords (DB URL, Redis password) — keep local.
+config.development.toml
+config.audit-dev.toml
+
+# Captured tokens / JWTs (never commit)
+token_raw.json
+*.token
+
+# Claude Code session-local scratch
+.claude/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Coverage / tooling artifacts
+coverage/
+*.profraw

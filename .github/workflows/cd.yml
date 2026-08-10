@@ -1,0 +1,85 @@
+# CD Pipeline - Environment promotion with gates
+
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+
+jobs:
+  promote-staging:
+    name: Promote to Staging
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsOIDC
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Login to ECR
+        run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+      - name: Build and push images
+        run: |
+          docker compose -f docker-compose.yml build
+          for svc in api-gateway tenant-service audit-service; do
+            docker tag aos-${svc}:latest ${{ env.ECR_REGISTRY }}/aos-${svc}:${{ github.sha }}
+            docker push ${{ env.ECR_REGISTRY }}/aos-${svc}:${{ github.sha }}
+          done
+      - name: Deploy to Staging
+        run: |
+          kubectl set image deployment/aos-api-gateway aos-api-gateway=${{ env.ECR_REGISTRY }}/aos-api-gateway:${{ github.sha }} -n aos-staging
+          kubectl set image deployment/aos-tenant-service aos-tenant-service=${{ env.ECR_REGISTRY }}/aos-tenant-service:${{ github.sha }} -n aos-staging
+          kubectl set image deployment/aos-audit-service aos-audit-service=${{ env.ECR_REGISTRY }}/aos-audit-service:${{ github.sha }} -n aos-staging
+      - name: Run smoke tests
+        run: |
+          sleep 30
+          curl -f https://staging-api.aos.example.com/health/live
+          curl -f https://staging-api.aos.example.com/health/ready
+          curl -f https://staging-api.aos.example.com/api/v1/tenants/status
+
+  promote-production:
+    name: Promote to Production
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: production
+    needs: promote-staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsOIDC
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Login to ECR
+        run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+      - name: Deploy to Production (blue/green)
+        run: |
+          # ArgoCD manages production; this triggers the sync
+          argocd app sync aos-api-gateway --prune
+          argocd app sync aos-tenant-service --prune
+          argocd app sync aos-audit-service --prune
+      - name: Run production smoke tests
+        run: |
+          sleep 60
+          curl -f https://api.aos.example.com/health/live
+          curl -f https://api.aos.example.com/health/ready
+      - name: Notify on completion
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "Production deployment successful"
+          else
+            echo "Production deployment failed - initiating rollback"
+            argocd app rollback aos-api-gateway
+            argocd app rollback aos-tenant-service
+            argocd app rollback aos-audit-service
+          fi
