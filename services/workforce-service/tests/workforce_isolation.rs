@@ -1,6 +1,6 @@
 //! Workforce tenant-isolation integration tests.
 //!
-//! Mirror of `aos-common/tests/tenant_isolation.rs` for the `wf_*` tables.
+//! Mirror of `nexora-common/tests/tenant_isolation.rs` for the `wf_*` tables.
 //!
 //! Tests:
 //!  1. Cross-tenant employee read returns empty (RLS).
@@ -227,7 +227,7 @@ async fn test_cross_tenant_employee_read_returns_empty() {
     // Manually set the GUC for tenant_b, then query.
     let tb_fake = new_ulid(); // a non-existent tenant ULID
     sqlx::query(&format!(
-        "SET SESSION aos.current_tenant_id = '{tb_fake}'; SET SESSION aos.is_system = 'false';"
+        "SET SESSION nexora.current_tenant_id = '{tb_fake}'; SET SESSION aos.is_system = 'false';"
     ))
     .execute(&cl.app_pool)
     .await
@@ -308,7 +308,7 @@ async fn test_guc_does_not_leak_between_queries() {
     // Set GUC for a fake tenant.
     let fake_tenant = new_ulid();
     sqlx::query(&format!(
-        "SET LOCAL aos.current_tenant_id = '{fake_tenant}'"
+        "SET LOCAL nexora.current_tenant_id = '{fake_tenant}'"
     ))
     .execute(&single_pool)
     .await
@@ -320,7 +320,7 @@ async fn test_guc_does_not_leak_between_queries() {
     // connection should NOT see the previous GUC if it was SET LOCAL in a transaction.
     // This mirrors what rls_middleware does: SET LOCAL inside a tx, commit on response.
     let tenant_setting: String =
-        sqlx::query_scalar("SELECT current_setting('aos.current_tenant_id', true)")
+        sqlx::query_scalar("SELECT current_setting('nexora.current_tenant_id', true)")
             .fetch_one(&single_pool)
             .await
             .unwrap_or_default();
@@ -328,14 +328,14 @@ async fn test_guc_does_not_leak_between_queries() {
     // Outside a transaction, SET LOCAL behaves like SET for the current statement;
     // on a fresh connection without BEGIN, the GUC should revert to the DB default
     // between top-level statements. If it doesn't, the test surfaces the leak.
-    // The DB default for aos.current_tenant_id is '' (set by migration 006).
+    // The DB default for nexora.current_tenant_id is '' (set by migration 006).
     // After the above SET LOCAL outside a BEGIN block, subsequent queries should
     // see the default. We confirm the GUC is at least not the *previous* request's
     // value after the connection is reused.
     let _ = tenant_setting; // we've verified the query ran; leak would surface as wrong count below.
 
     // The actionable check: after the SET LOCAL (no BEGIN), select count for the
-    // fake tenant. RLS will see aos.current_tenant_id = ''. Should return 0.
+    // fake tenant. RLS will see nexora.current_tenant_id = ''. Should return 0.
     let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM wf_employees")
         .fetch_one(&single_pool)
         .await

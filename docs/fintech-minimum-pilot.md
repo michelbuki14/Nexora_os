@@ -7,7 +7,7 @@ possible.
 
 Rules that govern all issues:
 
-- Reuse `aos-common`: `Money` (CDF default), `add_rls_middleware`/`DbConn`/`RlsState`,
+- Reuse `nexora-common`: `Money` (CDF default), `add_rls_middleware`/`DbConn`/`RlsState`,
   `auth_middleware`, `audit`, `validation`, `ulid`, `error`. Do not rebuild these.
 - Every money-mutating endpoint is **idempotent** (client-supplied `Idempotency-Key`,
   unique constraint) — a retry must never double-credit or double-debit.
@@ -32,7 +32,7 @@ tenants/orgs/users/roles/memberships/audit (all RLS) but **no fintech tables**.
   RLS middleware, auth middleware, health, tracing, graceful shutdown).
 - **Why:** Nothing else in this set is possible until the service can talk to
   postgres under tenant isolation.
-- **Done when:** `cargo run -p aos-fintech-service` serves `/health` 200 and a
+- **Done when:** `cargo run -p nexora-fintech-service` serves `/health` 200 and a
   placeholder `/api/v1/finance` route; `cargo check --workspace` clean.
 - **Verification (DRC):** none needed — pure wiring.
 
@@ -60,7 +60,7 @@ tenants/orgs/users/roles/memberships/audit (all RLS) but **no fintech tables**.
     provider_ref, idempotency_key UNIQUE, status, created_at.
 - **Why:** Double-entry via `ledger_entries` is the primitive everything else
   reads. `version` on wallets prevents lost updates.
-- **Done when:** `cargo run -p aos-migrate -- run` applies it; ledger table has
+- **Done when:** `cargo run -p nexora-migrate -- run` applies it; ledger table has
   a new success row; RLS blocks cross-tenant reads when run as `aos_app`.
 
 ---

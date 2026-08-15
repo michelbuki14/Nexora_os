@@ -134,12 +134,12 @@ mod tests {
     fn test_claims() -> AosClaims {
         AosClaims {
             sub: "01ARZ3NDEKTSV4RRFFQ69G5FAV".into(),
-            iss: "https://keycloak.example.com/realms/aos".into(),
-            aud: vec!["aos-api".into()],
+            iss: "https://keycloak.example.com/realms/nexora".into(),
+            aud: vec!["nexora-api".into()],
             exp: u64::MAX,
             iat: 0,
             jti: "test-jti".into(),
-            azp: Some("aos-client".into()),
+            azp: Some("nexora-client".into()),
             scope: Some("openid profile email".into()),
             roles: vec!["HR_ADMIN".into(), "EMPLOYEE".into()],
             tenant_id: Some("01ARZ3NDEKTSV4RRFFQ69G5FAW".into()),

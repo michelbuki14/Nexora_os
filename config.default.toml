@@ -1,30 +1,26 @@
-# Nexora OS Workforce Service — local development configuration.
-# Matches docker-compose.yml (nexora-postgres / nexora-redis / nexora-keycloak / nexora-minio).
-
-[service]
-name = "nexora-workforce-service"
-version = "0.1.0"
-environment = "development"
+# Default configuration for Nexora OS services.
+# This file provides default values loaded before service-specific configs.
+# Overridden by config.<AOS_ENV>.toml and AOS_ environment variables.
 
 [server]
 host = "0.0.0.0"
-port = 3002
+port = 3000
 request_timeout_secs = 30
 body_limit_bytes = 10485760
 graceful_shutdown_secs = 30
 
 [database]
-url = "postgresql://nexora:nexora_dev_password@localhost:5432/nexora"
+url = "postgres://nexora:nexora_dev_password@localhost:5432/nexora"
 max_connections = 20
 min_connections = 5
 connect_timeout_secs = 10
 idle_timeout_secs = 300
 max_lifetime_secs = 1800
-enable_logging = true
+enable_logging = false
 
 [redis]
 url = "redis://:nexora_dev_password@localhost:6379/0"
-max_connections = 20
+max_connections = 50
 connection_timeout_secs = 5
 command_timeout_secs = 5
 
@@ -37,17 +33,10 @@ require_https = false
 allowed_algorithms = ["RS256"]
 
 [tracing]
-enabled = false
+enabled = true
 otlp_endpoint = "http://localhost:4317"
-service_name = "nexora-workforce-service"
+service_name = "nexora-service"
 sample_rate = 1.0
 export_timeout_secs = 10
 
-[s3]
-endpoint = "http://localhost:9000"
-region = "us-east-1"
-bucket = "nexora-workforce-documents"
-access_key_id = "minioadmin"
-secret_access_key = "minioadmin"
-presign_ttl_secs = 60
-force_path_style = true
+[features]

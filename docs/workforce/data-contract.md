@@ -30,8 +30,8 @@ OIDC bearer token, and are tenant-isolated by RLS. Errors are the shared
 | `wf_documents` | soft-delete | no | metadata only — bytes in MinIO at `object_key`; `is_active` flag |
 
 All tables: UUID PK, `CHAR(26)` ULID external id, `tenant_id`/`org_id` FKs, RLS
-`WITH CHECK` on tenant (`current_setting('aos.current_tenant_id')`), system bypass
-via `current_setting('aos.is_system', true) = 'true'`.
+`WITH CHECK` on tenant (`current_setting('nexora.current_tenant_id')`), system bypass
+via `current_setting('nexora.is_system', true) = 'true'`.
 
 **Object key namespace (documents):** `{tenant_ulid}/{employee_ulid}/{doc_ulid}` —
 ULIDs are unguessable; no public bucket path exists.

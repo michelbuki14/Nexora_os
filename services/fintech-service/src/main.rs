@@ -1,3 +1,3 @@
 fn main() {
-    println!("aos-fintech-service boundary reserved");
+    println!("nexora-fintech-service boundary reserved");
 }

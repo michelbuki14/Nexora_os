@@ -1,4 +1,4 @@
-# Africa Operating System (AOS)
+# Nexora OS
 
 Africa Operating System is an infrastructure-first, API-first, AI-native platform for African commerce and public/private-sector operations. It is designed as a **modular monolith MVP** with explicit domain boundaries and a service-extraction path.
 
@@ -30,7 +30,7 @@ docker compose up -d
 cargo fmt --all
 cargo check --workspace
 cargo test --workspace
-cargo run -p aos-api-gateway
+cargo run -p nexora-api-gateway
 ```
 
 Gateway endpoints:
@@ -47,4 +47,4 @@ Production deployment is intentionally gated. Review [docs/production-readiness.
 
 ## Constitution alignment
 
-The design follows the AOS Master Constitution: modular monolith first, reusable platform capabilities, API-first boundaries, cloud-native delivery, security/observability/documentation first, and service extraction only when measured load or ownership boundaries justify it.
+The design follows the Nexora OS Master Constitution: modular monolith first, reusable platform capabilities, API-first boundaries, cloud-native delivery, security/observability/documentation first, and service extraction only when measured load or ownership boundaries justify it.

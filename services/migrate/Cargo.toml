@@ -1,12 +1,12 @@
 [package]
-name = "aos-migrate"
+name = "nexora-migrate"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-description = "AOS database migration runner (owns the SQLx migrations directory)"
+description = "Nexora OS database migration runner (owns the SQLx migrations directory)"
 
 [dependencies]
-aos-common = { workspace = true }
+nexora-common = { workspace = true }
 anyhow = { workspace = true }
 sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "migrate"] }
 tokio = { workspace = true }
@@ -14,5 +14,5 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 
 [[bin]]
-name = "aos-migrate"
+name = "nexora-migrate"
 path = "src/main.rs"

@@ -20,7 +20,7 @@
 //! `url::Url`, which re-serializes `npipe:////./pipe/docker_engine` to
 //! `npipe:////pipe/docker_engine` (drops the dot), so bollard attempts a bogus UNC
 //! path and container create fails with ERROR_BAD_NETPATH (53). Run on Linux/CI
-//! with `cargo test -p aos-common --test tenant_isolation -- --ignored`.
+//! with `cargo test -p nexora-common --test tenant_isolation -- --ignored`.
 //! If Docker is unavailable (e.g. a minimal CI runner), the suite FAILS with a
 //! panic ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â the integration tests are a correctness gate and MUST run against a
 //! real PostgreSQL. Vacuous passes are a false-green security risk.
@@ -538,13 +538,13 @@ async fn tenant_gucs_do_not_leak_across_pooled_requests() {
 
     let mut conn1 = pool.acquire().await.unwrap();
     sqlx::query("BEGIN").execute(&mut *conn1).await.unwrap();
-    sqlx::query("SELECT set_config('aos.current_tenant_id', $1, true)")
+    sqlx::query("SELECT set_config('nexora.current_tenant_id', $1, true)")
         .bind(&c.tenant_a_ulid)
         .execute(&mut *conn1)
         .await
         .unwrap();
     let during: String =
-        sqlx::query_scalar("SELECT current_setting('aos.current_tenant_id', true)")
+        sqlx::query_scalar("SELECT current_setting('nexora.current_tenant_id', true)")
             .fetch_one(&mut *conn1)
             .await
             .unwrap();
@@ -557,7 +557,7 @@ async fn tenant_gucs_do_not_leak_across_pooled_requests() {
 
     // Same physical connection, next request: the GUC must be gone.
     let mut conn2 = pool.acquire().await.unwrap();
-    let after: String = sqlx::query_scalar("SELECT current_setting('aos.current_tenant_id', true)")
+    let after: String = sqlx::query_scalar("SELECT current_setting('nexora.current_tenant_id', true)")
         .fetch_one(&mut *conn2)
         .await
         .unwrap();

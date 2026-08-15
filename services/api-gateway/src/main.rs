@@ -1,4 +1,4 @@
-//! AOS API Gateway - modular monolith entry point.
+//! Nexora OS API Gateway - modular monolith entry point.
 //!
 //! The gateway owns cross-cutting concerns (request IDs, tracing, CORS,
 //! timeouts, health probes) and exposes versioned domain routes. Routes for
@@ -303,7 +303,7 @@ async fn main() -> anyhow::Result<()> {
 
     let address: SocketAddr = format!("{}:{}", config.server.host, config.server.port).parse()?;
     let listener = tokio::net::TcpListener::bind(address).await?;
-    info!(%address, service = %config.service.name, "AOS API Gateway started");
+    info!(%address, service = %config.service.name, "Nexora OS API Gateway started");
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())

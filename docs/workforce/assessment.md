@@ -1,15 +1,15 @@
 # Workforce Module — Architecture Assessment
 
-> Phase 1, backend-only. AOS has no frontend crate, so the Workforce prompt's
+> Phase 1, backend-only. Nexora OS has no frontend crate, so the Workforce prompt's
 > portal/UI requirements are satisfied by this OpenAPI spec + data-contract
 > docs, not by a built UI.
 
-## What AOS already provided (reused, not reinvented)
+## What Nexora OS already provided (reused, not reinvented)
 
 | Capability | Where it lives | How Workforce uses it |
 |------------|----------------|------------------------|
 | Keycloak OIDC auth | `common::auth_middleware` | unchanged — `AuthContext` carries tenant/org/user ULIDs + roles + permissions |
-| RLS tenant isolation | `common::tenant_context::rls_middleware` + migrations 005/006/007 | every `wf_*` table gets the same `current_setting('aos.current_tenant_id')` policy with `WITH CHECK` |
+| RLS tenant isolation | `common::tenant_context::rls_middleware` + migrations 005/006/007 | every `wf_*` table gets the same `current_setting('nexora.current_tenant_id')` policy with `WITH CHECK` |
 | Hash-chained audit | `audit_events` + `common::audit::{compute_chain_hash, GENESIS_HASH}` | `audit_emit.rs` writes a chained row on every lifecycle change |
 | Transactional outbox | `outbox_events` (migration 005) | workforce lifecycle events dual-written in the same tx; future dispatcher job publishes |
 | Granular RBAC keys | `permissions` table (migration 005) | migration 008 seeds 18 `category='workforce'` keys |
@@ -33,7 +33,7 @@
 
 ## What is deliberately NOT built this phase
 
-- **Frontend / portals** — AOS has no design system yet. OpenAPI spec + `portal-map.md` describe what the portals would call.
+- **Frontend / portals** — Nexora OS has no design system yet. OpenAPI spec + `portal-map.md` describe what the portals would call.
 - **Payroll engine** — documented in `payroll-contract.md`; built in Phase 4.
 - **Leave / attendance / approvals** — Phase 3.
 - **Notifications provider** — abstraction documented; Mailhog runs in compose but no Rust mailer (Phase 3).
@@ -46,7 +46,7 @@
 2. **`wf_employment_records` / `wf_compensation_records` append-only** — enforced by application convention (no UPDATE path in handlers). The matching DB-level REVOKE is on the same hardening checklist as item 1.
 3. **No restore test yet** — per the prompt, *"Do not claim backups are valid until a restore test succeeds."* A rollback migration (009, planned) is the restore-test artifact; until it runs green, backups are unverified.
 
-## "Must feel like it was always part of AOS" — how Phase 1 satisfies this
+## "Must feel like it was always part of Nexora OS" — how Phase 1 satisfies this
 
 - Shared identity (Keycloak OIDC, stable ULID from `sub`).
 - Shared organizations / tenants (FK, not duplication).

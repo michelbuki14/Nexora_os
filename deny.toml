@@ -1,4 +1,4 @@
-# cargo-deny policy for the AOS workspace.
+# cargo-deny policy for the Nexora OS workspace.
 #
 # Gates: cargo deny check  (CI job "deny")
 # The policy is strict-by-default: any license outside the allow-list or any
@@ -27,7 +27,7 @@ feature-depth = 1
 # rustls-webpki 0.102.8, which is pulled exclusively by the
 # `testcontainers` *dev*-dependency used by the tenant-isolation integration
 # tests. They are not reachable from any production service binary
-# (aos-api-gateway / aos-tenant-service / aos-audit-service / aos-migrate /
+# (nexora-api-gateway / nexora-tenant-service / nexora-audit-service / nexora-migrate /
 # domain services). The bollard 0.16.1 → rustls 0.22.4 → rustls-webpki
 # ^0.102.1 SemVer constraint prevents a clean upgrade; the permanent fix is
 # to bump testcontainers (and therefore bollard) once a release ships that
@@ -61,7 +61,7 @@ ignore = [
 
 # This section is considered when running `cargo deny check licenses`
 [licenses]
-# The AOS workspace is Apache-2.0. Dependencies may use any permissive license
+# The Nexora OS workspace is Apache-2.0. Dependencies may use any permissive license
 # in this list. "deny" (the default) applies to anything not listed, so adding
 # a new dependency with an unusual license fails loudly in CI rather than
 # silently slipping through.

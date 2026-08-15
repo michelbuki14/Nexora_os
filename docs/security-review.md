@@ -1,4 +1,4 @@
-# AOS Security Review — Foundation Baseline
+# Nexora OS Security Review — Foundation Baseline
 
 ## Scope
 This review covers the Rust workspace foundation, local stack, tenant schema, API gateway boundaries, and planned AWS delivery controls.

@@ -1,0 +1,44 @@
+[
+  {
+    "file": "config.gateway-docker.toml",
+    "line": 51-55,
+    "summary": "All three gateway feature flags (audit_enabled, commerce_enabled, finance_enabled, government_enabled) are hardcoded to false with no variation. They are explicitly maintained dead state that adds cognitive load and could be removed entirely since they never change from their default.",
+    "failure_scenario": "A developer might incorrectly change one flag to true, believing it controls feature behavior, but the flag has no downstream consumer — the service would need separate changes to actually honor it, creating a misleading configuration surface.",
+    "id": "candidate-1"
+  },
+  {
+    "file": "docker-compose.yml",
+    "line": 132-138,
+    "summary": "The `AOS_SERVICE__NAME` environment variable is redundant — it mirrors the `container_name` field that Docker already sets. The service name is derivable from the container name, so explicitly setting it via env var adds derivable state that could go out of sync with the actual container name.",
+    "failure_scenario": "If a contributor updates `container_name` but forgets `AOS_SERVICE__NAME` (or vice versa), the service name environment variable becomes inconsistent with the container identity, potentially breaking service discovery or config resolution that depends on the env var value.",
+    "id": "candidate-2"
+  },
+  {
+    "file": "config.gateway-docker.toml",
+    "line": 46-55,
+    "summary": "The `[gateway]` section contains three base URL references (workforce_base_url, audit_base_url, tenant_base_url) that are duplicated identically across 6+ config files (audit, tenant, workforce dev and docker variants). Each file copy-pastes the same structure with only the service hostname differing, creating copy-paste maintenance risk.",
+    "failure_scenario": "A change to one gateway base URL config requires identical changes in 5 other files. If any instance is missed, some services will resolve to stale endpoints while others update, causing intermittent failures that are hard to debug.",
+    "id": "candidate-3"
+  },
+  {
+    "file": "services/common/Cargo.toml",
+    "line": 3-4,
+    "summary": "The workspace dependency `aos-common` → `nexora-common` is renamed identically in 8 service Cargo.toml files plus the root workspace Cargo.toml. This is pure copy-paste variation with no logical difference between any two instances — the rename is mechanically identical across all files.",
+    "failure_scenario": "If a developer accidentally skips one service's Cargo.toml during the rename, that service will fail to compile with a missing dependency error while all others succeed, creating an inconsistent workspace state.",
+    "id": "candidate-4"
+  },
+  {
+    "file": "config.workforce-dev.toml",
+    "line": 45,
+    "summary": "The S3 bucket name `aos-workforce-documents` → `nexora-workforce-documents` is an example of derivable state — the bucket name follows the deterministic pattern `{service-name}-documents` and could be computed from the service name rather than stored explicitly in every config file.",
+    "failure_scenario": "If the service rename happens but the bucket name is missed or set to a different value, MinIO/S3 access breaks for that service while other services work fine, creating a partial outage that's easy to miss until the specific service is used.",
+    "id": "candidate-5"
+  },
+  {
+    "file": "config.audit-docker.toml",
+    "line": 17-37,
+    "summary": "The Keycloak auth configuration (jwks_url, issuer, audience) is duplicated nearly identically across 6 config files (audit, tenant-dev, tenant-docker, workforce-dev, workforce-docker, gateway-docker). Each file has the same structure with only the realm name (`aos` → `nexora`) differing — this is copy-paste with slight variation that creates unnecessary maintenance surface.",
+    "failure_scenario": "A developer updating the Keycloak realm configuration in one file but missing another means some services authenticate against the old realm while others use the new one, causing authentication failures for users of the missed service without clear error messages about which service is misconfigured.",
+    "id": "candidate-6"
+    }
+]

@@ -39,7 +39,7 @@ pub fn build_s3_client(cfg: &S3Config) -> Client {
         cfg.secret_access_key.expose(),
         None,
         None,
-        "aos-config",
+        "nexora-config",
     );
     let sdk_config = SdkConfig::builder()
         .region(Region::new(cfg.region.clone()))

@@ -9,7 +9,7 @@
 -- Conventions inherited from 001/005/006 and deliberately NOT re-invented here:
 --   * UUID primary keys (`gen_random_uuid()`), `CHAR(26)` ULIDs as the external id.
 --   * `tenant_id`/`org_id` on every row table, isolated by RLS against the
---     `aos.current_tenant_id` GUC that `rls_middleware` sets per request.
+--     `nexora.current_tenant_id` GUC that `rls_middleware` sets per request.
 --   * Reference data (currencies, countries, permissions) is shared, not copied.
 --
 -- History tables (`wf_employment_records`, `wf_compensation_records`) and document
@@ -302,99 +302,99 @@ ALTER TABLE wf_documents ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS tenant_isolation_wf_legal_entities ON wf_legal_entities;
 CREATE POLICY tenant_isolation_wf_legal_entities ON wf_legal_entities
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
 DROP POLICY IF EXISTS tenant_isolation_wf_locations ON wf_locations;
 CREATE POLICY tenant_isolation_wf_locations ON wf_locations
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
 DROP POLICY IF EXISTS tenant_isolation_wf_departments ON wf_departments;
 CREATE POLICY tenant_isolation_wf_departments ON wf_departments
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
 DROP POLICY IF EXISTS tenant_isolation_wf_teams ON wf_teams;
 CREATE POLICY tenant_isolation_wf_teams ON wf_teams
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
 DROP POLICY IF EXISTS tenant_isolation_wf_positions ON wf_positions;
 CREATE POLICY tenant_isolation_wf_positions ON wf_positions
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
 DROP POLICY IF EXISTS tenant_isolation_wf_employees ON wf_employees;
 CREATE POLICY tenant_isolation_wf_employees ON wf_employees
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
 DROP POLICY IF EXISTS tenant_isolation_wf_employment_records ON wf_employment_records;
 CREATE POLICY tenant_isolation_wf_employment_records ON wf_employment_records
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
 DROP POLICY IF EXISTS tenant_isolation_wf_compensation_records ON wf_compensation_records;
 CREATE POLICY tenant_isolation_wf_compensation_records ON wf_compensation_records
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
 DROP POLICY IF EXISTS tenant_isolation_wf_documents ON wf_documents;
 CREATE POLICY tenant_isolation_wf_documents ON wf_documents
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 

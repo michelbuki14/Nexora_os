@@ -1,4 +1,4 @@
-//! AOS Audit Service — append-only audit log for tenant actions.
+//! Nexora OS Audit Service — append-only audit log for tenant actions.
 //!
 //! Domain boundary: Audit events — append-only record of all tenant actions
 //! for compliance, forensic analysis, and security auditing.
@@ -72,7 +72,7 @@ async fn main() -> anyhow::Result<()> {
         .layer(cors);
 
     let addr: SocketAddr = format!("{}:{}", config.server.host, config.server.port).parse()?;
-    info!(%addr, "AOS Audit Service started");
+    info!(%addr, "Nexora OS Audit Service started");
 
     axum::serve(tokio::net::TcpListener::bind(addr).await?, app)
         .with_graceful_shutdown(shutdown_signal())

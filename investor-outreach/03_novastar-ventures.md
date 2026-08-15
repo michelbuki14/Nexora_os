@@ -1,7 +1,7 @@
 # Novastar Ventures
 **To:** deals@novastarventures.com  
 **From:** mkasongo@myyahoo.com  
-**Subject:** Pre-seed — AOS, workforce OS for African SMEs and enterprises
+**Subject:** Pre-seed — Nexora OS, workforce OS for African SMEs and enterprises
 
 ---
 

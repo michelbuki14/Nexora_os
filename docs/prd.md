@@ -1,14 +1,14 @@
-# AOS MVP Product Requirements Document
+# Nexora OS MVP Product Requirements Document
 
 ## Problem
 African organizations operate across fragmented identity, commerce, payments, compliance, logistics, and government systems. They need reusable infrastructure that works across countries, currencies, connectivity conditions, and regulatory environments.
 
 ## Business context
-AOS is infrastructure for African commerce, not a collection of disconnected vertical applications. The MVP establishes shared tenant, identity, authorization, audit, workflow, data, and observability capabilities. Vertical domains consume those primitives through stable APIs.
+Nexora OS is infrastructure for African commerce, not a collection of disconnected vertical applications. The MVP establishes shared tenant, identity, authorization, audit, workflow, data, and observability capabilities. Vertical domains consume those primitives through stable APIs.
 
 ## MVP users
 - Tenant administrators managing organizations, memberships, roles, and integrations
-- Developers integrating AOS APIs
+- Developers integrating Nexora OS APIs
 - Operations and compliance teams reviewing immutable activity
 - Design partners in one selected vertical at a time
 

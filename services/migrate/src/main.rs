@@ -1,4 +1,4 @@
-//! AOS database migration runner.
+//! Nexora OS database migration runner.
 //!
 //! Owns the SQLx migrations directory and applies pending migrations in order
 //! within a versioned schema table (`_sqlx_migrations`). Invoked explicitly
@@ -6,9 +6,9 @@
 //! startup, so migrations are applied by exactly one process.
 //!
 //! Usage:
-//!   aos-migrate run        # apply pending migrations
-//!   aos-migrate info       # print applied/pending status
-//!   aos-migrate verify     # exit non-zero if pending migrations exist
+//!   nexora-migrate run        # apply pending migrations
+//!   nexora-migrate info       # print applied/pending status
+//!   nexora-migrate verify     # exit non-zero if pending migrations exist
 
 use aos_common::{config::Config, db, logging::init_logging};
 use sqlx::migrate::{Migrate, Migrator};

@@ -1,4 +1,4 @@
-# AOS Implementation Plan
+# Nexora OS Implementation Plan
 
 ## Workforce, Payroll, Payments — Built on Existing Rust Foundation
 
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-AOS will be built as a **Rust modular monolith** using Axum, SQLx, PostgreSQL 16, Tokio, and Keycloak — preserving the existing foundation. The plan adds three major commercial verticals (Workforce, Payroll, Payments) plus a Finance foundation over **4 phases across 16 weeks**.
+Nexora OS will be built as a **Rust modular monolith** using Axum, SQLx, PostgreSQL 16, Tokio, and Keycloak — preserving the existing foundation. The plan adds three major commercial verticals (Workforce, Payroll, Payments) plus a Finance foundation over **4 phases across 16 weeks**.
 
 The current repository provides a solid base (Docker Compose stack, Core schema with RLS, CI/CD pipeline, Keycloak realm, observability primitives) but needs critical fixes before vertical implementation can begin.
 
@@ -32,10 +32,10 @@ The adversarial review identified **8 critical gaps** that must be addressed bef
 
 | # | Gap | Severity | Resolution |
 |---|-----|----------|------------|
-| 1 | **Workspace doesn't compile** — `services/common/src/health.rs` uses `sqlx::PgPool` and `redis::Client` but `Cargo.toml` declares neither; ~53 errors | CRITICAL | Add sqlx/redis deps to aos-common, fix unused imports |
+| 1 | **Workspace doesn't compile** — `services/common/src/health.rs` uses `sqlx::PgPool` and `redis::Client` but `Cargo.toml` declares neither; ~53 errors | CRITICAL | Add sqlx/redis deps to nexora-common, fix unused imports |
 | 2 | **No DRC payroll analysis anywhere** — grep for payroll/DRC/IPR/CNSS/SMIG returns nothing | CRITICAL | Produce DRC payroll design artifact with regulatory review before payroll implementation |
 | 3 | **No money representation standard** — no NUMERIC columns, no money types, no rounding policy | CRITICAL | Adopt NUMERIC(19,4) + `rust_decimal` everywhere, clippy guard banning f32/f64 for money |
-| 4 | **RLS is inert** — no code ever calls `set_config('aos.current_tenant_id', ...)`, no WITH CHECK policies, organizations policy has wrong dimension | CRITICAL | Wire RLS per-request, add WITH CHECK, fix organizations policy |
+| 4 | **RLS is inert** — no code ever calls `set_config('nexora.current_tenant_id', ...)`, no WITH CHECK policies, organizations policy has wrong dimension | CRITICAL | Wire RLS per-request, add WITH CHECK, fix organizations policy |
 | 5 | **Audit is not tamper-evident** — no hash-chain computation, no append-only enforcement, audit-service is a stub | CRITICAL | Keyed HMAC hash chain, REVOKE UPDATE/DELETE, verification job |
 | 6 | **No idempotency anywhere** — only an error variant exists; no dedup table, no key middleware | CRITICAL | Idempotency-key layer on every POST/PUT, unique constraints on payroll/payment |
 | 7 | **No deterministic payroll engine** — no computation engine, no versioned rules, no DRC calendar/timezone | CRITICAL | Spec deterministic engine with versioned effective-dated rule sets |
@@ -49,11 +49,11 @@ The adversarial review identified **8 critical gaps** that must be addressed bef
 
 | Asset | Adaptation |
 |-------|-----------|
-| `aos-common` crate (config/error/jwt/tenant/validation/ulid/time/logging/health) | Add PermissionExtractor, authz middleware, shared money types |
+| `nexora-common` crate (config/error/jwt/tenant/validation/ulid/time/logging/health) | Add PermissionExtractor, authz middleware, shared money types |
 | `rust_decimal` (transitive dep in fintech-service) | Promote to workspace dep, add sqlx NUMERIC support |
 | `AosError` variants (IdempotencyConflict, InsufficientFunds, ExternalService) | Map to payment retry, payroll validation, reconciliation |
 | `audit_events` schema (append-only, SHA-256 hash, RLS) | Reuse for payroll/payment/lifecycle; add verifier job |
-| RLS policy pattern (`current_setting('aos.current_tenant_id')`) | Replicate for all 35+ new tables |
+| RLS policy pattern (`current_setting('nexora.current_tenant_id')`) | Replicate for all 35+ new tables |
 | `TenantResolver`/`TenantExtractor` middleware | Extend into full authz chain: JWT → tenant → permissions → RLS GUC |
 | `JwtValidator` + `AosClaims` | Add employee_id, country_code, currency claims |
 | Health checks (DatabaseHealthCheck, RedisHealthCheck) | Wire into new service routers |
@@ -68,11 +68,11 @@ The adversarial review identified **8 critical gaps** that must be addressed bef
 
 | Service | Purpose | Dependencies |
 |---------|---------|-------------|
-| `aos-workforce-service` | Employee lifecycle, contracts, compensation, attendance, leave, documents, compliance | aos-common, Keycloak, PostgreSQL, Redis, MinIO, Redpanda |
-| `aos-payroll-service` | Deterministic payroll engine, DRC localization, payslips, approval workflow | aos-common, aos-workforce-service, PostgreSQL, Redis |
-| `aos-payments-service` | Payment orchestration, provider adapters, transaction ledger, reconciliation, idempotency | aos-common, PostgreSQL, Redis, Redpanda |
-| `aos-finance-service` | Chart of accounts, double-entry journal, payroll-to-accounting posting (replaces fintech stub) | aos-common, PostgreSQL |
-| `aos-worker` | Background job runner: payroll processing, payslip generation, payment retries, reconciliation | aos-common, Redis, Redpanda, MinIO, PostgreSQL |
+| `nexora-workforce-service` | Employee lifecycle, contracts, compensation, attendance, leave, documents, compliance | nexora-common, Keycloak, PostgreSQL, Redis, MinIO, Redpanda |
+| `nexora-payroll-service` | Deterministic payroll engine, DRC localization, payslips, approval workflow | nexora-common, nexora-workforce-service, PostgreSQL, Redis |
+| `nexora-payments-service` | Payment orchestration, provider adapters, transaction ledger, reconciliation, idempotency | nexora-common, PostgreSQL, Redis, Redpanda |
+| `nexora-finance-service` | Chart of accounts, double-entry journal, payroll-to-accounting posting (replaces fintech stub) | nexora-common, PostgreSQL |
+| `nexora-worker` | Background job runner: payroll processing, payslip generation, payment retries, reconciliation | nexora-common, Redis, Redpanda, MinIO, PostgreSQL |
 
 ---
 
@@ -246,7 +246,7 @@ created → validated → authorized → submitted → in_transit → completed
 
 ### Pattern: Transactional Outbox + Redis Streams
 - Domain mutations write to `outbox_events` in the same transaction
-- `aos-worker` polls `outbox_events` → dispatches to Redis Streams
+- `nexora-worker` polls `outbox_events` → dispatches to Redis Streams
 - Consumers process with exactly-once semantics (idempotency key + dedup table)
 - Failed jobs retry with exponential backoff → dead letter after max attempts
 
@@ -315,7 +315,7 @@ report.read, report.export
 
 | Track | Task ID | Title | Days | Dependencies |
 |-------|---------|-------|------|-------------|
-| Backend | P1-BE-01 | Fix workspace compilation (sqlx/redis in aos-common, unused imports) | 2 | — |
+| Backend | P1-BE-01 | Fix workspace compilation (sqlx/redis in nexora-common, unused imports) | 2 | — |
 | Backend | P1-BE-02 | Harden API gateway (request-ID, timeouts, body limits, CORS, rate-limit) | 5 | — |
 | Backend | P1-BE-03 | Tenant context + RLS middleware (set_config per-request) | 4 | P1-DB-01 |
 | Backend | P1-BE-04 | Tenant service CRUD (org, tenant, user, role, membership) | 6 | P1-BE-03 |
@@ -363,7 +363,7 @@ report.read, report.export
 | Backend | P2-BE-08 | Compliance records (CNSS/IPR registration, filing tracking) | 3 | P2-BE-01 |
 | Backend | P2-BE-09 | Workforce reports (headcount, turnover, attendance, leave) | 4 | P2-BE-01 |
 | Backend | P2-BE-10 | Outbox event publisher (employee.changed, contract.created) | 3 | Phase 1 |
-| Backend | P2-BE-11 | aos-worker: outbox dispatcher + basic job runner | 4 | Phase 1, P2-BE-10 |
+| Backend | P2-BE-11 | nexora-worker: outbox dispatcher + basic job runner | 4 | Phase 1, P2-BE-10 |
 | Frontend | P2-FE-01 | Next.js app shell + Keycloak PKCE auth flow | 5 | Phase 1 |
 | Frontend | P2-FE-02 | Employee list + detail pages | 5 | P2-BE-01, P2-FE-01 |
 | Frontend | P2-FE-03 | Contract + compensation management | 4 | P2-BE-03, P2-BE-04 |
@@ -505,7 +505,7 @@ report.read, report.export
 
 1. **Restore green build:** Add sqlx/redis to `services/common/Cargo.toml`, fix unused imports, make `cargo check --workspace` pass
 2. **Adopt money policy:** `rust_decimal` + NUMERIC(19,4) everywhere, clippy guard banning floats for money
-3. **Wire RLS:** `set_config('aos.current_tenant_id', ...)` per-request, add WITH CHECK policies, fix organizations policy
+3. **Wire RLS:** `set_config('nexora.current_tenant_id', ...)` per-request, add WITH CHECK policies, fix organizations policy
 4. **Commission DRC payroll regulatory review** (IPR rates, CNSS rates, SMIG, filing obligations)
 5. **User confirmation** to begin Phase 1 implementation
 

@@ -1,8 +1,8 @@
-# AOS Teaser Series — "We Actually Built It"
+# Nexora OS Teaser Series — "We Actually Built It"
 
 > Audience: African fintech operators, HR leaders, developers, frontier-tech investors
 > Channels: LinkedIn, X/Twitter, landing-page hero
-> Anchor proof (live, demonstrable): a real Keycloak OIDC token authenticates → a `201` audit event is written → it is chained via SHA-256 (`prev_hash || canonical_payload`) to the previous event, under PostgreSQL Row-Level Security tenant isolation. Verify-hash-chain endpoint replays the chain. The same primitives now power a second vertical: AOS Workforce — 9 RLS-enabled tables (migration 008), 17 handlers, compiles clean — where every hire, transfer, salary change, and document access writes into the same hash chain. Not a deck. Two running services on one working core.
+> Anchor proof (live, demonstrable): a real Keycloak OIDC token authenticates → a `201` audit event is written → it is chained via SHA-256 (`prev_hash || canonical_payload`) to the previous event, under PostgreSQL Row-Level Security tenant isolation. Verify-hash-chain endpoint replays the chain. The same primitives now power a second vertical: Nexora OS Workforce — 9 RLS-enabled tables (migration 008), 17 handlers, compiles clean — where every hire, transfer, salary change, and document access writes into the same hash chain. Not a deck. Two running services on one working core.
 
 ---
 
@@ -10,11 +10,11 @@
 
 ### LinkedIn #1 — The credibility anchor
 
-**AOS — "We actually built it, not just decked it."**
+**Nexora OS — "We actually built it, not just decked it."**
 
 Most pitch decks describe an audit trail. We shipped one. Today a live Keycloak OIDC token authenticates a request, our Rust/Axum service writes a `201` audit event, and that event is SHA-256 chained to the one before it — under PostgreSQL Row-Level Security. Tenant isolation is enforced in the database, fail-closed. There's a verify-hash-chain endpoint that replays the whole chain and flags tampering.
 
-This is AOS: infrastructure for African commerce, one honest vertical at a time.
+This is Nexora OS: infrastructure for African commerce, one honest vertical at a time.
 
 ---
 
@@ -36,7 +36,7 @@ If you're a regulated African institution needing audit evidence *and* trustwort
 
 **Built before funded. Seeking one design partner, not ten customers.**
 
-AOS runs locally on Docker Compose (Postgres, Keycloak, Redis, MinIO, OpenSearch, Jaeger, Redpanda) with CI/CD wired. Two verticals compile and return clean HTTP codes against a live dev-admin token — audit *and* workforce. The workforce backend (Phase 1) is backend-only with no portal frontend yet; production infrastructure (EKS/Aurora/Terraform) is documented, not deployed — that's what a design-partner pilot funds.
+Nexora OS runs locally on Docker Compose (Postgres, Keycloak, Redis, MinIO, OpenSearch, Jaeger, Redpanda) with CI/CD wired. Two verticals compile and return clean HTTP codes against a live dev-admin token — audit *and* workforce. The workforce backend (Phase 1) is backend-only with no portal frontend yet; production infrastructure (EKS/Aurora/Terraform) is documented, not deployed — that's what a design-partner pilot funds.
 
 Pilot: ~$15–25K setup to harden one vertical on this core (workforce: DB-level append-only REVOKE, restore test, portal) or build a new one (fintech/retail/gov). Or ~$2–5K/mo audit SaaS standalone.
 
@@ -48,7 +48,7 @@ Design partner → reference → scale. No invented ARR. Built, not decked.
 
 ### X #1 — the proof in one shot
 
-AOS — "we actually built it, not just decked it."
+Nexora OS — "we actually built it, not just decked it."
 
 Live Keycloak OIDC token → Rust/Axum 201 audit event → SHA-256 hash chain under PostgreSQL Row-Level Security. Tenant isolation enforced in DB, fail-closed. Tamper-evident, replay-verifiable. #fintech #Africa
 
@@ -67,7 +67,7 @@ Africa commerce infra, one honest vertical at a time.
 
 ### X #3 — design-partner call
 
-Seeking ONE design partner for AOS.
+Seeking ONE design partner for Nexora OS.
 
 The core works today: two verticals live (audit log + workforce backend). Keycloak JWT → tamper-evident audit chain, RLS-isolated, ~$2–5K/mo audit standalone or ~$15–25K pilot to harden/build one vertical on it.
 

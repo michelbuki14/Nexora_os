@@ -1,12 +1,12 @@
 [package]
-name = "aos-api-gateway"
+name = "nexora-api-gateway"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/michelbuki14/AFRICA-OPERATING-SYSTEM-AOS-"
 
 [dependencies]
-aos-common = { workspace = true, features = [] }
+nexora-common = { workspace = true, features = [] }
 anyhow = { workspace = true }
 axum = { workspace = true }
 tokio = { workspace = true }

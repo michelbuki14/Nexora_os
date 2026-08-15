@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-AOS must deliver reusable platform capabilities (identity, tenancy, audit, authorization, data, workflow, observability) while supporting independent vertical domain development. Starting with distributed microservices adds operational complexity before domain boundaries are proven.
+Nexora OS must deliver reusable platform capabilities (identity, tenancy, audit, authorization, data, workflow, observability) while supporting independent vertical domain development. Starting with distributed microservices adds operational complexity before domain boundaries are proven.
 
 ## Decision
 Adopt a **modular monolith** as the MVP architecture. Domain modules share a single deployment unit (Axum server) with strict internal boundaries:

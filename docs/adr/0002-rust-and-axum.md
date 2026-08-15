@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-AOS requires high-throughput APIs, predictable memory behavior, strong compile-time guarantees, safe concurrency, and long-term maintainability. The constitution permits TypeScript, Go, Rust, Python, and SQL; the user selected Rust for deployment.
+Nexora OS requires high-throughput APIs, predictable memory behavior, strong compile-time guarantees, safe concurrency, and long-term maintainability. The constitution permits TypeScript, Go, Rust, Python, and SQL; the user selected Rust for deployment.
 
 ## Decision
 Use Rust stable with Axum/Tokio for HTTP services and SQLx for PostgreSQL. Use explicit ports/adapters for external providers, serde for contracts, and utoipa for OpenAPI.

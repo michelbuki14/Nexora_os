@@ -1,0 +1,62 @@
+[
+  {
+    "file": "services/common/src/config.rs",
+    "line": 299,
+    "summary": "Missing config.default.toml causes config load failure",
+    "failure_scenario": "Config::load() merges Toml::file(\"config.default.toml\") which does not exist in the repo; when AOS_ENV is unset (defaults to development), figment.extract() fails and prevents any service from starting"
+  },
+  {
+    "file": "services/common/src/config.rs",
+    "line": 295,
+    "summary": "AOS_ENV config file name mismatch",
+    "failure_scenario": "When AOS_ENV=docker (set for all services in docker-compose.yml), code formats config_file as \"config.docker.toml\" but no such file exists; actual config files use patterned names like config.gateway-docker.toml, each service needs its specific config file"
+  },
+  {
+    "file": "services/common/src/config.rs",
+    "line": 196,
+    "summary": "DatabaseConfig default URL references old credentials",
+    "failure_scenario": "DatabaseConfig::default() sets url to \"postgres://aos:aos_dev_password@localhost:5432/aos\"; without explicit config or env overrides, services connect to old AOS database with wrong credentials instead of new nexora database, causing connection failures"
+  },
+  {
+    "file": "services/common/src/config.rs",
+    "line": 219,
+    "summary": "RedisConfig default URL references old password",
+    "failure_scenario": "RedisConfig::default() sets url to \"redis://:aos_dev_password@localhost:6379/0\"; without explicit config, services attempt to connect to Redis with old password, causing connection failures in development environments not using docker compose"
+  },
+  {
+    "file": "services/common/src/config.rs",
+    "line": 243,
+    "summary": "AuthConfig default audience references old aos-api",
+    "failure_scenario": "AuthConfig::default() sets audience to \"aos-api\"; if auth is used without explicit config, JWT tokens validated with old audience claim either fail validation or accept tokens they shouldn't, potentially allowing unauthorized access"
+  },
+  {
+    "file": "services/common/src/config.rs",
+    "line": 110,
+    "summary": "S3Config default bucket references old bucket name",
+    "failure_scenario": "S3Config::default() sets bucket to \"aos-workforce-documents\"; without explicit config, workforce service references old MinIO bucket name, causing object lookup failures for documents stored under new nexora-workforce-documents bucket"
+  },
+  {
+    "file": "config.gateway-docker.toml",
+    "line": 75,
+    "summary": "Gateway auth URLs reference old Keycloak realm name",
+    "failure_scenario": "If the Keycloak realm was originally named 'aos' and only got a prefix rename in config files (but the actual Keycloak realm still called 'aos'), all API gateway authentication would fail — JWT tokens issued against realm 'aos' would be rejected by the gateway configured for 'nexora'"
+  },
+  {
+    "file": "docker-compose.yml",
+    "line": 10,
+    "summary": "Database credential names changed from aos to nexora",
+    "failure_scenario": "External scripts, backup jobs, or monitoring referencing 'aos_dev_password' or 'aos-postgres' will silently fail to authenticate; new 'nexora_dev_password' and 'nexora-postgres' credentials must be updated in all dependent automation"
+  },
+  {
+    "file": "README.md",
+    "line": 30,
+    "summary": "Removed cargo run alias for api-gateway",
+    "failure_scenario": "The line `cargo run -p aos-api-gateway` was deleted and replaced with `cargo run -p nexora-api-gateway`; anyone using the old alias in scripts or CI will get \"command not found\" errors and the gateway won't start, requiring update to the new command name"
+  },
+  {
+    "file": "deny.toml",
+    "line": 20,
+    "summary": "Wildcard dependency policy may not be properly re-established",
+    "failure_scenario": "If the `wildcards = \"deny\"` policy was altered (relaxed to `warn` or removed), previously-failing path dependencies would silently pass cargo-deny; conversely, if tightened, previously-passing deps would break the build. The supply-chain invariant may not be properly re-established."
+  }
+]

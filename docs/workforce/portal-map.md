@@ -1,8 +1,8 @@
 # Workforce Portal Map
 
-> AOS has **no frontend crate today** (verified — no `package.json`, no design
-> system). The Workforce prompt's "My-AOS / Manager / HR-Admin portals
-> integrated into the existing AOS design system" cannot be satisfied literally
+> Nexora OS has **no frontend crate today** (verified — no `package.json`, no design
+> system). The Workforce prompt's "My-Nexora OS / Manager / HR-Admin portals
+> integrated into the existing Nexora OS design system" cannot be satisfied literally
 > in Phase 1. This doc is the **forward contract**: it sketches the three
 > portals against the Phase-1 endpoints each calls, so when a frontend crate
 > (likely React/TS, TBD) is created it can be built straight from this map and
@@ -15,7 +15,7 @@
 ## Shared shell (all three portals)
 
 - Auth: Keycloak OIDC bearer token in `Authorization: Bearer …`; same identity,
-  organizations, permissions as the rest of AOS.
+  organizations, permissions as the rest of Nexora OS.
 - Error surface: `ErrorResponse { code, message, details? }` (shared `AosError`).
 - Pagination: `?page=&page_size=` → `{ items, total, page, page_size }`.
 - Tenant/org: implicit from the token (RLS); never sent in the request body.
@@ -24,7 +24,7 @@
 
 ---
 
-## Portal 1 — My-AOS (the employee self-service portal)
+## Portal 1 — My-Nexora OS (the employee self-service portal)
 
 **Role:** EMPLOYEE. Sees only their own record.
 
@@ -120,4 +120,4 @@ trail). The "Bulk export" tab triggers `employee.exported`.
   re-resolved to ULIDs (marked `ponytail:` in `employee_row_to_response`).
 - Notifications provider (Mailhog is in compose; no Rust mailer yet — Phase 3).
 - Full org-chart traversal for managers (direct reports only in MVP).
-- A design system / component library — does not exist in AOS yet.
+- A design system / component library — does not exist in Nexora OS yet.

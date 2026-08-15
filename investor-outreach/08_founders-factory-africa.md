@@ -1,7 +1,7 @@
 # Founders Factory Africa
 **To:** Apply via foundersfactory.com/africa — use this as intro narrative  
 **From:** mkasongo@myyahoo.com  
-**Subject:** AOS — Workforce OS for African employers (venture studio fit)
+**Subject:** Nexora OS — Workforce OS for African employers (venture studio fit)
 
 ---
 

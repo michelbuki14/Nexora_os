@@ -1,4 +1,4 @@
-//! AOS Tenant Service - Multi-tenancy core domain.
+//! Nexora OS Tenant Service - Multi-tenancy core domain.
 //!
 //! Domain boundary: Organizations, Tenants.
 //!
@@ -106,7 +106,7 @@ async fn main() -> anyhow::Result<()> {
         .layer(cors);
 
     let addr: SocketAddr = format!("{}:{}", config.server.host, config.server.port).parse()?;
-    info!(%addr, "AOS Tenant Service started");
+    info!(%addr, "Nexora OS Tenant Service started");
 
     axum::serve(tokio::net::TcpListener::bind(addr).await?, app)
         .with_graceful_shutdown(shutdown_signal())

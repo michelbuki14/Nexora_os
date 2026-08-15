@@ -1,0 +1,38 @@
+[
+  {
+    "file": "services/common/src/config.rs",
+    "line": 294-306,
+    "summary": "Redundant TOML config file I/O on every Config::load() call",
+    "failure_scenario": "Config::load() reads config.default.toml and config.{env}.toml from disk every time it's called via Figment::file(). If services call Config::load() multiple times during startup (e.g., error retry paths, middleware initialization), this introduces unnecessary disk I/O on the hot startup path. Each call merges three Figment layers (defaults, env-specific TOML, environment variables). Fix: cache the loaded Config after first load, or load once at process startup and pass the Arc<Config> reference."
+  },
+  {
+    "file": "services/common/src/tenant_context.rs",
+    "line": 184,
+    "summary": "Repeated PostgreSQL BEGIN transaction on every HTTP request via rls_middleware",
+    "failure_scenario": "The rls_middleware executes state.pool.begin().await on every single HTTP request (line 184). This is a PostgreSQL round-trip that adds latency on every hot path request. While necessary for transaction-scoped RLS GUCs, the repeated BEGIN/COMMIT cycle represents wasted I/O when many requests could share a pre-existing transaction or when RLS isn't needed (e.g., health checks). Fix: explore session-level connection pooling with per-request GUC setting without full transaction begin, or conditional RLS activation only when auth context is present and RLS is required."
+  },
+  {
+    "file": "services/common/src/tenant_context.rs",
+    "line": 50-53,
+    "summary": "Arc<Mutex<Option<Transaction>>> keeps full Arc<Config> alive for request lifetime",
+    "failure_scenario": "The DbConn struct wraps a Transaction in Arc<Mutex<Option<Transaction>>> (lines 50-53). Since RlsState contains both pool: PgPool and config: Arc<Config>, the entire Arc<Config> is kept alive for the duration of every request using RLS middleware. If Config grows to include large fields (feature flags, large S3 configs, extensive auth settings), this creates a memory leak pattern where the enclosing scope's large values persist request-after-request. The closure capturing RlsState perpetuates this. Fix: split RlsState into separate pool and config state, or extract only the needed fields (pool) into a minimal middleware state struct that copies only what it needs."
+  },
+  {
+    "file": "services/common/src/config.rs",
+    "line": 301,
+    "summary": "Repeated environment variable parsing on every Config::load() call",
+    "failure_scenario": "Config::load() merges Env::prefixed("AOS_").split("__") on every call (line 301). This parses all AOS_ environment variables and splits on double-underscore on every invocation. If config is loaded multiple times during startup or in test harnesses, this is redundant computation. The env var parsing includes string allocation for prefix stripping and key normalization. Fix: load environment variables once at startup, cache the parsed config, or use a one-time initialization pattern (lazy_static/OnceLock) to ensure config is extracted only once."
+  },
+  {
+    "file": "services/api-gateway/src/main.rs",
+    "line": 231-234,
+    "summary": "Blocking synchronous Config::load() at API gateway startup",
+    "failure_scenario": "The API gateway's main() calls Config::load() synchronously at line 231-234 before the tokio runtime is fully established (line 228: #[tokio::main]). If config TOML files are large or environment variable parsing is complex, this blocks the thread during process startup, increasing time-to-first-request. The Figment library's file reads and env var merging are not async-native. Fix: refactor Config::load() to be async (using aio-fs or similar), or separate the critical path so only essential config is loaded synchronously while the rest initializes asynchronously."
+  },
+  {
+    "file": "services/common/src/config.rs",
+    "line": 110,
+    "summary": "S3Config default bucket name not updated with aos→nexora rename",
+    "failure_scenario": "S3Config::default() hardcodes bucket: \"aos-workforce-documents\".to_string() (line 110). After the workspace rename from aos- to nexora-, if the default config is used without overriding the bucket name via config file or environment variable, the service resolves to the old aos- bucket name. This causes either a miss (nonexistent bucket) or silently wrong behavior if an aos- bucket still exists. The mismatch can trigger repeated failed config loads or fallback code paths, introducing wasted I/O and computation. Fix: update the default to \"nexora-workforce-documents\" to match the renamed configuration, or make the bucket name fully configurable via environment variable with no hardcoded default."
+  }
+]

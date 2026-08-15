@@ -24,7 +24,7 @@
 **The ask.** Sign this Letter of Intent to pilot. It commits you to nothing beyond the items above; it commits us to a working settlement and reconciliation workflow in your environment within 8–12 weeks. No exclusivity, no upfront license purchase. Dates and contacts are intentionally blank; we propose a Kinshasa working session within two weeks to pin scope, the report format, and acceptance criteria, and we hold this LOI open for [60/90] days. French version available for signature.
 
 **Signed — [Your organization]:** ________ Name/Title: ________
-**Signed — [AOS / your entity]:** ________ Name/Title: ________
+**Signed — [Nexora OS / your entity]:** ________ Name/Title: ________
 
 ---
 *External facts — BCC licensing mechanics, PSP sandbox/production API terms, exact law references (including DRC data-protection law), and report formats — must be verified with counsel and the counterparty before any binding agreement. This LOI is confidential, creates no license, exclusivity, or regulatory-status claim, and is governed by law to be agreed at signature.*

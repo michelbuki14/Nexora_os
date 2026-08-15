@@ -107,7 +107,7 @@ impl Default for S3Config {
         Self {
             endpoint: "http://localhost:9000".to_string(),
             region: "us-east-1".to_string(),
-            bucket: "aos-workforce-documents".to_string(),
+            bucket: "nexora-workforce-documents".to_string(),
             access_key_id: RedactedSecret::new("minioadmin"),
             secret_access_key: RedactedSecret::new("minioadmin"),
             presign_ttl_secs: 60,
@@ -130,7 +130,7 @@ pub struct ServiceConfig {
 impl Default for ServiceConfig {
     fn default() -> Self {
         Self {
-            name: "aos-service".to_string(),
+            name: "nexora-service".to_string(),
             version: env!("CARGO_PKG_VERSION").to_string(),
             environment: Environment::Development,
             instance_id: crate::ulid::new_ulid(),
@@ -193,7 +193,7 @@ pub struct DatabaseConfig {
 impl Default for DatabaseConfig {
     fn default() -> Self {
         Self {
-            url: RedactedSecret::new("postgres://aos:aos_dev_password@localhost:5432/aos"),
+            url: RedactedSecret::new("postgres://nexora:nexora_dev_password@localhost:5432/nexora"),
             max_connections: 20,
             min_connections: 5,
             connect_timeout_secs: 10,
@@ -216,7 +216,7 @@ pub struct RedisConfig {
 impl Default for RedisConfig {
     fn default() -> Self {
         Self {
-            url: RedactedSecret::new("redis://:aos_dev_password@localhost:6379/0"),
+            url: RedactedSecret::new("redis://:nexora_dev_password@localhost:6379/0"),
             max_connections: 50,
             connection_timeout_secs: 5,
             command_timeout_secs: 5,
@@ -238,9 +238,9 @@ pub struct AuthConfig {
 impl Default for AuthConfig {
     fn default() -> Self {
         Self {
-            jwks_url: "http://localhost:8080/realms/aos/protocol/openid-connect/certs".to_string(),
-            issuer: "http://localhost:8080/realms/aos".to_string(),
-            audience: "aos-api".to_string(),
+            jwks_url: "http://localhost:8080/realms/nexora/protocol/openid-connect/certs".to_string(),
+            issuer: "http://localhost:8080/realms/nexora".to_string(),
+            audience: "nexora-api".to_string(),
             jwks_cache_ttl_secs: 300,
             require_https: false,
             allowed_algorithms: vec!["RS256".to_string()],
@@ -263,7 +263,7 @@ impl Default for TracingConfig {
         Self {
             enabled: true,
             otlp_endpoint: "http://localhost:4317".to_string(),
-            service_name: "aos-service".to_string(),
+            service_name: "nexora-service".to_string(),
             sample_rate: 1.0,
             export_timeout_secs: 10,
         }
@@ -296,7 +296,6 @@ impl Config {
         let config_file = format!("config.{env}.toml");
 
         let figment = Figment::new()
-            .merge(Toml::file("config.default.toml"))
             .merge(Toml::file(&config_file))
             .merge(Env::prefixed("AOS_").split("__"));
 

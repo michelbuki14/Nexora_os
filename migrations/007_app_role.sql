@@ -2,7 +2,7 @@
 -- Bootstrap a non-superuser application role so row-level security is enforced.
 --
 -- PostgreSQL superusers bypass row-level security, so if the runtime services
--- connect as the `aos` superuser (the default POSTGRES_USER), the `aos.current_tenant_id`
+-- connect as the `aos` superuser (the default POSTGRES_USER), the `nexora.current_tenant_id`
 -- / `aos.is_system` GUCs are ignored and every request sees every tenant's rows.
 --
 -- This migration creates `aos_app`, a LOGIN role with only DML privileges on the

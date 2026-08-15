@@ -1,4 +1,4 @@
-//! AOS Workforce Service — Phase 1.
+//! Nexora OS Workforce Service — Phase 1.
 //!
 //! Provides org structure, employee identity/employment/compensation,
 //! secure document management, and lifecycle audit events.
@@ -80,7 +80,7 @@ async fn main() -> anyhow::Result<()> {
 
     let addr: SocketAddr = format!("{}:{}", config.server.host, config.server.port).parse()?;
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    info!(%addr, "AOS Workforce Service started");
+    info!(%addr, "Nexora OS Workforce Service started");
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())

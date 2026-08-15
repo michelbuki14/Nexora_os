@@ -5,7 +5,7 @@
 
 ---
 
-**Company:** Africa Operating System (AOS)  
+**Company:** Nexora OS  
 **Founder:** Miche Kasongo — mkasongo@myyahoo.com  
 **Stage:** Pre-seed, Phase 1 complete  
 
@@ -13,7 +13,7 @@
 
 **What does your company do?**
 
-AOS is the workforce operating system for African employers. We provide multi-tenant HR and workforce management infrastructure purpose-built for African labour law, multi-currency payroll, and compliance requirements that global platforms ignore.
+Nexora OS is the workforce operating system for African employers. We provide multi-tenant HR and workforce management infrastructure purpose-built for African labour law, multi-currency payroll, and compliance requirements that global platforms ignore.
 
 **What's the problem?**
 
@@ -34,7 +34,7 @@ Built in Rust + PostgreSQL for correctness, performance, and data integrity unde
 
 **Why you?**
 
-I am African, I understand the market from the inside, and I have built the core infrastructure. Phase 2 (payroll engine) is designed. Phase 3 (country-specific tax compliance) and Phase 4 (government integrations) have clear technical paths. The moat is domain knowledge + data — once tenants' employee records are on AOS, switching cost is high.
+I am African, I understand the market from the inside, and I have built the core infrastructure. Phase 2 (payroll engine) is designed. Phase 3 (country-specific tax compliance) and Phase 4 (government integrations) have clear technical paths. The moat is domain knowledge + data — once tenants' employee records are on Nexora OS, switching cost is high.
 
 **Business model:** Per-seat SaaS, $8–15 PEPM. 100 employees × $10 = $1,000 MRR per tenant.
 

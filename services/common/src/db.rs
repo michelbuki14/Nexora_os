@@ -2,7 +2,7 @@
 //!
 //! Centralizes PostgreSQL pool creation so every service and the migration
 //! runner uses the same sizing and timeout policy. Migrations themselves are
-//! owned by the `aos-migrate` binary, not by service startup, so exactly one
+//! owned by the `nexora-migrate` binary, not by service startup, so exactly one
 //! process applies schema changes (see `services/migrate`).
 
 use crate::{AosError, AosResult, DatabaseConfig};
@@ -71,10 +71,10 @@ mod tests {
 
     #[test]
     fn valid_url_parses() {
-        let opts = parse_options("postgres://aos@localhost:5432/aos").expect("valid url");
+        let opts = parse_options("postgres://nexora@localhost:5432/nexora").expect("valid url");
         assert_eq!(opts.get_host(), "localhost");
         assert_eq!(opts.get_port(), 5432);
-        assert_eq!(opts.get_database(), Some("aos"));
-        assert_eq!(opts.get_username(), "aos");
+        assert_eq!(opts.get_database(), Some("nexora"));
+        assert_eq!(opts.get_username(), "nexora");
     }
 }

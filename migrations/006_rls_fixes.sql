@@ -14,11 +14,11 @@
 DROP POLICY IF EXISTS tenant_isolation_organizations ON organizations;
 CREATE POLICY org_isolation_organizations ON organizations
     USING (
-        id = (SELECT org_id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        id = (SELECT org_id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        id = (SELECT org_id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        id = (SELECT org_id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
@@ -26,11 +26,11 @@ CREATE POLICY org_isolation_organizations ON organizations
 DROP POLICY IF EXISTS tenant_isolation_tenants ON tenants;
 CREATE POLICY tenant_isolation_tenants ON tenants
     USING (
-        ulid = current_setting('aos.current_tenant_id', true)
+        ulid = current_setting('nexora.current_tenant_id', true)
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        ulid = current_setting('aos.current_tenant_id', true)
+        ulid = current_setting('nexora.current_tenant_id', true)
         OR current_setting('aos.is_system', true) = 'true'
     );
 
@@ -38,13 +38,13 @@ CREATE POLICY tenant_isolation_tenants ON tenants
 DROP POLICY IF EXISTS tenant_isolation_users ON users;
 CREATE POLICY tenant_isolation_users ON users
     USING (
-        (tenant_id IS NOT NULL AND tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true)))
-        OR (tenant_id IS NULL AND org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true)))
+        (tenant_id IS NOT NULL AND tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true)))
+        OR (tenant_id IS NULL AND org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true)))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        (tenant_id IS NOT NULL AND tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true)))
-        OR (tenant_id IS NULL AND org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true)))
+        (tenant_id IS NOT NULL AND tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true)))
+        OR (tenant_id IS NULL AND org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true)))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
@@ -52,11 +52,11 @@ CREATE POLICY tenant_isolation_users ON users
 DROP POLICY IF EXISTS tenant_isolation_roles ON roles;
 CREATE POLICY org_isolation_roles ON roles
     USING (
-        org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
@@ -64,13 +64,13 @@ CREATE POLICY org_isolation_roles ON roles
 DROP POLICY IF EXISTS tenant_isolation_memberships ON memberships;
 CREATE POLICY tenant_isolation_memberships ON memberships
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
-        OR org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
+        OR org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
-        OR org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
+        OR org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
@@ -78,11 +78,11 @@ CREATE POLICY tenant_isolation_memberships ON memberships
 DROP POLICY IF EXISTS tenant_isolation_features ON tenant_features;
 CREATE POLICY tenant_isolation_features ON tenant_features
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
@@ -90,11 +90,11 @@ CREATE POLICY tenant_isolation_features ON tenant_features
 DROP POLICY IF EXISTS tenant_isolation_audit ON audit_events;
 CREATE POLICY tenant_isolation_audit ON audit_events
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
@@ -122,7 +122,7 @@ DO $$
 DECLARE
     db_name text := current_database();
 BEGIN
-    EXECUTE format('ALTER DATABASE %I SET aos.current_tenant_id = %L', db_name, '');
+    EXECUTE format('ALTER DATABASE %I SET nexora.current_tenant_id = %L', db_name, '');
     EXECUTE format('ALTER DATABASE %I SET aos.is_system = %L', db_name, 'false');
 END
 $$;

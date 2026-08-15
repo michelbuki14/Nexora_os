@@ -1,7 +1,7 @@
 # TLcom Capital
 **To:** investments@tlcomcapital.com  
 **From:** mkasongo@myyahoo.com  
-**Subject:** Pre-seed — Africa Operating System (B2B workforce infrastructure)
+**Subject:** Pre-seed — Nexora OS (B2B workforce infrastructure)
 
 ---
 
@@ -9,7 +9,7 @@ Hi TLcom team,
 
 African enterprises — from 50-person manufacturers in Lagos to 500-person banks in Kinshasa — share the same problem: no workforce management platform was built for them. Local labour law, multi-currency payroll, and country-specific compliance are afterthoughts in every global HRIS. The result is spreadsheets, compliance risk, and payroll errors at scale.
 
-The Africa Operating System (AOS) is a multi-tenant B2B SaaS platform that solves this at the infrastructure layer.
+The Nexora OS is a multi-tenant B2B SaaS platform that solves this at the infrastructure layer.
 
 **Technical proof — what's built and running today:**
 

@@ -22,8 +22,8 @@ repository = "https://github.com/michelbuki14/AFRICA-OPERATING-SYSTEM-AOS-"
 # Pin a concrete version on the path dep. Cargo tolerates an implicit `*` here,
 # but `cargo deny`'s `wildcards = "deny"` treats an unversioned workspace path
 # dep as a wildcard and fails to resolve it (see deny.toml `[bans]`). The version
-# mirrors `aos-common`'s `[package] version` so the requirement always resolves.
-aos-common = { path = "services/common", version = "0.1.0" }
+# mirrors `nexora-common`'s `[package] version` so the requirement always resolves.
+nexora-common = { path = "services/common", version = "0.1.0" }
 anyhow = "1.0"
 async-trait = "0.1"
 axum = { version = "0.7", features = ["macros", "json", "tokio", "http1", "http2"] }

@@ -9,7 +9,7 @@ Hi Launch Africa team,
 
 African employers have a $4B+ problem: no workforce management platform was built for them. SAP and Workday don't handle CDF or NGN payroll. BambooHR doesn't know DRC labour law. The result: spreadsheets, compliance failures, and payroll errors every month for millions of employees.
 
-The Africa Operating System (AOS) is a multi-tenant B2B SaaS platform — the workforce OS that African employers need.
+The Nexora OS is a multi-tenant B2B SaaS platform — the workforce OS that African employers need.
 
 **Phase 1 is complete:**
 - Full org structure management (legal entities, locations, departments, teams, positions)

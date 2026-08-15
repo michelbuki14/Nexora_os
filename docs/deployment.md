@@ -18,7 +18,7 @@ management (billing, SCPs, IAM roles)
 ## Terraform apply order
 ```bash
 cd infra/environments/dev
-terraform init -backend-config="bucket=aos-terraform-state-dev"
+terraform init -backend-config="bucket=nexora-terraform-state-dev"
 terraform apply -target module.vpc -target module.eks -target module.aurora -target module.elasticache
 # verify core infra
 terraform apply

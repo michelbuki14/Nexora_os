@@ -1,4 +1,4 @@
-# AOS — Africa Operating System
+# Nexora OS — Nexora OS
 ### Investor Speech (4-5 min, ~850 words)
 
 ---
@@ -9,7 +9,7 @@ Good morning. Let me start with a number most people outside Africa don't sit wi
 
 A fintech in Lagos, a savings cooperative in Nairobi, a payment processor in Kinshasa — they all hit the same wall. Identity is fragmented: every country, sometimes every institution, runs its own notion of who a user is. Mobile money dominates, but each rail is its own world. And above all of it sits the regulator — the BCC in Congo, the CBN in Nigeria, the CBK in Kenya — asking the same uncomfortable question: *prove to us, with evidence that can't be tampered with, who did what, when, and under whose authority.*
 
-That audit question is not a feature request. It is a license-to-operate requirement. And today, across the region, it is answered with spreadsheets, copy-pasted logs, and hope. We built AOS to answer it properly — and to turn that answer into a platform.
+That audit question is not a feature request. It is a license-to-operate requirement. And today, across the region, it is answered with spreadsheets, copy-pasted logs, and hope. We built Nexora OS to answer it properly — and to turn that answer into a platform.
 
 ---
 
@@ -33,7 +33,7 @@ Every fintech, retailer, and government service on this continent needs those pr
 
 So we are not a point product. We are a backbone, proven under the most demanding requirement — auditability — and now ready to carry verticals on top of it.
 
-And we didn't stop at the wedge. Today we have a second vertical live on the same core: **AOS Workforce**. Nine database tables — legal entities, departments, positions, the employee lifecycle from hire to termination, compensation history, and secure document management. Seventeen handlers. Every one of those tables sits behind the same Row-Level Security, the same Keycloak identity, and every lifecycle action writes into the same SHA-256 hash chain. When a salary changes, that is not just an HR update — it is a chained, forensically verifiable event plus a row in the transactional outbox that the future payroll dispatcher will consume. We built the pipe Phase 2 runs through before we built the engine.
+And we didn't stop at the wedge. Today we have a second vertical live on the same core: **Nexora OS Workforce**. Nine database tables — legal entities, departments, positions, the employee lifecycle from hire to termination, compensation history, and secure document management. Seventeen handlers. Every one of those tables sits behind the same Row-Level Security, the same Keycloak identity, and every lifecycle action writes into the same SHA-256 hash chain. When a salary changes, that is not just an HR update — it is a chained, forensically verifiable event plus a row in the transactional outbox that the future payroll dispatcher will consume. We built the pipe Phase 2 runs through before we built the engine.
 
 Money is stored as integer minor units, never floats. National IDs are SHA-256-hashed with only the last four characters exposed. Contracts and identity documents live in object storage under tenant-and-employee namespaced keys, served only through short-lived presigned URLs — never publicly accessible, never downloadable by another tenant. This is why two verticals matter more than one: the second one proves the primitives are reusable. The backbone carries weight.
 

@@ -243,22 +243,22 @@ CREATE POLICY global_read_permissions ON permissions
 -- Outbox events - tenant isolated
 CREATE POLICY tenant_isolation_outbox ON outbox_events
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
 -- Idempotency records - tenant isolated
 CREATE POLICY tenant_isolation_idempotency ON idempotency_records
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 
@@ -270,11 +270,11 @@ CREATE POLICY global_read_job_definitions ON job_definitions
 -- Job runs - tenant isolated
 CREATE POLICY tenant_isolation_job_runs ON job_runs
     USING (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     )
     WITH CHECK (
-        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('aos.current_tenant_id', true))
+        tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR current_setting('aos.is_system', true) = 'true'
     );
 

@@ -1,7 +1,7 @@
 # Partech Africa
 **To:** africa@partechpartners.com  
 **From:** mkasongo@myyahoo.com  
-**Subject:** Pre-seed — Africa Operating System (workforce OS for African employers)
+**Subject:** Pre-seed — Nexora OS (workforce OS for African employers)
 
 ---
 
@@ -9,7 +9,7 @@ Hi Partech Africa team,
 
 50 million African SMEs run payroll and HR on spreadsheets. Global platforms (SAP, Workday, BambooHR) don't handle local labour law, multi-currency payroll, or country-specific compliance — so African employers are left stitching together disconnected tools that were never built for them.
 
-We are building the Africa Operating System (AOS) — a multi-tenant workforce OS designed from the ground up for African employers.
+We are building the Nexora OS — a multi-tenant workforce OS designed from the ground up for African employers.
 
 **What's live today:**
 - Full org-structure engine: legal entities, locations, departments, teams, positions

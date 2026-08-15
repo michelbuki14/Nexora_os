@@ -9,11 +9,11 @@ Hi GFC team,
 
 African enterprises need workforce infrastructure that was never built for them. We are building it.
 
-The Africa Operating System (AOS) is a multi-tenant SaaS platform that provides the HR and workforce management layer African employers need: org structure, employee lifecycle, multi-currency compensation, secure document management, and compliance audit trail — all with per-tenant data isolation enforced at the database level.
+The Nexora OS is a multi-tenant SaaS platform that provides the HR and workforce management layer African employers need: org structure, employee lifecycle, multi-currency compensation, secure document management, and compliance audit trail — all with per-tenant data isolation enforced at the database level.
 
 **Technical differentiation:**
 
-Most HRIS platforms enforce tenant separation in application code — a bug leaks data. AOS enforces it at the PostgreSQL row-level security layer: every query runs inside a tenant-scoped transaction. This is the right security primitive for an African market where data sovereignty and compliance are becoming regulatory requirements.
+Most HRIS platforms enforce tenant separation in application code — a bug leaks data. Nexora OS enforces it at the PostgreSQL row-level security layer: every query runs inside a tenant-scoped transaction. This is the right security primitive for an African market where data sovereignty and compliance are becoming regulatory requirements.
 
 **What's live:**
 - Org structure: legal entities → locations → departments → teams → positions
