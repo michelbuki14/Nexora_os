@@ -21,6 +21,7 @@ pub mod time;
 pub mod tracing;
 pub mod ulid;
 pub mod validation;
+pub mod idempotency;
 
 pub use auth_middleware::{auth_middleware, AuthState, OptionalAuthContext};
 pub use config::*;
@@ -36,3 +37,4 @@ pub use tenant_context::{add_rls_middleware, AuthContext, DbConn, DbConnGuard, R
 pub use time::*;
 pub use ulid::*;
 pub use validation::*;
+pub use idempotency::{IdempotencyState, add_idempotency_middleware, IDEMPOTENCY_KEY_HEADER};

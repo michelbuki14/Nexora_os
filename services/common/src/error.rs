@@ -244,3 +244,9 @@ impl From<validator::ValidationErrors> for AosError {
         AosError::from_validation_errors(err)
     }
 }
+
+impl From<uuid::Error> for AosError {
+    fn from(err: uuid::Error) -> Self {
+        AosError::Internal(format!("UUID error: {}", err))
+    }
+}
