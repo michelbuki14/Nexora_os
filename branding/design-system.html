@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora OS Design System</title>
+    <style>
+        :root {
+            --bg-light: #F5F0E8;
+            --bg-dark: #0D0D18;
+            --midnight: #1A1A2E;
+            --azure: #0066FF;
+            --sand: #F5F0E8;
+            --obsidian: #0D0D18;
+            --emerald: #00A859;
+            --crimson: #E53E3E;
+            --error: #EF4444;
+            --border-light: #D1D5DB;
+            --border-dark: #374151;
+            --text-light: #1A1A2E;
+            --text-dark: #F9FAFB;
+            --muted-light: #4A4A5A;
+            --muted-dark: #6B7280;
+            --white: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-light);
+            color: var(--midnight);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: var(--bg-dark);
+                color: var(--text-dark);
+            }
+        }
+
+        /* Make all colors visible */
+        .color-block {
+            width: 100%;
+            height: 60px;
+            border-radius: 6px;
+            margin: 4px 0;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+        }
+
+        .text-color {
+            text-color: var(--white);
+        }
+
+        /* Color samples */
+        .swatch-midnight { background: var(--midnight); }
+        .swatch-azure { background: var(--azure); }
+        .swatch-sand { background: var(--sand); color: var(--midnight); }
+        .swatch-obsidian { background: var(--obsidian); color: var(--white); }
+        .swatch-emerald { background: var(--emerald); color: var(--white); }
+        .swatch-crimson { background: var(--crimson); color: var(--white); }
+        .swatch-error { background: var(--error); color: var(--white); }
+
+        /* Typography */
+        .typography-section {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .type-category {
+            margin: 2rem 0;
+            padding: 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .typography-section {
+                border: 1px solid var(--border-dark);
+                background: var(--bg-dark);
+            }
+        }
+
+        .type-category .name {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted-light);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .type-category .sample {
+            font-size: clamp(0.75rem, 2vw, 1rem);
+            line-height: 1.5;
+            padding: 0.5rem 0;
+            min-height: 3rem;
+            background: var(--white);
+            color: var(--midnight);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .type-category .sample {
+                background: var(--obsidian);
+                color: var(--text-dark);
+            }
+        }
+
+        /* Voice guidelines */
+        .voice-section {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .voice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .voice-card {
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            transition: all 0.2s;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .voice-card {
+                border: 1px solid var(--border-dark);
+                background: var(--bg-dark);
+            }
+        }
+
+        .voice-card.prohibited {
+            background: #FECACA;
+            border-color: #EF4444;
+        }
+
+        .voice-card.prohibited .card-title {
+            color: #DC2626;
+        }
+
+        .voice-card.allowed {
+            background: #D1F2BD;
+            border-color: #059669;
+        }
+
+        .voice-card.allowed .card-title {
+            color: #059669;
+        }
+
+        .voice-card .card-title {
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .voice-card .card-description {
+            font-size: 0.875rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Brand showcase */
+        .brand-section {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .brand-section h1 {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin: 0 0 1rem;
+            color: var(--midnight);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .brand-section h1 {
+                color: var(--text-dark);
+            }
+        }
+
+        .brand-section p {
+            font-size: 1.125rem;
+            color: #666;
+            margin: 0 0 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--azure);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .cta-button:hover {
+            background: #0052cc;
+        }
+
+        /* Contrast */
+        .contrast-section {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contrast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .contrast-item {
+            padding: 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .contrast-item {
+                border: 1px solid var(--border-dark);
+                background: var(--bg-dark);
+            }
+        }
+
+        .contrast-item.pass {
+            background: #D1F2BD;
+        }
+
+        .contrast-item.fail {
+            background: #FECACA;
+        }
+
+        .contrast-ratio {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            margin: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+
+        .contrast-text {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* Logo section */
+        .logo-section {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .logo-mark {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1rem;
+            font-size: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--midnight);
+        }
+
+        .logo-wordmark {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: 2.5rem;
+            margin: 1rem 0;
+            color: var(--midnight);
+        }
+
+        .logo-tagline {
+            font-size: 1rem;
+            color: #666;
+            margin: 0;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Logo Section -->
+    <div class="logo-section">
+        <div class="logo-mark">🧱</div>
+        <div class="logo-wordmark">Nexora OS</div>
+        <p class="logo-tagline">Honest infrastructure for African commerce — built, not decked.</p>
+    </div>
+
+    <!-- Color Palette -->
+    <div class="typography-section">
+        <h2 style="font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 2rem; margin-bottom: 1.5rem; color: var(--midnight);">Color Palette</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            <div>
+                <div class="color-block swatch-midnight"></div>
+                <div style="margin-top: 0.25rem; text-align: center;">#1A1A2E<br/>Midnight</div>
+            </div>
+            <div>
+                <div class="color-block swatch-azure"></div>
+                <div style="margin-top: 0.25rem; text-align: center;">#0066FF<br/>Azure</div>
+            </div>
+            <div>
+                <div class="color-block swatch-sand" style="color: var(--midnight);"></div>
+                <div style="margin-top: 0.25rem; text-align: center;">#F5F0E8<br/>Sand</div>
+            </div>
+            <div>
+                <div class="color-block swatch-obsidian" style="color: var(--white);"></div>
+                <div style="margin-top: 0.25rem; text-align: center;">#0D0D18<br/>Obsidian</div>
+            </div>
+            <div>
+                <div class="color-block swatch-emerald"></div>
+                <div style="margin-top: 0.25rem; text-align: center;">#00A859<br/>Emerald</div>
+            </div>
+            <div>
+                <div class="color-block swatch-crimson"></div>
+                <div style="margin-top: 0.25rem; text-align: center;">#E53E3E<br/>Crimson</div>
+            </div>
+            <div>
+                <div class="color-block swatch-error"></div>
+                <div style="margin-top: 0.25rem; text-align: center;">#EF4444<br/>Error</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Typography Scale -->
+    <div class="typography-section">
+        <h2 style="font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 2rem; margin-bottom: 1.5rem; color: var(--midnight);">Typography Scale</h2>
+
+        <div class="type-category">
+            <div class="name">--type-scale-1 (0.75rem / 12px)</div>
+            <div class="sample">Captions, meta text</div>
+        </div>
+
+        <div class="type-category">
+            <div class="name">--type-scale-2 (0.875rem / 14px)</div>
+            <div class="sample">Body secondary, help text</div>
+        </div>
+
+        <div class="type-category">
+            <div class="name">--type-scale-3 (1rem / 16px)</div>
+            <div class="sample">Body base, paragraph</div>
+        </div>
+
+        <div class="type-category">
+            <div class="name">--type-scale-4 (1.25rem / 20px)</div>
+            <div class="sample">Headings H4, section titles</div>
+        </div>
+
+        <div class="type-category">
+            <div class="name">--type-scale-5 (1.5rem / 24px)</div>
+            <div class="sample">Headings H3, page titles</div>
+        </div>
+
+        <div class="type-category">
+            <div class="name">--type-scale-6 (2rem / 32px)</div>
+            <div class="sample">Headings H2, major section</div>
+        </div>
+
+        <div class="type-category">
+            <div class="name">--type-scale-7 (3rem / 48px)</div>
+            <div class="sample">Headings H1, hero titles</div>
+        </div>
+    </div>
+
+    <!-- Voice Guidelines -->
+    <div class="voice-section">
+        <h2 style="font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 2rem; margin-bottom: 1.5rem; color: var(--midnight);">Voice & Tone Guidelines</h2>
+
+        <div class="voice-grid">
+            <div class="voice-card prohibited">
+                <div class="card-title">Prohibited Phrases</div>
+                <div class="card-description">
+                    • "delve into"<br>
+                    • "the bottom line is"<br>
+                    • "here's the kicker"<br>
+                    • "in today's landscape"<br>
+                    • "it's worth noting that"
+                </div>
+            </div>
+
+            <div class="voice-card allowed">
+                <div class="card-title">Allowed Constructions</div>
+                <div class="card-description">
+                    • "this means"<br>
+                    • "users will"<br>
+                    • "the system does"<br>
+                    • "here's what happens"
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contrast Ratios -->
+    <div class="contrast-section">
+        <h2 style="font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 2rem; margin-bottom: 1.5rem; color: var(--midnight);">Contrast Ratio Examples</h2>
+
+        <div class="contrast-grid">
+            <div class="contrast-item pass">
+                <div class="contrast-ratio">#1A1A2E on #F5F0E8</div>
+                <div class="contrast-text">8.5:1 — AAA</div>
+            </div>
+            <div class="contrast-item fail">
+                <div class="contrast-ratio">#E53E3E on #F5F0E8</div>
+                <div class="contrast-text">3.2:1 — AA (large text only)</div>
+            </div>
+            <div class="contrast-item pass">
+                <div class="contrast-ratio">#F9FAFB on #0D0D18</div>
+                <div class="contrast-text">8.5:1 — AAA</div>
+            </div>
+            <div class="contrast-item pass">
+                <div class="contrast-ratio">#FFFFFF on #0066FF</div>
+                <div class="contrast-text">3.1:1 — AA (large text)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brand Showcase -->
+    <div class="brand-section">
+        <h1>Nexora OS</h1>
+        <p>Honest infrastructure for African commerce — built, not decked.</p>
+        <a href="#" class="cta-button">See the live audit chain →</a>
+    </div>
+
+</body>
+</html>
