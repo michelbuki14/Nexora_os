@@ -1,5 +1,6 @@
 # Nexora OS — Nexora OS
-### Investor Speech (4-5 min, ~850 words)
+
+## Investor Speech (4-5 min, ~850 words)
 
 ---
 

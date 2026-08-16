@@ -253,7 +253,6 @@ async fn test_cross_tenant_employee_read_returns_empty() {
 // ---------------------------------------------------------------------------
 
 #[tokio::test]
-#[ignore = "requires testcontainers docker socket; broken on Windows npipe (see module docs)"]
 async fn test_mass_assignment_struct_protection() {
     // CreateEmployeeRequest does NOT contain a `tenant_id` field.
     // Sending a JSON payload with an extra `tenant_id` key → serde ignores it.
@@ -268,7 +267,7 @@ async fn test_mass_assignment_struct_protection() {
         "gross_amount_minor": 999999999,
     });
 
-    let req: Result<aos_workforce_service::models::CreateEmployeeRequest, _> =
+    let req: Result<nexora_workforce_service::models::CreateEmployeeRequest, _> =
         serde_json::from_value(payload);
 
     // Must parse without error (unknown fields are silently ignored by serde default).
@@ -305,43 +304,34 @@ async fn test_guc_does_not_leak_between_queries() {
         .await
         .expect("single-conn pool");
 
-    // Set GUC for a fake tenant.
-    let fake_tenant = new_ulid();
+    // Set GUC inside a transaction, then commit — this is what rls_middleware does.
+    // After commit, the GUC should be reset to the DB default.
     sqlx::query(&format!(
-        "SET LOCAL nexora.current_tenant_id = '{fake_tenant}'"
+        "BEGIN; SET LOCAL nexora.current_tenant_id = '00000000000000000000000000000000';
+         SELECT current_setting('nexora.current_tenant_id', true); COMMIT;"
     ))
     .execute(&single_pool)
     .await
     .unwrap_or_default();
 
-    // Immediately query — GUC is SET LOCAL so it only applies within a transaction.
-    // Outside a transaction, SET LOCAL is equivalent to SET SESSION for that statement.
-    // The key invariant: after the statement commits, the next statement on the same
-    // connection should NOT see the previous GUC if it was SET LOCAL in a transaction.
-    // This mirrors what rls_middleware does: SET LOCAL inside a tx, commit on response.
-    let tenant_setting: String =
+    // After commit, the GUC should be at the DB default ('').
+    let _tenant_setting: String =
         sqlx::query_scalar("SELECT current_setting('nexora.current_tenant_id', true)")
             .fetch_one(&single_pool)
             .await
             .unwrap_or_default();
 
-    // Outside a transaction, SET LOCAL behaves like SET for the current statement;
-    // on a fresh connection without BEGIN, the GUC should revert to the DB default
-    // between top-level statements. If it doesn't, the test surfaces the leak.
     // The DB default for nexora.current_tenant_id is '' (set by migration 006).
-    // After the above SET LOCAL outside a BEGIN block, subsequent queries should
-    // see the default. We confirm the GUC is at least not the *previous* request's
-    // value after the connection is reused.
-    let _ = tenant_setting; // we've verified the query ran; leak would surface as wrong count below.
-
-    // The actionable check: after the SET LOCAL (no BEGIN), select count for the
-    // fake tenant. RLS will see nexora.current_tenant_id = ''. Should return 0.
+    // After committing a tx that set GUC, the next query should see the default.
     let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM wf_employees")
         .fetch_one(&single_pool)
         .await
         .unwrap_or(0);
 
-    assert_eq!(count, 0, "GUC-isolated query must see no cross-tenant rows");
+    assert_eq!(
+        count, 0,
+        "GUC should not leak across transactions: after commit, should see no rows"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -349,7 +339,6 @@ async fn test_guc_does_not_leak_between_queries() {
 // ---------------------------------------------------------------------------
 
 #[tokio::test]
-#[ignore = "requires testcontainers docker socket; broken on Windows npipe (see module docs)"]
 async fn test_employee_role_cannot_write_employees() {
     // An AuthContext with only "employee.read" (EMPLOYEE role).
     let auth = make_auth(
@@ -372,7 +361,6 @@ async fn test_employee_role_cannot_write_employees() {
 // ---------------------------------------------------------------------------
 
 #[tokio::test]
-#[ignore = "requires testcontainers docker socket; broken on Windows npipe (see module docs)"]
 async fn test_employee_read_does_not_grant_compensation_read() {
     let auth = make_auth(
         &new_ulid(),
@@ -418,7 +406,7 @@ fn test_audit_emit_canonical_payload_stable() {
         "resource_ulid": "01HXZ_EMP_ULID_1234567890",
     });
 
-    use aos_workforce_service::audit_emit::serialize_canonical;
+    use nexora_workforce_service::audit_emit::serialize_canonical;
     let a = serialize_canonical(&value).unwrap();
     let b = serialize_canonical(&value).unwrap();
     assert_eq!(a, b, "canonical serialization must be deterministic");
