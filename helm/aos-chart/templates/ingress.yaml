@@ -2,10 +2,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "aos.fullname" . }}
+  name: {{ include "nexora.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "aos.labels" . | nindent 4 }}
+    {{- include "nexora.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -28,7 +28,7 @@ spec:
             pathType: {{ .pathType | default "Prefix" }}
             backend:
               service:
-                name: {{ include "aos.fullname" $ }}
+                name: {{ include "nexora.fullname" $ }}
                 port:
                   name: http
           {{- end }}

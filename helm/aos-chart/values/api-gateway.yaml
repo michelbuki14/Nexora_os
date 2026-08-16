@@ -2,28 +2,34 @@
 replicaCount: 2
 
 image:
-  repository: ghcr.io/michelbuki14/aos-api-gateway
+  repository: ghcr.io/michelbuki14/nexora-api-gateway
   tag: "0.1.0"
 
 env:
-  AOS_SERVICE__NAME: aos-api-gateway
-  AOS_SERVICE__ENVIRONMENT: production
-  AOS_SERVER__HOST: 0.0.0.0
-  AOS_SERVER__PORT: "3000"
-  AOS_AUTH__JWKS_URL: http://keycloak:8080/realms/aos/protocol/openid-connect/certs
-  AOS_AUTH__ISSUER: http://keycloak:8080/realms/aos
-  AOS_AUTH__AUDIENCE: aos-api
-  AOS_AUTH__JWKS_CACHE_TTL_SECS: "300"
-  AOS_AUTH__REQUIRE_HTTPS: "false"
-  AOS_TRACING__ENABLED: "true"
-  AOS_TRACING__OTLP_ENDPOINT: http://aos-grafana-tempo:4317
-  AOS_TRACING__SAMPLE_RATE: "0.1"
+  NEXORA_SERVICE__NAME: nexora-api-gateway
+  NEXORA_SERVICE__ENVIRONMENT: production
+  NEXORA_SERVER__HOST: 0.0.0.0
+  NEXORA_SERVER__PORT: "3000"
+  NEXORA_AUTH__JWKS_URL: http://keycloak:8080/realms/nexora/protocol/openid-connect/certs
+  NEXORA_AUTH__ISSUER: http://keycloak:8080/realms/nexora
+  NEXORA_AUTH__AUDIENCE: nexora-api
+  NEXORA_AUTH__JWKS_CACHE_TTL_SECS: "300"
+  NEXORA_AUTH__REQUIRE_HTTPS: "false"
+  NEXORA_TRACING__ENABLED: "true"
+  NEXORA_TRACING__OTLP_ENDPOINT: http://nexora-grafana-tempo:4317
+  NEXORA_TRACING__SAMPLE_RATE: "0.1"
   # Reverse-proxy targets: Services deployed by the same chart set.
-  AOS_GATEWAY__WORKFORCE_BASE_URL: http://aos-workforce-service:3002
-  AOS_GATEWAY__AUDIT_BASE_URL: http://aos-audit-service:3001
-  AOS_GATEWAY__TENANT_BASE_URL: http://aos-tenant-service:3004
+  NEXORA_GATEWAY__WORKFORCE_BASE_URL: http://nexora-workforce-service:3002
+  NEXORA_GATEWAY__AUDIT_BASE_URL: http://nexora-audit-service:3001
+  NEXORA_GATEWAY__TENANT_BASE_URL: http://nexora-tenant-service:3004
 
-existingSecret: aos-runtime
+  # Ingress host (override per-environment if needed).
+  ingress:
+    host: api.nexora.example.com
+  # Legacy host alias — update DNS records when migrating from AOS to Nexora OS.
+  # Old host: api.nexora.example.com
+
+existingSecret: nexora-runtime
 
 service:
   port: 3000
@@ -51,11 +57,11 @@ ingress:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
   hosts:
-    - host: api.aos.example.com
+    - host: api.nexora.example.com
       paths:
         - path: /
           pathType: Prefix
   tls:
     - hosts:
-        - api.aos.example.com
+        - api.nexora.example.com
       secretName: aos-api-tls

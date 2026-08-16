@@ -13,7 +13,7 @@ mod models;
 mod openapi;
 mod routes;
 
-use aos_common::{
+use nexora_common::{
     auth_middleware::AuthState, config::Config, db::connect, health::health_router,
     jwt::JwtValidator, logging::init_logging, tenant_context::RlsState,
 };
@@ -28,7 +28,7 @@ use tracing::info;
 async fn main() -> anyhow::Result<()> {
     let config = Config::load().unwrap_or_else(|e| {
         eprintln!("config load failed: {e}");
-        Config::default()
+        Config::load().unwrap()
     });
     init_logging(&config.tracing)?;
 

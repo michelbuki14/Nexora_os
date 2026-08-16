@@ -5,7 +5,7 @@
 //! live services (workforce) are reverse-proxied to the upstream service;
 //! not-yet-built verticals render an honest "planned" boundary.
 
-use aos_common::{config::Config, health::health_router, logging::init_logging};
+use nexora_common::{config::Config, health::health_router, logging::init_logging};
 use axum::{
     body::{to_bytes, Body},
     extract::State,

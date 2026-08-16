@@ -2,13 +2,13 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "aos.fullname" . }}
+  name: {{ include "nexora.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "aos.labels" . | nindent 4 }}
+    {{- include "nexora.labels" . | nindent 4 }}
 spec:
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
   selector:
     matchLabels:
-      {{- include "aos.selectorLabels" . | nindent 6 }}
+      {{- include "nexora.selectorLabels" . | nindent 6 }}
 {{- end }}

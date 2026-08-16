@@ -12,7 +12,7 @@ pub mod openapi;
 #[doc(hidden)]
 pub mod routes;
 
-use aos_common::config::{Config, S3Config};
+use nexora_common::config::{Config, S3Config};
 use aws_sdk_s3::Client as S3Client;
 use std::sync::Arc;
 
@@ -26,9 +26,9 @@ pub struct AppState {
 
 impl AppState {
     pub fn placeholder() -> Self {
-        let cfg = Config::default();
+        let cfg = Config::load().unwrap();
         let s3_cfg = cfg.s3.clone();
-        let client = aos_common::s3::build_s3_client(&s3_cfg);
+        let client = nexora_common::s3::build_s3_client(&s3_cfg);
         Self {
             config: Arc::new(cfg),
             s3_client: Arc::new(client),

@@ -16,7 +16,7 @@
 //! employee.exported, mass_employee_update, suspicious_document_access) route
 //! through this same helper — the `action` string IS the signal.
 
-use aos_common::{
+use nexora_common::{
     audit::{compute_chain_hash, GENESIS_HASH},
     error::{AosError, AosResult},
     tenant_context::AuthContext,

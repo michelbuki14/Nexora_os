@@ -1,29 +1,29 @@
 # Tenant Service — tenant/org context CRUD. Connects to Postgres.
 # NOTE: the service binds `server.port + 1` (tenant-service/src/main.rs:108),
-# so AOS_SERVER__PORT=3003 -> listens on 3004. Service port must be 3004.
+# so NEXORA_SERVER__PORT=3003 -> listens on 3004. Service port must be 3004.
 replicaCount: 2
 
 image:
-  repository: ghcr.io/michelbuki14/aos-tenant-service
+  repository: ghcr.io/michelbuki14/nexora-tenant-service
   tag: "0.1.0"
 
 env:
-  AOS_SERVICE__NAME: aos-tenant-service
-  AOS_SERVICE__ENVIRONMENT: production
-  AOS_SERVER__HOST: 0.0.0.0
-  AOS_SERVER__PORT: "3003"
-  AOS_DATABASE__MAX_CONNECTIONS: "20"
-  AOS_REDIS__MAX_CONNECTIONS: "50"
-  AOS_AUTH__JWKS_URL: http://keycloak:8080/realms/aos/protocol/openid-connect/certs
-  AOS_AUTH__ISSUER: http://keycloak:8080/realms/aos
-  AOS_AUTH__AUDIENCE: aos-api
-  AOS_AUTH__JWKS_CACHE_TTL_SECS: "300"
-  AOS_AUTH__REQUIRE_HTTPS: "false"
-  AOS_TRACING__ENABLED: "true"
-  AOS_TRACING__OTLP_ENDPOINT: http://aos-grafana-tempo:4317
-  AOS_TRACING__SAMPLE_RATE: "0.1"
+  NEXORA_SERVICE__NAME: nexora-tenant-service
+  NEXORA_SERVICE__ENVIRONMENT: production
+  NEXORA_SERVER__HOST: 0.0.0.0
+  NEXORA_SERVER__PORT: "3003"
+  NEXORA_DATABASE__MAX_CONNECTIONS: "20"
+  NEXORA_REDIS__MAX_CONNECTIONS: "50"
+  NEXORA_AUTH__JWKS_URL: http://keycloak:8080/realms/nexora/protocol/openid-connect/certs
+  NEXORA_AUTH__ISSUER: http://keycloak:8080/realms/nexora
+  NEXORA_AUTH__AUDIENCE: nexora-api
+  NEXORA_AUTH__JWKS_CACHE_TTL_SECS: "300"
+  NEXORA_AUTH__REQUIRE_HTTPS: "false"
+  NEXORA_TRACING__ENABLED: "true"
+  NEXORA_TRACING__OTLP_ENDPOINT: http://nexora-grafana-tempo:4317
+  NEXORA_TRACING__SAMPLE_RATE: "0.1"
 
-existingSecret: aos-runtime
+existingSecret: nexora-runtime
 
 service:
   port: 3004

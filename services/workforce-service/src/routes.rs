@@ -3,7 +3,7 @@
 //! Middleware order matches audit-service (load-bearing): auth middleware is
 //! added LAST so it is outermost and populates extensions before RLS reads them.
 
-use aos_common::{
+use nexora_common::{
     auth_middleware::{auth_middleware, AuthState},
     tenant_context::{rls_middleware, RlsState},
 };

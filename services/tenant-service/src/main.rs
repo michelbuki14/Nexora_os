@@ -10,7 +10,7 @@
 mod handlers;
 mod models;
 
-use aos_common::{
+use nexora_common::{
     auth_middleware::{auth_middleware, AuthState},
     config::Config,
     health::health_router,
@@ -35,14 +35,14 @@ use tracing::info;
 async fn main() -> anyhow::Result<()> {
     let config = Config::load().unwrap_or_else(|e| {
         eprintln!("config load failed: {e}");
-        Config::default()
+        Config::load().unwrap()
     });
     init_logging(&config.tracing)?;
 
     let config = Arc::new(config);
 
     // Database pool
-    let pool = aos_common::db::connect(&config.database).await?;
+    let pool = nexora_common::db::connect(&config.database).await?;
 
     // JWT validator
     let jwt_validator = Arc::new(JwtValidator::new(config.auth.clone()));

@@ -1,10 +1,10 @@
 apiVersion: v2
-name: aos
+name: nexora
 description: >
-  Africa Operating System — shared chart for a single AOS service deployment
-  (Deployment, Service, ConfigMap for AOS_* env, Secret refs, HPA, PDB, probes).
+  Nexora OS — shared chart for a single Nexora OS service deployment
+  (Deployment, Service, ConfigMap for NEXORA_* env, Secret refs, HPA, PDB, probes).
   Install once per service with a service-specific values file:
-    helm install -n aos workforce ./aos-chart -f values/workforce.yaml
+    helm install -n nexora workforce ./nexora-chart -f values/workforce.yaml
 type: application
 version: 0.1.0
 appVersion: "0.1.0"

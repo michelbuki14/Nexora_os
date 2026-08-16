@@ -22,7 +22,7 @@
 //!
 //! There is intentionally NO route that returns raw bytes or a public URL.
 
-use aos_common::{
+use nexora_common::{
     config::S3Config,
     error::{AosError, AosResult},
     s3::{delete_document, document_object_key, presign_get, put_document},

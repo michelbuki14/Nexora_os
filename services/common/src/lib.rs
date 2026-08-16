@@ -1,4 +1,4 @@
-//! AOS Common - Shared library for Africa Operating System services.
+//! Nexora OS Common - Shared library for Nexora OS services.
 //!
 //! This crate provides foundational types, configuration, error handling,
 //! telemetry, and utilities used across all AOS microservices.
@@ -12,6 +12,7 @@ pub mod health;
 pub mod jwt;
 pub mod logging;
 pub mod money;
+pub use rust_decimal::Decimal;
 pub mod rbac;
 pub mod s3;
 pub mod tenant;

@@ -37,6 +37,7 @@ securityContext:
 # ships only the four AOS services. The env values below use short DNS names
 # that must resolve inside the cluster; override per-service (values/*.yaml)
 # with FQDNs if infra lives in another namespace.
+# Monitoring configuration added for platform observability
 env:
   AOS_SERVICE__ENVIRONMENT: production
   AOS_SERVER__HOST: 0.0.0.0
@@ -51,6 +52,10 @@ env:
   AOS_TRACING__ENABLED: "true"
   AOS_TRACING__OTLP_ENDPOINT: http://aos-grafana-tempo:4317
   AOS_TRACING__SAMPLE_RATE: "0.1"
+  # Monitoring endpoints
+  AOS_METRICS__ENABLED: "true"
+  AOS_METRICS__SCRAPE_INTERVAL: "15s"
+  AOS_HEALTH__PATH: "/health/ready"
 
 # Secret values (DB URL, Redis URL, S3 creds). Referenced via secretKeyRef so
 # they never land in the chart. ESO (External Secrets Operator) syncs
@@ -91,13 +96,54 @@ service:
   targetPort: http
 
 # HTTP probes. All AOS services expose /health, /health/live, /health/ready.
+# These probes are used by Kubernetes for liveness/readiness detection
+# and by Prometheus for service discovery.
 probes:
   enabled: true
-  path: /health/ready
-  initialDelaySeconds: 10
-  periodSeconds: 10
-  timeoutSeconds: 3
-  failureThreshold: 6
+  # Liveness probe - checks if the service is still running
+  liveness:
+    path: /health/live
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 6
+  # Readiness probe - checks if the service is ready to receive traffic
+  readiness:
+    path: /health/ready
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 6
+  # Startup probe - waits for the service to start before enabling liveness/readiness
+  # Only enabled if the service has a slow startup
+  startup:
+    enabled: false
+    path: /health/ready
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 30
+    failureThreshold: 12
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Autoscaling configuration
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+# Pod disruption budget for high availability
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
 
 resources:
   limits:

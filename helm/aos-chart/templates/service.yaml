@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "aos.fullname" . }}
+  name: {{ include "nexora.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "aos.labels" . | nindent 4 }}
+    {{- include "nexora.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   selector:
-    {{- include "aos.selectorLabels" . | nindent 4 }}
+    {{- include "nexora.selectorLabels" . | nindent 4 }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}

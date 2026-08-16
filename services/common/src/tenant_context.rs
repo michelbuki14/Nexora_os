@@ -3,7 +3,7 @@
 //! This module provides the [`AuthContext`] extractor that represents the
 //! authenticated user's identity and permissions within a tenant, and the
 //! [`RlsMiddleware`] that activates PostgreSQL row-level security by setting
-//! the transaction GUCs `nexora.current_tenant_id` and `aos.is_system` on every
+//! the transaction GUCs `nexora.current_tenant_id` and `nexora.is_system` on every
 //! request.
 //!
 //! The middleware MUST be applied to all routes that access RLS-protected tables.
@@ -33,7 +33,7 @@ use tracing::{debug, error};
 /// A request-scoped, RLS-activated database transaction.
 ///
 /// The RLS middleware begins one transaction per request, sets the
-/// `nexora.current_tenant_id` / `aos.is_system` GUCs on it, and stores it here in
+/// `nexora.current_tenant_id` / `nexora.is_system` GUCs on it, and stores it here in
 /// request extensions so handlers reuse the *same* transaction (and thus the
 /// same RLS context). The transaction is committed on a successful response and
 /// rolled back on error; either way its transaction-local GUCs are discarded,
@@ -157,7 +157,7 @@ pub struct RlsState {
 /// For each request with a valid auth context:
 /// 1. Begins a transaction on a pooled connection
 /// 2. Executes `SELECT set_config('nexora.current_tenant_id', …, true)` (transaction-local)
-/// 3. Executes `SELECT set_config('aos.is_system', …, true)` (transaction-local)
+/// 3. Executes `SELECT set_config('nexora.is_system', …, true)` (transaction-local)
 /// 4. Stores the transaction in request extensions for handler reuse
 /// 5. Runs the handler
 /// 6. Commits the transaction on a successful response, rolls back otherwise
@@ -199,12 +199,12 @@ pub async fn rls_middleware(
 
     // Set the system GUC
     let is_system = ctx.is_system.to_string();
-    if let Err(e) = sqlx::query("SELECT set_config('aos.is_system', $1, true)")
+    if let Err(e) = sqlx::query("SELECT set_config('nexora.is_system', $1, true)")
         .bind(&is_system)
         .execute(&mut *tx)
         .await
     {
-        error!(error = %e, is_system = ctx.is_system, "failed to set aos.is_system");
+        error!(error = %e, is_system = ctx.is_system, "failed to set nexora.is_system");
         return Err(AosError::Internal("RLS system GUC setup failed".into()));
     }
 

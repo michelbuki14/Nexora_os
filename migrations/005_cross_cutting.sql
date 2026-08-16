@@ -1,6 +1,6 @@
 -- Migration: 005_cross_cutting.sql
 -- Description: Cross-cutting infrastructure tables - currencies, permissions, outbox, jobs
--- Author: AOS Platform Team
+-- Author: Nexora OS Platform Team
 -- Date: 2026-08-07
 
 -- =============================================================================
@@ -226,56 +226,56 @@ ALTER TABLE job_runs ENABLE ROW LEVEL SECURITY;
 -- Reference data (currencies, countries, permissions) - globally readable, system-writable
 CREATE POLICY global_read_currencies ON currencies
     USING (true)
-    WITH CHECK (current_setting('aos.is_system', true) = 'true');
+    WITH CHECK (current_setting('nexora.is_system', true) = 'true');
 
 CREATE POLICY global_read_exchange_rates ON exchange_rates
     USING (true)
-    WITH CHECK (current_setting('aos.is_system', true) = 'true');
+    WITH CHECK (current_setting('nexora.is_system', true) = 'true');
 
 CREATE POLICY global_read_countries ON countries
     USING (true)
-    WITH CHECK (current_setting('aos.is_system', true) = 'true');
+    WITH CHECK (current_setting('nexora.is_system', true) = 'true');
 
 CREATE POLICY global_read_permissions ON permissions
     USING (true)
-    WITH CHECK (current_setting('aos.is_system', true) = 'true');
+    WITH CHECK (current_setting('nexora.is_system', true) = 'true');
 
 -- Outbox events - tenant isolated
 CREATE POLICY tenant_isolation_outbox ON outbox_events
     USING (
         tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
-        OR current_setting('aos.is_system', true) = 'true'
+        OR current_setting('nexora.is_system', true) = 'true'
     )
     WITH CHECK (
         tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
-        OR current_setting('aos.is_system', true) = 'true'
+        OR current_setting('nexora.is_system', true) = 'true'
     );
 
 -- Idempotency records - tenant isolated
 CREATE POLICY tenant_isolation_idempotency ON idempotency_records
     USING (
         tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
-        OR current_setting('aos.is_system', true) = 'true'
+        OR current_setting('nexora.is_system', true) = 'true'
     )
     WITH CHECK (
         tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
-        OR current_setting('aos.is_system', true) = 'true'
+        OR current_setting('nexora.is_system', true) = 'true'
     );
 
 -- Job definitions - globally readable, system-writable
 CREATE POLICY global_read_job_definitions ON job_definitions
     USING (true)
-    WITH CHECK (current_setting('aos.is_system', true) = 'true');
+    WITH CHECK (current_setting('nexora.is_system', true) = 'true');
 
 -- Job runs - tenant isolated
 CREATE POLICY tenant_isolation_job_runs ON job_runs
     USING (
         tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
-        OR current_setting('aos.is_system', true) = 'true'
+        OR current_setting('nexora.is_system', true) = 'true'
     )
     WITH CHECK (
         tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
-        OR current_setting('aos.is_system', true) = 'true'
+        OR current_setting('nexora.is_system', true) = 'true'
     );
 
 -- =============================================================================

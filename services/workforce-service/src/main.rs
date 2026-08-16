@@ -7,7 +7,7 @@
 
 use std::{net::SocketAddr, sync::Arc};
 
-use aos_common::{
+use nexora_common::{
     auth_middleware::AuthState, config::Config, db::connect, health::health_router,
     jwt::JwtValidator, logging::init_logging, s3::build_s3_client, tenant_context::RlsState,
 };
@@ -19,13 +19,13 @@ use tower_http::{
 };
 use tracing::info;
 
-use aos_workforce_service::{routes::workforce_router, AppState};
+use nexora_workforce_service::{routes::workforce_router, AppState};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let config = Config::load().unwrap_or_else(|e| {
         eprintln!("config load failed, using defaults: {e}");
-        Config::default()
+        Config::load().unwrap()
     });
     init_logging(&config.tracing)?;
 

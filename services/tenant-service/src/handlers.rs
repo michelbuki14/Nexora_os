@@ -2,11 +2,11 @@
 //!
 //! All database access runs through the request-scoped [`DbConn`] extractor so
 //! queries execute inside the tenant's RLS transaction set up by `rls_middleware`
-//! (see `aos_common::tenant_context`). Handlers never touch the raw pool on
+//! (see `nexora_common::tenant_context`). Handlers never touch the raw pool on
 //! RLS-protected paths.
 
 use crate::models::{CreateTenantRequest, TenantResponse, TenantRow, VALID_TIERS};
-use aos_common::{ulid::new_ulid, AosError, AuthContext, DbConn};
+use nexora_common::{ulid::new_ulid, AosError, AuthContext, DbConn};
 use axum::{extract::Path, http::StatusCode, response::IntoResponse, Json};
 use tracing::debug;
 
@@ -28,10 +28,10 @@ const TENANT_SELECT: &str = r#"
     request_body = CreateTenantRequest,
     responses(
         (status = 201, description = "Tenant created", body = TenantResponse),
-        (status = 400, description = "Validation failed", body = aos_common::ErrorResponse),
-        (status = 401, description = "Unauthorized", body = aos_common::ErrorResponse),
-        (status = 403, description = "Forbidden", body = aos_common::ErrorResponse),
-        (status = 500, description = "Internal error", body = aos_common::ErrorResponse),
+        (status = 400, description = "Validation failed", body = nexora_common::ErrorResponse),
+        (status = 401, description = "Unauthorized", body = nexora_common::ErrorResponse),
+        (status = 403, description = "Forbidden", body = nexora_common::ErrorResponse),
+        (status = 500, description = "Internal error", body = nexora_common::ErrorResponse),
     ),
     security(("bearer" = []))
 )]
@@ -72,7 +72,7 @@ pub async fn create_tenant(
     .await?;
 
     // Then the tenant referencing it. Runs inside the request's RLS transaction
-    // where `aos.is_system` = 'true' permits the insert.
+    // where `nexora.is_system` = 'true' permits the insert.
     sqlx::query(
         r#"
         INSERT INTO tenants (ulid, org_id, name, slug, tier)
@@ -110,7 +110,7 @@ pub async fn create_tenant(
     tag = "Tenant",
     responses(
         (status = 200, description = "Tenants visible to caller", body = [TenantResponse]),
-        (status = 401, description = "Unauthorized", body = aos_common::ErrorResponse),
+        (status = 401, description = "Unauthorized", body = nexora_common::ErrorResponse),
     ),
     security(("bearer" = []))
 )]
@@ -134,8 +134,8 @@ pub async fn list_tenants(
     params(("id" = String, Path, description = "Tenant ULID")),
     responses(
         (status = 200, description = "Tenant", body = TenantResponse),
-        (status = 401, description = "Unauthorized", body = aos_common::ErrorResponse),
-        (status = 404, description = "Not found", body = aos_common::ErrorResponse),
+        (status = 401, description = "Unauthorized", body = nexora_common::ErrorResponse),
+        (status = 404, description = "Not found", body = nexora_common::ErrorResponse),
     ),
     security(("bearer" = []))
 )]

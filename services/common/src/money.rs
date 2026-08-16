@@ -5,8 +5,7 @@
 //! - Amounts are stored as `NUMERIC(19,4)` in PostgreSQL and `Decimal` in Rust.
 //! - All arithmetic is checked; operations across currencies are rejected.
 //! - Rounding is explicit via [`RoundingPolicy`]; there is no implicit rounding.
-//! - The default scale is 4 decimal places (matches `NUMERIC(19,4)`).
-
+//! - The default scale is 4 decimal places (matches `NUMERIC(19,4)`.
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -104,6 +103,12 @@ pub enum RoundingPolicy {
     RoundFloor,
 }
 
+impl Default for RoundingPolicy {
+    fn default() -> Self {
+        RoundingPolicy::RoundHalfUp
+    }
+}
+
 impl RoundingPolicy {
     /// Apply the strategy, rounding to `DEFAULT_SCALE` decimal places.
     pub fn apply(self, amount: Decimal) -> Decimal {
@@ -124,6 +129,26 @@ impl RoundingPolicy {
         };
         amount.round_dp_with_strategy(scale, strategy)
     }
+}
+
+/// Apply the strategy, rounding to `DEFAULT_SCALE` decimal places.
+pub fn apply_to_scale(amount: Decimal, scale: u32, policy: RoundingPolicy) -> Decimal {
+    use rust_decimal::RoundingStrategy;
+    let strategy = match policy {
+        RoundingPolicy::RoundHalfUp => RoundingStrategy::MidpointAwayFromZero,
+        RoundingPolicy::RoundHalfDown => RoundingStrategy::MidpointTowardZero,
+        RoundingPolicy::RoundHalfEven => RoundingStrategy::MidpointNearestEven,
+        RoundingPolicy::RoundUp => RoundingStrategy::AwayFromZero,
+        RoundingPolicy::RoundDown => RoundingStrategy::ToZero,
+        RoundingPolicy::RoundCeiling => RoundingStrategy::ToPositiveInfinity,
+        RoundingPolicy::RoundFloor => RoundingStrategy::ToNegativeInfinity,
+    };
+    amount.round_dp_with_strategy(scale, strategy)
+}
+
+/// Apply the default rounding strategy (round half away from zero) to `DEFAULT_SCALE` decimal places.
+pub fn apply_default(amount: Decimal) -> Decimal {
+    apply_to_scale(amount, DEFAULT_SCALE, RoundingPolicy::RoundHalfUp)
 }
 
 /// A monetary value with an associated currency.
@@ -247,7 +272,7 @@ impl Money {
     /// Apply an explicit rounding strategy at the default scale.
     pub fn rounded(&self, policy: RoundingPolicy) -> Self {
         Self {
-            amount: policy.apply(self.amount),
+            amount: apply_to_scale(self.amount, crate::DEFAULT_SCALE, policy),
             currency: self.currency.clone(),
         }
     }
@@ -255,7 +280,7 @@ impl Money {
     /// Apply an explicit rounding strategy at an explicit scale.
     pub fn rounded_to_scale(&self, policy: RoundingPolicy, scale: u32) -> Self {
         Self {
-            amount: policy.apply_to_scale(self.amount, scale),
+            amount: apply_to_scale(self.amount, scale, policy),
             currency: self.currency.clone(),
         }
     }
@@ -352,5 +377,12 @@ mod tests {
         assert!(m.is_negative());
         assert_eq!(m.abs(), money!("10.00", "CDF"));
         assert_eq!(m.checked_neg().unwrap(), money!("10.00", "CDF"));
+    }
+
+    #[test]
+    fn rounding_half_up_default() {
+        let m = money!("125000.00005", "CDF");
+        let r = m.rounded(RoundingPolicy::default());
+        assert_eq!(r.amount.to_string(), "125000.0001");
     }
 }

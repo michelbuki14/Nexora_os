@@ -5,11 +5,11 @@
 
 set -euo pipefail
 
-ALIAS="aos"
+ALIAS="nexora"
 ENDPOINT="${MINIO_ENDPOINT:-http://minio:9000}"
 ACCESS="${MINIO_ROOT_USER:-minioadmin}"
 SECRET="${MINIO_ROOT_PASSWORD:-minioadmin}"
-BUCKET="${MINIO_BUCKET:-aos-workforce-documents}"
+BUCKET="${MINIO_BUCKET:-nexora-workforce-documents}"
 
 echo "Setting up MinIO alias '$ALIAS' -> $ENDPOINT"
 docker run --rm --network aos-network minio/mc:latest \

@@ -2,18 +2,18 @@
 -- Bootstrap a non-superuser application role so row-level security is enforced.
 --
 -- PostgreSQL superusers bypass row-level security, so if the runtime services
--- connect as the `aos` superuser (the default POSTGRES_USER), the `nexora.current_tenant_id`
--- / `aos.is_system` GUCs are ignored and every request sees every tenant's rows.
+-- connect as the `nexora` superuser (the default POSTGRES_USER), the `nexora.current_tenant_id`
+-- / `nexora.is_system` GUCs are ignored and every request sees every tenant's rows.
 --
--- This migration creates `aos_app`, a LOGIN role with only DML privileges on the
+-- This migration creates `nexora_app`, a LOGIN role with only DML privileges on the
 -- public schema, and grants it access to future tables/sequences too (via
 -- ALTER DEFAULT PRIVILEGES, applied to objects owned by the migration user).
--- Because `aos_app` is neither a superuser nor a table owner, RLS policies apply
+-- Because `nexora_app` is neither a superuser nor a table owner, RLS policies apply
 -- to every query it runs.
 --
 -- The block is idempotent and self-guarding: it only acts when run by a superuser
 -- (the initial container bootstrap or `aos-migrate`). When a migration run is
--- invoked as `aos_app` itself (role already bootstrapped), the block no-ops, so
+-- invoked as `nexora_app` itself (role already bootstrapped), the block no-ops, so
 -- running migrations does not require superuser credentials post-bootstrap.
 
 DO $$

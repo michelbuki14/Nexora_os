@@ -10,7 +10,7 @@
 //!   nexora-migrate info       # print applied/pending status
 //!   nexora-migrate verify     # exit non-zero if pending migrations exist
 
-use aos_common::{config::Config, db, logging::init_logging};
+use nexora_common::{config::Config, db, logging::init_logging};
 use sqlx::migrate::{Migrate, Migrator};
 use sqlx::PgPool;
 use std::env;
@@ -22,7 +22,7 @@ static MIGRATOR: Migrator = sqlx::migrate!("../../migrations");
 async fn main() -> anyhow::Result<()> {
     let config = Config::load().unwrap_or_else(|e| {
         eprintln!("config load failed, using env DATABASE_URL: {e}");
-        Config::default()
+        Config::load().unwrap()
     });
     init_logging(&config.tracing)?;
 

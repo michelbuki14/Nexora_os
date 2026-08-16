@@ -17,7 +17,7 @@
 //! Run on Linux/CI: `cargo test -p aos-workforce-service --test workforce_isolation -- --ignored`.
 //! MUST run against a real PostgreSQL — vacuous passes are a false-green security risk.
 
-use aos_common::{
+use nexora_common::{
     tenant_context::AuthContext,
     ulid::{new_ulid, Ulid},
     AuthContextExt,
@@ -31,10 +31,10 @@ use tokio::sync::OnceCell;
 
 static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!("../../migrations");
 
-const SUPERUSER: &str = "aos";
-const SUPERUSER_PASSWORD: &str = "aos_super_password";
-const APP_ROLE: &str = "aos_app";
-const APP_ROLE_PASSWORD: &str = "aos_app_dev_password";
+const SUPERUSER: &str = "nexora";
+const SUPERUSER_PASSWORD: &str = "nexora_super_password";
+const APP_ROLE: &str = "nexora_app";
+const APP_ROLE_PASSWORD: &str = "nexora_app_dev_password";
 
 struct Cluster {
     super_pool: PgPool,
@@ -49,7 +49,7 @@ async fn cluster() -> Arc<Cluster> {
             let image = GenericImage::new("postgres", "16-alpine")
                 .with_env_var("POSTGRES_USER", SUPERUSER)
                 .with_env_var("POSTGRES_PASSWORD", SUPERUSER_PASSWORD)
-                .with_env_var("POSTGRES_DB", "aos_test")
+                .with_env_var("POSTGRES_DB", "nexora_test")
                 .with_wait_for(WaitFor::message_on_stderr("database system is ready to accept connections"));
 
             let container = image
@@ -59,7 +59,7 @@ async fn cluster() -> Arc<Cluster> {
 
             let port = container.get_host_port_ipv4(5432).await.unwrap();
             let super_url = format!(
-                "postgres://{SUPERUSER}:{SUPERUSER_PASSWORD}@localhost:{port}/aos_test"
+                "postgres://{SUPERUSER}:{SUPERUSER_PASSWORD}@localhost:{port}/nexora_test"
             );
 
             let super_pool = PgPoolOptions::new()
@@ -72,7 +72,7 @@ async fn cluster() -> Arc<Cluster> {
             // Apply migrations as superuser.
             MIGRATOR.run(&super_pool).await.expect("migrations");
 
-            // Create the aos_app role (migration 007 does this in prod, but
+            // Create the nexora_app role (migration 007 does this in prod, but
             // testcontainers starts fresh — re-run just the CREATE ROLE safely).
             let _ = sqlx::query(&format!(
                 "DO $$ BEGIN
@@ -93,7 +93,7 @@ async fn cluster() -> Arc<Cluster> {
             .await;
 
             let app_url = format!(
-                "postgres://{APP_ROLE}:{APP_ROLE_PASSWORD}@localhost:{port}/aos_test"
+                "postgres://{APP_ROLE}:{APP_ROLE_PASSWORD}@localhost:{port}/nexora_test"
             );
             let app_pool = PgPoolOptions::new()
                 .max_connections(2)
@@ -227,7 +227,7 @@ async fn test_cross_tenant_employee_read_returns_empty() {
     // Manually set the GUC for tenant_b, then query.
     let tb_fake = new_ulid(); // a non-existent tenant ULID
     sqlx::query(&format!(
-        "SET SESSION nexora.current_tenant_id = '{tb_fake}'; SET SESSION aos.is_system = 'false';"
+        "SET SESSION nexora.current_tenant_id = '{tb_fake}'; SET SESSION nexora.is_system = 'false';"
     ))
     .execute(&cl.app_pool)
     .await
@@ -394,10 +394,10 @@ async fn test_employee_read_does_not_grant_compensation_read() {
 
 #[test]
 pub(crate) fn test_document_object_key_namespacing() {
-    let key = aos_common::s3::document_object_key("TENANT123", "EMP456", "DOC789");
+    let key = nexora_common::s3::document_object_key("TENANT123", "EMP456", "DOC789");
     assert_eq!(key, "TENANT123/EMP456/DOC789");
     // A key from another tenant starts with a different prefix — unguessable.
-    let key2 = aos_common::s3::document_object_key("OTHER_TENANT", "EMP456", "DOC789");
+    let key2 = nexora_common::s3::document_object_key("OTHER_TENANT", "EMP456", "DOC789");
     assert_ne!(key, key2);
 }
 

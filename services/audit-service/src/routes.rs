@@ -1,6 +1,6 @@
 //! Audit service route definitions and middleware composition.
 //!
-//! The public health router comes from [`aos_common::health::health_router`].
+//! The public health router comes from [`nexora_common::health::health_router`].
 //! The protected `/api/v1/audit/*` routes are assembled here with the
 //! middleware order: **auth first** (extracts JWT → `AuthContext`), then
 //! **RLS** (reads `AuthContext`, sets GUCs, stores `DbConn`).
@@ -10,7 +10,7 @@
 //! populates the request extensions that `rls_middleware` reads.
 
 use crate::handlers::{create_audit_event, get_audit_event, list_audit_events, verify_hash_chain};
-use aos_common::{auth_middleware, tenant_context::rls_middleware, AuthState, RlsState};
+use nexora_common::{auth_middleware, tenant_context::rls_middleware, AuthState, RlsState};
 use axum::{
     middleware,
     routing::{get, post},

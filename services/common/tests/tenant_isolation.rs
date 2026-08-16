@@ -25,11 +25,11 @@
 //! panic ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â the integration tests are a correctness gate and MUST run against a
 //! real PostgreSQL. Vacuous passes are a false-green security risk.
 
-use aos_common::audit::{compute_chain_hash, GENESIS_HASH};
-use aos_common::config::Config;
-use aos_common::tenant_context::{rls_middleware, AuthContext, DbConn, RlsState};
-use aos_common::ulid::{new_ulid, Ulid};
-use aos_common::AosError;
+use nexora_common::audit::{compute_chain_hash, GENESIS_HASH};
+use nexora_common::config::Config;
+use nexora_common::tenant_context::{rls_middleware, AuthContext, DbConn, RlsState};
+use nexora_common::ulid::{new_ulid, Ulid};
+use nexora_common::AosError;
 use axum::{
     body::Body,
     extract::{Path, Request},
@@ -557,10 +557,11 @@ async fn tenant_gucs_do_not_leak_across_pooled_requests() {
 
     // Same physical connection, next request: the GUC must be gone.
     let mut conn2 = pool.acquire().await.unwrap();
-    let after: String = sqlx::query_scalar("SELECT current_setting('nexora.current_tenant_id', true)")
-        .fetch_one(&mut *conn2)
-        .await
-        .unwrap();
+    let after: String =
+        sqlx::query_scalar("SELECT current_setting('nexora.current_tenant_id', true)")
+            .fetch_one(&mut *conn2)
+            .await
+            .unwrap();
     assert_eq!(
         after, "",
         "transaction-local GUC must not survive commit on the pooled connection"

@@ -9,10 +9,10 @@ use crate::models::{
     AuditEventListResponse, AuditEventResponse, AuditEventRow, AuditListQuery, CreateAuditRequest,
     HashChainVerification,
 };
-use aos_common::audit::{compute_chain_hash, GENESIS_HASH};
-use aos_common::{AosError, AuthContext, DbConn};
+use nexora_common::audit::{compute_chain_hash, GENESIS_HASH};
+use nexora_common::{AosError, AuthContext, DbConn};
 use axum::{
-    extract::{Path, Query},
+    extract::{Extension, Path, Query},
     http::StatusCode,
     response::IntoResponse,
     Json,
@@ -37,15 +37,15 @@ const SELECT_COLUMNS: &str = r#"
     request_body = CreateAuditRequest,
     responses(
         (status = 201, description = "Audit event created", body = AuditEventResponse),
-        (status = 400, description = "Validation failed", body = aos_common::ErrorResponse),
-        (status = 401, description = "Unauthorized", body = aos_common::ErrorResponse),
-        (status = 500, description = "Internal error", body = aos_common::ErrorResponse),
+        (status = 400, description = "Validation failed", body = nexora_common::ErrorResponse),
+        (status = 401, description = "Unauthorized", body = nexora_common::ErrorResponse),
+        (status = 500, description = "Internal error", body = nexora_common::ErrorResponse),
     ),
     security(("bearer" = []))
 )]
 pub async fn create_audit_event(
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Json(req): Json<CreateAuditRequest>,
 ) -> Result<impl IntoResponse, AosError> {
     // Reject empty action / resource_type early — these are NOT NULL in DB.
@@ -75,7 +75,7 @@ pub async fn create_audit_event(
     let payload = canonical_payload(&auth, &tenant_id, &org_id, &req);
     let hash = compute_chain_hash(&prev_hash, &payload);
 
-    let event_ulid = aos_common::ulid::new_ulid();
+    let event_ulid = nexora_common::ulid::new_ulid();
     // Bind `ip_address` as text and let Postgres cast it to `INET`. sqlx's
     // `IpAddr` mapping requires the `ipnetwork` feature which we don't take on.
     let ip_address = req.ip_address.as_ref().map(|addr| addr.to_string());
@@ -132,14 +132,14 @@ pub async fn create_audit_event(
     params(AuditListQuery),
     responses(
         (status = 200, description = "Paginated audit events", body = AuditEventListResponse),
-        (status = 400, description = "Validation failed", body = aos_common::ErrorResponse),
-        (status = 401, description = "Unauthorized", body = aos_common::ErrorResponse),
+        (status = 400, description = "Validation failed", body = nexora_common::ErrorResponse),
+        (status = 401, description = "Unauthorized", body = nexora_common::ErrorResponse),
     ),
     security(("bearer" = []))
 )]
 pub async fn list_audit_events(
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Query(query): Query<AuditListQuery>,
 ) -> Result<Json<AuditEventListResponse>, AosError> {
     let query = query.sanitized();
@@ -242,14 +242,14 @@ pub async fn list_audit_events(
     params(("id" = i64, Path, description = "Audit event serial ID")),
     responses(
         (status = 200, description = "Audit event", body = AuditEventResponse),
-        (status = 404, description = "Not found", body = aos_common::ErrorResponse),
-        (status = 401, description = "Unauthorized", body = aos_common::ErrorResponse),
+        (status = 404, description = "Not found", body = nexora_common::ErrorResponse),
+        (status = 401, description = "Unauthorized", body = nexora_common::ErrorResponse),
     ),
     security(("bearer" = []))
 )]
 pub async fn get_audit_event(
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Path(event_id): Path<i64>,
 ) -> Result<Json<AuditEventResponse>, AosError> {
     let mut conn = db.acquire().await?;
@@ -279,7 +279,7 @@ pub async fn get_audit_event(
     params(("id" = i64, Path, description = "Audit event serial ID to verify up to")),
     responses(
         (status = 200, description = "Hash-chain verification result", body = HashChainVerification),
-        (status = 401, description = "Unauthorized", body = aos_common::ErrorResponse),
+        (status = 401, description = "Unauthorized", body = nexora_common::ErrorResponse),
     ),
     security(("bearer" = []))
 )]
@@ -497,7 +497,7 @@ fn validate_result(s: &str) -> Result<(), AosError> {
 mod tests {
     use super::*;
     use crate::models::{ActorType, AuditEventRow, AuditResult};
-    use aos_common::{ulid::Ulid, AuthContext};
+    use nexora_common::{ulid::Ulid, AuthContext};
     use chrono::Utc;
     use uuid::Uuid;
 

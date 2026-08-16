@@ -1,6 +1,6 @@
 -- Migration: 001_initial_schema.sql
--- Description: Core AOS schema - tenants, organizations, users, audit log
--- Author: AOS Platform Team
+-- Description: Core Nexora OS schema - tenants, organizations, users, audit log
+-- Author: Nexora OS Platform Team
 -- Date: 2026-01-01
 
 -- Enable required extensions
@@ -160,7 +160,8 @@ ALTER TABLE audit_events ENABLE ROW LEVEL SECURITY;
 -- Application middleware must call SELECT set_config('nexora.current_tenant_id', <tenant_ulid>, false)
 
 CREATE POLICY tenant_isolation_organizations ON organizations
-    USING (ulid = current_setting('nexora.current_tenant_id', true) OR current_setting('aos.is_system', true) = 'true');
+    USING (ulid = current_setting('nexora.current_tenant_id', true) OR current_setting('aos.is_system', true) = 'true')
+    WITH CHECK (ulid = current_setting('nexora.current_tenant_id', true) OR current_setting('aos.is_system', true) = 'true');
 
 CREATE POLICY tenant_isolation_tenants ON tenants
     USING (ulid = current_setting('nexora.current_tenant_id', true) OR current_setting('aos.is_system', true) = 'true');

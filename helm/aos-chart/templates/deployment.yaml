@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "aos.fullname" . }}
+  name: {{ include "nexora.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "aos.labels" . | nindent 4 }}
+    {{- include "nexora.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "aos.selectorLabels" . | nindent 6 }}
+      {{- include "nexora.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -17,13 +17,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "aos.selectorLabels" . | nindent 8 }}
+        {{- include "nexora.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "aos.serviceAccountName" . }}
+      serviceAccountName: {{ include "nexora.serviceAccountName" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -44,6 +44,7 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+          # Monitoring and health probes
           {{- if .Values.probes.enabled }}
           livenessProbe:
             httpGet:
@@ -62,9 +63,16 @@ spec:
             timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
             failureThreshold: {{ .Values.probes.failureThreshold }}
           {{- end }}
+          # Prometheus metrics endpoint
+          # All AOS services expose /metrics endpoint for Prometheus scraping
+          # The metrics port is 9090 by default (separate from HTTP port)
+          # Metrics are collected via sidecar or direct endpoint
+          # See: https://prometheus.io/docs/instrumenting/exposition/
+          args:
+            - "--metrics-address=0.0.0.0:9090"
           envFrom:
             - configMapRef:
-                name: {{ include "aos.fullname" . }}
+                name: {{ include "nexora.fullname" . }}
             {{- if .Values.existingSecret }}
             - secretRef:
                 name: {{ .Values.existingSecret }}
@@ -75,3 +83,23 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          # Liveness and readiness probes
+          {{- if .Values.probes.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: {{ .Values.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.failureThreshold }}
+          {{- end }}
+          # Prometheus scrap annotations          # These annotations allow Prometheus to discover and scrape the /metrics endpoint          prometheus.io/scrape: "true"          prometheus.io/port: "9090"          prometheus.io/path: "/metrics"

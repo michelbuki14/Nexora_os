@@ -50,189 +50,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 
 [[package]]
-name = "aos-api-gateway"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "aos-common",
- "axum",
- "jsonwebtoken",
- "redis",
- "reqwest",
- "serde",
- "serde_json",
- "sqlx",
- "testcontainers",
- "thiserror 1.0.69",
- "tokio",
- "tokio-test",
- "tower-http",
- "tracing",
- "utoipa",
- "utoipa-swagger-ui",
-]
-
-[[package]]
-name = "aos-audit-service"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "aos-common",
- "axum",
- "chrono",
- "hex",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "sqlx",
- "thiserror 1.0.69",
- "tokio",
- "tower-http",
- "tracing",
- "utoipa",
- "uuid",
-]
-
-[[package]]
-name = "aos-common"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "aws-config",
- "aws-credential-types",
- "aws-sdk-s3",
- "axum",
- "chrono",
- "figment",
- "hex",
- "jsonwebtoken",
- "opentelemetry",
- "opentelemetry-otlp",
- "opentelemetry_sdk",
- "rand 0.8.7",
- "redis",
- "reqwest",
- "rust_decimal",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "sqlx",
- "testcontainers",
- "thiserror 1.0.69",
- "tokio",
- "tokio-test",
- "tower 0.5.3",
- "tower-http",
- "tracing",
- "tracing-appender",
- "tracing-opentelemetry",
- "tracing-subscriber",
- "ulid",
- "utoipa",
- "validator",
-]
-
-[[package]]
-name = "aos-fintech-service"
-version = "0.1.0"
-dependencies = [
- "aos-common",
- "axum",
- "rust_decimal",
- "serde",
- "serde_json",
- "sqlx",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "utoipa",
-]
-
-[[package]]
-name = "aos-gov-service"
-version = "0.1.0"
-dependencies = [
- "aos-common",
- "axum",
- "serde",
- "serde_json",
- "sqlx",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "utoipa",
-]
-
-[[package]]
-name = "aos-migrate"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "aos-common",
- "sqlx",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "aos-retail-service"
-version = "0.1.0"
-dependencies = [
- "aos-common",
- "axum",
- "serde",
- "serde_json",
- "sqlx",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "utoipa",
-]
-
-[[package]]
-name = "aos-tenant-service"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "aos-common",
- "axum",
- "serde",
- "serde_json",
- "sqlx",
- "thiserror 1.0.69",
- "tokio",
- "tower-http",
- "tracing",
- "utoipa",
-]
-
-[[package]]
-name = "aos-workforce-service"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "aos-common",
- "aws-sdk-s3",
- "axum",
- "chrono",
- "hex",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "sqlx",
- "testcontainers",
- "thiserror 1.0.69",
- "tokio",
- "tower-http",
- "tracing",
- "utoipa",
- "utoipa-swagger-ui",
- "uuid",
-]
-
-[[package]]
 name = "arbitrary"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2462,6 +2279,189 @@ dependencies = [
  "security-framework 3.7.0",
  "security-framework-sys",
  "tempfile",
+]
+
+[[package]]
+name = "nexora-api-gateway"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "jsonwebtoken",
+ "nexora-common",
+ "redis",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "testcontainers",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-test",
+ "tower-http",
+ "tracing",
+ "utoipa",
+ "utoipa-swagger-ui",
+]
+
+[[package]]
+name = "nexora-audit-service"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "chrono",
+ "hex",
+ "nexora-common",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "thiserror 1.0.69",
+ "tokio",
+ "tower-http",
+ "tracing",
+ "utoipa",
+ "uuid",
+]
+
+[[package]]
+name = "nexora-common"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "aws-config",
+ "aws-credential-types",
+ "aws-sdk-s3",
+ "axum",
+ "chrono",
+ "figment",
+ "hex",
+ "jsonwebtoken",
+ "opentelemetry",
+ "opentelemetry-otlp",
+ "opentelemetry_sdk",
+ "rand 0.8.7",
+ "redis",
+ "reqwest",
+ "rust_decimal",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "testcontainers",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-test",
+ "tower 0.5.3",
+ "tower-http",
+ "tracing",
+ "tracing-appender",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+ "ulid",
+ "utoipa",
+ "validator",
+]
+
+[[package]]
+name = "nexora-fintech-service"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "nexora-common",
+ "rust_decimal",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "utoipa",
+]
+
+[[package]]
+name = "nexora-gov-service"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "nexora-common",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "utoipa",
+]
+
+[[package]]
+name = "nexora-migrate"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "nexora-common",
+ "sqlx",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "nexora-retail-service"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "nexora-common",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "utoipa",
+]
+
+[[package]]
+name = "nexora-tenant-service"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "nexora-common",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror 1.0.69",
+ "tokio",
+ "tower-http",
+ "tracing",
+ "utoipa",
+]
+
+[[package]]
+name = "nexora-workforce-service"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "aws-sdk-s3",
+ "axum",
+ "chrono",
+ "hex",
+ "nexora-common",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "testcontainers",
+ "thiserror 1.0.69",
+ "tokio",
+ "tower-http",
+ "tracing",
+ "utoipa",
+ "utoipa-swagger-ui",
+ "uuid",
 ]
 
 [[package]]

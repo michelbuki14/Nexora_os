@@ -1,0 +1,99 @@
+# Grafana Dashboard Provisioning for Nexora OS Platform
+# ======================================================
+# This dashboard provides comprehensive monitoring of the Nexora OS platform,
+# including service health, throughput, latency, error rates, and business KPIs.
+#
+# Dashboard ID: 10123 (provisioned via Grafana config map)
+# Dashboard UID: nexora-os-platform
+# Refresh: 15s
+#
+# =============================================================================
+# Panels
+# =============================================================================
+
+# 1. Overall System Health
+# ---------------------------------------------------------------------------
+# Shows the health status of all Nexora OS services based on Kubernetes
+# liveness/readiness probes and /health endpoint responses.
+
+[{"expr": "count(kube_pod_status{job=~\"nexora-.*\", condition=\"Ready\"}) by (namespace)", "formatter": "time_series", "interval": "", "legendFormat": "{{service}}", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}]
+
+# 2. Service Request Throughput
+# ---------------------------------------------------------------------------
+# Requests per second per Nexora OS service, measured via Prometheus counters.
+
+[{"expr": "rate(http_requests_total{service=~\"nexora-.*\"}[1m])", "formatter": "time_series", "interval": "", "legendFormat": "{{service}}", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}]
+
+# 3. Request Latency (p95)
+# ---------------------------------------------------------------------------
+# 95th percentile request latency per service, measured via Prometheus histogram.
+
+[{"expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=~\"nexora-.*\"}[5m])) by (le, service))", "formatter": "time_series", "interval": "", "legendFormat": "{{service}}", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}]
+
+# 4. Error Rate
+# ---------------------------------------------------------------------------
+# HTTP 5xx errors per minute per service.
+
+[{"expr": "rate(http_requests_total{service=~\"nexora-.*\", status=~\"5..\"}[1m])", "formatter": "time_series", "interval": "", "legendFormat": "{{service}} 5xx", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}]
+
+# 5. Tenant Isolation Validation
+# ---------------------------------------------------------------------------
+# Cross-tenant test results - should always pass (fail closed).
+
+[{"expr": "nexo_rls_test_cross_tenant_failures_total", "formatter": "time_series", "interval": "", "legendFormat": "cross-tenant failures", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}]
+
+# 6. Database Connection Pool Usage
+# ---------------------------------------------------------------------------
+# PostgreSQL connection pool utilization per service.
+
+[{"expr": "pool_active_connections{service=~\"nexora-.*\"} / pool_max_connections{service=~\"nexora-.*\"} * 100", "formatter": "time_series", "interval": "", "legendFormat": "{{service}} pool usage %", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}]
+
+# 7. Vault Secret Access
+# ---------------------------------------------------------------------------
+# Vault secret access attempts and success/failure rates.
+
+[{"expr": "vault_secret_access_total{outcome=\"success\"}", "formatter": "time_series", "interval": "", "legendFormat": "vault successes", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}, {"expr": "vault_secret_access_total{outcome=\"failure\"}", "formatter": "time_series", "interval": "", "legendFormat": "vault failures", "refId": "B", "type": "graph"}]
+
+# 8. Keycloak Authentication
+# ---------------------------------------------------------------------------
+# Authentication success/failure rates per realm.
+
+[{"expr": "keycloak_auth_success_total{realm=~\"nexora-.*\"}", "formatter": "time_series", "interval": "", "legendFormat": "{{realm}} successes", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}, {"expr": "keycloak_auth_failure_total{realm=~\"nexora-.*\"}", "formatter": "time_series", "interval": "", "legendFormat": "{{realm}} failures", "refId": "B", "type": "graph"}]
+
+# 9. MinIO Replication Lag
+# ---------------------------------------------------------------------------
+# Cross-region MinIO replication lag in seconds.
+
+[{"expr": "minio_replication_lag_seconds{bucket=~\"nexora-.*\"}", "formatter": "time_series", "interval": "", "legendFormat": "{{bucket}} lag", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}]
+
+# 10. Business KPI: Active Tenants
+# ---------------------------------------------------------------------------
+# Number of active tenants across all organizations.
+
+[{"expr": "count(nexora_tenants{status=\"active\"})", "formatter": "time_series", "interval": "", "legendFormat": "active tenants", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}]
+
+# 11. Business KPI: Active Employees
+# ---------------------------------------------------------------------------
+# Number of active employees across all tenants.
+
+[{"expr": "count(nexora_employees{status=\"active\"})", "formatter": "time_series", "interval": "", "legendFormat": "active employees", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}]
+
+# 12. Deployment Health
+# ---------------------------------------------------------------------------
+# Kubernetes deployment status (available vs desired replicas).
+
+[{"expr": "kube_deployment_status_available{deployment=~\"nexora-.*\"} / kube_deployment_status_replicas_available{deployment=~\"nexora-.*\"} * 100", "formatter": "time_series", "interval": "", "legendFormat": "{{deployment}} readiness %", "refId": "A", "type": "query"}, {"format": "native", "maxDataPoints": 100, "refId": "A", "type": "graph"}]
+
+# =============================================================================
+# Footer
+# =============================================================================
+
+# Dashboard notes:
+# - All timeseries are refreshed every 15s
+# - Alerts are configured on critical panels (latency > 2s, error rate > 5%, pool usage > 80%)
+# - All panels have drag-to-zoom and click-to-filter enabled
+# - Dashboard is read-only for operations team, edit access limited to SRE team
+# - Data source: Prometheus (default), Vault, Keycloak exporters
+#
+# Alert rules are defined in a separate file and referenced via Grafana alerts.
+# See: grafana-alerts.yml for complete alert rule definitions.

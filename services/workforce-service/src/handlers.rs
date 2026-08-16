@@ -20,7 +20,7 @@
 //!   recorded for defence-in-depth).
 
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Extension, Path, Query, State},
     http::StatusCode,
     response::IntoResponse,
     Json,
@@ -28,7 +28,7 @@ use axum::{
 use sha2::{Digest, Sha256};
 use tracing::{info, warn};
 
-use aos_common::{
+use nexora_common::{
     error::{AosError, AosResult, ErrorResponse},
     rbac::AuthContextExt,
     tenant_context::{AuthContext, DbConn},
@@ -101,8 +101,8 @@ async fn resolve_ulid(
 )]
 pub async fn create_legal_entity(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Json(req): Json<CreateLegalEntityRequest>,
 ) -> AosResult<impl IntoResponse> {
     auth.require_permission("legal_entity.write")?;
@@ -174,8 +174,8 @@ pub async fn create_legal_entity(
 )]
 pub async fn list_legal_entities(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
 ) -> AosResult<impl IntoResponse> {
     auth.require_permission("legal_entity.read")?;
@@ -245,8 +245,8 @@ pub async fn list_legal_entities(
 )]
 pub async fn create_location(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Json(req): Json<CreateLocationRequest>,
 ) -> AosResult<impl IntoResponse> {
     auth.require_permission("location.write")?;
@@ -313,8 +313,8 @@ pub async fn create_location(
 )]
 pub async fn list_locations(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
 ) -> AosResult<impl IntoResponse> {
     auth.require_permission("location.read")?;
@@ -385,8 +385,8 @@ pub async fn list_locations(
 )]
 pub async fn create_department(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Json(req): Json<CreateDepartmentRequest>,
 ) -> AosResult<impl IntoResponse> {
     auth.require_permission("department.write")?;
@@ -456,8 +456,8 @@ pub async fn create_department(
 )]
 pub async fn list_departments(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
 ) -> AosResult<impl IntoResponse> {
     auth.require_permission("department.read")?;
@@ -526,8 +526,8 @@ pub async fn list_departments(
 )]
 pub async fn create_team(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Json(req): Json<CreateTeamRequest>,
 ) -> AosResult<impl IntoResponse> {
     auth.require_permission("team.write")?;
@@ -585,8 +585,8 @@ pub async fn create_team(
 )]
 pub async fn list_teams(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
 ) -> AosResult<impl IntoResponse> {
     auth.require_permission("team.read")?;
@@ -652,8 +652,8 @@ pub async fn list_teams(
 )]
 pub async fn create_position(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Json(req): Json<CreatePositionRequest>,
 ) -> AosResult<impl IntoResponse> {
     auth.require_permission("position.write")?;
@@ -729,8 +729,8 @@ pub async fn create_position(
 )]
 pub async fn list_positions(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
 ) -> AosResult<impl IntoResponse> {
     auth.require_permission("position.read")?;
@@ -805,8 +805,8 @@ pub async fn list_positions(
 )]
 pub async fn create_employee(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Json(req): Json<CreateEmployeeRequest>,
 ) -> AosResult<impl IntoResponse> {
     auth.require_permission("employee.write")?;
@@ -957,8 +957,8 @@ pub async fn create_employee(
 )]
 pub async fn list_employees(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
 ) -> AosResult<impl IntoResponse> {
     // MANAGERs and above may list; EMPLOYEE role may only get their own record.
@@ -1063,8 +1063,8 @@ pub async fn list_employees(
 )]
 pub async fn get_employee(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Path(employee_ulid): Path<String>,
 ) -> AosResult<impl IntoResponse> {
     let mut conn = db.acquire().await?;
@@ -1092,8 +1092,8 @@ pub async fn get_employee(
 )]
 pub async fn update_employee_status(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
     Path(employee_ulid): Path<String>,
     Json(req): Json<UpdateEmployeeStatusRequest>,
 ) -> AosResult<impl IntoResponse> {

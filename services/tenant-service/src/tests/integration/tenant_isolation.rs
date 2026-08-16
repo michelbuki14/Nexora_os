@@ -1,5 +1,5 @@
 use anyshow::TestError;
-use aos_common::{
+use nexora_common::{
     config::Config,
     db::connect,
     jwt::JwtValidator,
