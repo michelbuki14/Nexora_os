@@ -1,6 +1,6 @@
 # Nexora OS
 
-Africa Operating System is an infrastructure-first, API-first, AI-native platform for African commerce and public/private-sector operations. It is designed as a **modular monolith MVP** with explicit domain boundaries and a service-extraction path.
+NexoraOS is an infrastructure-first, API-first, AI-native platform for African commerce and public/private-sector operations. It is designed as a **modular monolith MVP** with explicit domain boundaries and a service-extraction path.
 
 ## Current implementation status
 
