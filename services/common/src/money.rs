@@ -84,10 +84,11 @@ impl Default for CurrencyCode {
 ///
 /// AOS never performs implicit rounding — callers must state which strategy
 /// applies, and payroll/ledger configs pin a strategy per calculation step.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "snake_case")]
 pub enum RoundingPolicy {
     /// Round half away from zero (common for payroll).
+    #[default]
     RoundHalfUp,
     /// Round half towards zero.
     RoundHalfDown,
@@ -101,12 +102,6 @@ pub enum RoundingPolicy {
     RoundCeiling,
     /// Always round towards negative infinity.
     RoundFloor,
-}
-
-impl Default for RoundingPolicy {
-    fn default() -> Self {
-        RoundingPolicy::RoundHalfUp
-    }
 }
 
 impl RoundingPolicy {

@@ -7,9 +7,9 @@ services:
     image: postgres:16-alpine
     container_name: nexora-postgres
     environment:
-      POSTGRES_USER: aos
-      POSTGRES_PASSWORD: aos_dev_password
-      POSTGRES_DB: aos
+      POSTGRES_USER: nexora
+      POSTGRES_PASSWORD: nexora_dev_password
+      POSTGRES_DB: nexora
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
     ports:
       - "5432:5432"
@@ -18,7 +18,7 @@ services:
       # Creates the keycloak DB + user on first boot
       - ./scripts/postgres-init.sql:/docker-entrypoint-initdb.d/01-keycloak.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aos -d aos"]
+      test: ["CMD-SHELL", "pg_isready -U nexora -d nexora"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,13 +28,13 @@ services:
   redis:
     image: redis:7-alpine
     container_name: nexora-redis
-    command: redis-server --appendonly yes --requirepass aos_dev_password
+    command: redis-server --appendonly yes --requirepass nexora_dev_password
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "aos_dev_password", "ping"]
+      test: ["CMD", "redis-cli", "-a", "nexora_dev_password", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -107,12 +107,12 @@ services:
       - nexora-network
 
   # ─── AOS Services ──────────────────────────────────────────────────────────
-  # Each service reads its own config file via AOS_ENV; config.<env>.toml
-  # is loaded by figment. We set AOS_ENV=docker so each service picks up
+  # Each service reads its own config file via NEXORA_ENV; config.<env>.toml
+  # is loaded by figment. We set NEXORA_ENV=docker so each service picks up
   # its config.<service>-docker.toml via the symlink trick below, OR we
-  # override the config path per-service with AOS_CONFIG_FILE.
+  # override the config path per-service with NEXORA_CONFIG_FILE.
   # Simpler: set individual env vars that override the TOML fields directly
-  # (figment merges AOS__-prefixed vars on top of the file).
+  # (figment merges NEXORA__-prefixed vars on top of the file).
 
   nexora-migrate:
     image: nexora-services:latest
@@ -122,7 +122,7 @@ services:
     container_name: nexora-migrate
     entrypoint: ["nexora-migrate"]
     environment:
-      AOS_DATABASE__URL: "postgresql://aos:aos_dev_password@postgres:5432/aos"
+      NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
     depends_on:
       postgres:
         condition: service_healthy
@@ -138,16 +138,16 @@ services:
     container_name: nexora-workforce-service
     entrypoint: ["nexora-workforce-service"]
     environment:
-      AOS_ENV: docker
+      NEXORA_ENV: docker
       # figment reads config.docker.toml then these env overrides win
-      AOS_SERVICE__NAME: nexora-workforce-service
-      AOS_SERVER__PORT: "3002"
-      AOS_DATABASE__URL: "postgresql://aos:aos_dev_password@postgres:5432/aos"
-      AOS_REDIS__URL: "redis://:aos_dev_password@redis:6379/0"
-      AOS_AUTH__JWKS_URL: "http://keycloak:8080/realms/aos/protocol/openid-connect/certs"
-      AOS_AUTH__ISSUER: "http://keycloak:8080/realms/aos"
-      AOS_S3__ENDPOINT: "http://minio:9000"
-      AOS_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
+      NEXORA_SERVICE__NAME: nexora-workforce-service
+      NEXORA_SERVER__PORT: "3002"
+      NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
+      NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
+      NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
+      NEXORA_S3__ENDPOINT: "http://minio:9000"
+      NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
     ports:
       - "3002:3002"
     depends_on:
@@ -171,14 +171,14 @@ services:
     container_name: nexora-audit-service
     entrypoint: ["nexora-audit-service"]
     environment:
-      AOS_ENV: docker
-      AOS_SERVICE__NAME: nexora-audit-service
-      AOS_SERVER__PORT: "3001"
-      AOS_DATABASE__URL: "postgresql://aos:aos_dev_password@postgres:5432/aos"
-      AOS_REDIS__URL: "redis://:aos_dev_password@redis:6379/0"
-      AOS_AUTH__JWKS_URL: "http://keycloak:8080/realms/aos/protocol/openid-connect/certs"
-      AOS_AUTH__ISSUER: "http://keycloak:8080/realms/aos"
-      AOS_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
+      NEXORA_ENV: docker
+      NEXORA_SERVICE__NAME: nexora-audit-service
+      NEXORA_SERVER__PORT: "3001"
+      NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
+      NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
+      NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
+      NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
     ports:
       - "3001:3001"
     depends_on:
@@ -200,14 +200,14 @@ services:
     container_name: nexora-tenant-service
     entrypoint: ["nexora-tenant-service"]
     environment:
-      AOS_ENV: docker
-      AOS_SERVICE__NAME: nexora-tenant-service
-      AOS_SERVER__PORT: "3004"
-      AOS_DATABASE__URL: "postgresql://aos:aos_dev_password@postgres:5432/aos"
-      AOS_REDIS__URL: "redis://:aos_dev_password@redis:6379/0"
-      AOS_AUTH__JWKS_URL: "http://keycloak:8080/realms/aos/protocol/openid-connect/certs"
-      AOS_AUTH__ISSUER: "http://keycloak:8080/realms/aos"
-      AOS_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
+      NEXORA_ENV: docker
+      NEXORA_SERVICE__NAME: nexora-tenant-service
+      NEXORA_SERVER__PORT: "3004"
+      NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
+      NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
+      NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
+      NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
     ports:
       - "3004:3004"
     depends_on:
@@ -229,17 +229,17 @@ services:
     container_name: nexora-api-gateway
     entrypoint: ["nexora-api-gateway"]
     environment:
-      AOS_ENV: docker
-      AOS_SERVICE__NAME: nexora-api-gateway
-      AOS_SERVER__PORT: "3000"
-      AOS_DATABASE__URL: "postgresql://aos:aos_dev_password@postgres:5432/aos"
-      AOS_REDIS__URL: "redis://:aos_dev_password@redis:6379/0"
-      AOS_AUTH__JWKS_URL: "http://keycloak:8080/realms/aos/protocol/openid-connect/certs"
-      AOS_AUTH__ISSUER: "http://keycloak:8080/realms/aos"
-      AOS_GATEWAY__WORKFORCE_BASE_URL: "http://nexora-workforce-service:3002"
-      AOS_GATEWAY__AUDIT_BASE_URL: "http://nexora-audit-service:3001"
-      AOS_GATEWAY__TENANT_BASE_URL: "http://nexora-tenant-service:3004"
-      AOS_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
+      NEXORA_ENV: docker
+      NEXORA_SERVICE__NAME: nexora-api-gateway
+      NEXORA_SERVER__PORT: "3000"
+      NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
+      NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
+      NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
+      NEXORA_GATEWAY__WORKFORCE_BASE_URL: "http://nexora-workforce-service:3002"
+      NEXORA_GATEWAY__AUDIT_BASE_URL: "http://nexora-audit-service:3001"
+      NEXORA_GATEWAY__TENANT_BASE_URL: "http://nexora-tenant-service:3004"
+      NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
     ports:
       - "3000:3000"
     depends_on:
@@ -257,7 +257,7 @@ volumes:
   postgres_data:
   redis_data:
   keycloak_data:
-  minio_data:
+  minio_data
 
 networks:
   nexora-network:

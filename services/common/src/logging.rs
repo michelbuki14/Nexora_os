@@ -8,7 +8,7 @@ use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, Env
 /// Initialize structured JSON logging.
 pub fn init_logging(config: &TracingConfig) -> crate::AosResult<()> {
     let env_filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new("info,aos=debug,tower_http=debug"));
+        .unwrap_or_else(|_| EnvFilter::new("info,nexora=debug,tower_http=debug"));
 
     let fmt_layer = fmt::layer()
         .json()

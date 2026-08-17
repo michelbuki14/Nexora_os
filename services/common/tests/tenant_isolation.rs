@@ -11,8 +11,8 @@
 //! Each run spins up a throwaway `postgres:16-alpine` container via
 //! testcontainers, applies the real migrations (as the superuser), seeds
 //! fixtures as superuser (admin setup), and then connects as the non-superuser
-//! `aos_app` role created by migration 007 ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â the same shape as production.
-//! Because `aos_app` is neither a superuser nor a table owner, every RLS policy
+//! `nexora_app` role created by migration 007 — the same shape as production.
+//! Because `nexora_app` is neither a superuser nor a table owner, every RLS policy
 //! actually applies to its queries.
 //!
 //! ## Windows note
@@ -45,13 +45,13 @@ use std::time::Duration;
 use testcontainers::{core::WaitFor, runners::AsyncRunner, GenericImage};
 use tokio::sync::OnceCell;
 
-/// The compile-time migration set, identical to `aos-migrate`.
+/// The compile-time migration set, identical to `nexora-migrate`.
 static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!("../../migrations");
 
-const SUPERUSER: &str = "aos";
-const SUPERUSER_PASSWORD: &str = "aos_super_password";
-const APP_ROLE: &str = "aos_app";
-const APP_ROLE_PASSWORD: &str = "aos_app_dev_password";
+const SUPERUSER: &str = "nexora";
+const SUPERUSER_PASSWORD: &str = "nexora_super_password";
+const APP_ROLE: &str = "nexora_app";
+const APP_ROLE_PASSWORD: &str = "nexora_app_dev_password";
 
 /// Shared per-run test cluster: one postgres container for the whole suite.
 struct Cluster {
@@ -92,7 +92,7 @@ impl Cluster {
         let container = GenericImage::new("postgres", "16-alpine")
             .with_env_var("POSTGRES_USER", SUPERUSER)
             .with_env_var("POSTGRES_PASSWORD", SUPERUSER_PASSWORD)
-            .with_env_var("POSTGRES_DB", "aos")
+            .with_env_var("POSTGRES_DB", "nexora")
             .with_exposed_port(5432)
             .with_wait_for(WaitFor::message_on_stderr(
                 "database system is ready to accept connections",
@@ -102,7 +102,7 @@ impl Cluster {
 
         let host = container.get_host().await?.to_string();
         let port = container.get_host_port_ipv4(5432).await?;
-        let base_url = format!("{host}:{port}/aos");
+        let base_url = format!("{host}:{port}/nexora");
         let super_url = format!("postgres://{SUPERUSER}:{SUPERUSER_PASSWORD}@{base_url}");
         let app_url = format!("postgres://{APP_ROLE}:{APP_ROLE_PASSWORD}@{base_url}");
 

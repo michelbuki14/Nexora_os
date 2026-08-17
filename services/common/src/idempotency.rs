@@ -3,7 +3,8 @@
 //! Provides an Axum middleware that checks for an `Idempotency-Key` header
 //! and deduplicates requests by caching responses in the `idempotency_records` table.
 
-use crate::{AosError, AosResult, AuthContext};
+use crate::{AosResult, AuthContext};
+use crate::AosError;
 use axum::{
     body::Body,
     extract::{Request, State},
@@ -299,26 +300,6 @@ async fn update_idempotency_record(
     Ok(())
 }
 
-/// Update idempotency record status only.
-async fn update_idempotency_record_status(
-    pool: &sqlx::PgPool,
-    record_id: &Uuid,
-    status: &str,
-) -> AosResult<()> {
-    sqlx::query(
-        r#"
-        UPDATE idempotency_records
-        SET status = $1, updated_at = NOW()
-        WHERE id = $2
-        "#,
-    )
-    .bind(status)
-    .bind(record_id)
-    .execute(pool)
-    .await?;
-
-    Ok(())
-}
 
 /// Convert a database record to an Axum response.
 fn cached_response_to_axum(record: &IdempotencyRecord) -> Response {
@@ -349,6 +330,7 @@ fn cached_response_to_axum(record: &IdempotencyRecord) -> Response {
 
 /// Database record for idempotency records.
 #[derive(sqlx::FromRow, Debug)]
+#[allow(clippy::unused_fields)]
 struct IdempotencyRecord {
     id: Uuid,
     tenant_id: Uuid,

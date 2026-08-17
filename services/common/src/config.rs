@@ -292,12 +292,12 @@ impl Config {
     /// Load configuration from file and environment.
     /// Priority: defaults < config.toml < environment variables < secrets
     pub fn load() -> AosResult<Self> {
-        let env = std::env::var("AOS_ENV").unwrap_or_else(|_| "development".to_string());
+        let env = std::env::var("NEXORA_ENV").unwrap_or_else(|_| "development".to_string());
         let config_file = format!("config.{env}.toml");
 
         let figment = Figment::new()
             .merge(Toml::file(&config_file))
-            .merge(Env::prefixed("AOS_").split("__"));
+            .merge(Env::prefixed("NEXORA_").split("__"));
 
         figment
             .extract()

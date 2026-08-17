@@ -54,7 +54,7 @@ async fn main() -> anyhow::Result<()> {
         "info" => info_cmd(&pool).await,
         "verify" => verify(&pool).await,
         other => {
-            eprintln!("unknown command: {other}\nusage: aos-migrate [run|info|verify]");
+            eprintln!("unknown command: {other}\nusage: nexora-migrate [run|info|verify]");
             std::process::exit(2);
         }
     }
