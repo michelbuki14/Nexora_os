@@ -3,6 +3,7 @@ import { PlannedModule } from "../modules/PlannedModule";
 import { Forbidden } from "../pages/Forbidden";
 import { NotFound } from "../pages/NotFound";
 import { Dashboard } from "../pages/Dashboard";
+import { Dashboard3D } from "../pages/Dashboard3D";
 import { AppShell } from "../shell/AppShell";
 import { WorkforceOverview } from "../workforce/WorkforceOverview";
 import { EmployeeDirectory } from "../workforce/employees/EmployeeDirectory";
@@ -32,7 +33,7 @@ export const router = createBrowserRouter([
     element: <AppShell />,
     children: [
       { index: true, element: <Dashboard /> },
-      { path: "workforce", element: <WorkforceOverview /> },
+      { path: "3d", element: <Dashboard3D />,},
       { path: "workforce/employees", element: <EmployeeDirectory /> },
       { path: "workforce/employees/new", element: <EmployeeCreate /> },
       { path: "workforce/employees/:ulid", element: <EmployeeProfile /> },

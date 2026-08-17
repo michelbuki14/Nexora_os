@@ -21,6 +21,22 @@ pub const IDEMPOTENCY_KEY_HEADER: &str = "Idempotency-Key";
 /// Maximum time-to-live for pending idempotency records (7 days).
 const PENDING_TTL_DAYS: i64 = 7;
 
+/// Cleanup expired idempotency records older than PENDING_TTL_DAYS.
+/// Should be run periodically (e.g., via cron or background job).
+pub async fn cleanup_idempotency_records(pool: &sqlx::PgPool) -> NexoraResult<u64> {
+    let result = sqlx::query(
+        r#"
+        DELETE FROM idempotency_records
+        WHERE status = 'pending'
+        AND created_at < NOW() - INTERVAL '7 days'
+        "#,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(result.rows_affected())
+}
+
 /// Idempotency state shared across middleware invocations.
 #[derive(Clone)]
 pub struct IdempotencyState {
@@ -94,7 +110,7 @@ pub async fn idempotency_middleware(
     )
     .await?;
 
-    if let Some(record) = existing {
+    if let Some(ref record) = existing {
         match record.status.as_str() {
             "completed" => {
                 // Return cached response
@@ -103,6 +119,7 @@ pub async fn idempotency_middleware(
                     operation = %operation,
                     "Returning cached idempotent response"
                 );
+                // Record is consumed by cached_response_to_axum, so we return early
                 return Ok(cached_response_to_axum(&record));
             }
             "pending" => {
@@ -124,7 +141,7 @@ pub async fn idempotency_middleware(
                     operation = %operation,
                     "Previous idempotent request failed; allowing retry"
                 );
-                // Fall through to create new record
+                // Fall through to create new record below
             }
             _ => {
                 // Unknown status - treat as new request
@@ -132,6 +149,7 @@ pub async fn idempotency_middleware(
             }
         }
     }
+    // If status was "failed" or unknown, we fall through to create a new record
 
     // Create new pending record
     let record_id = create_pending_idempotency_record(
@@ -168,15 +186,19 @@ pub async fn idempotency_middleware(
     )
     .await?;
 
-    // We need to return the original response, but we consumed it in capture_response_parts.
-    // For the idempotency use case, we should reconstruct the response or just return a simple one.
-    // However, the middleware runs AFTER the handler, so the original response was already sent.
-    // The idempotency record is for FUTURE requests. For the current request, we just pass through.
-    // This is a design limitation - we can't both capture body and return original response.
-    // We'll return a minimal response with the status code for now.
+    // Return the cached response from the database record for idempotent re-requests.
+    // The middleware runs after the handler completes, so the original response was already sent.
+    // However, for the idempotency pattern to work correctly on re-requests, we return the
+    // cached response from the database record so subsequent identical requests get consistent data.
+    if let Some(record) = existing {
+        return Ok(cached_response_to_axum(&record));
+    }
+
+    // If we get here without an existing record (shouldn't happen since we checked above),
+    // return a simple success response
     Ok(Response::builder()
-        .status(status_code)
-        .body(Body::empty())
+        .status(StatusCode::OK)
+        .body(Body::from("Idempotent request processed"))
         .unwrap())
 }
 
