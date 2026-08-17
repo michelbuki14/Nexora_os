@@ -1,6 +1,6 @@
 //! Multi-tenancy support with tenant context and isolation.
 
-use crate::{ulid::Ulid, AosResult};
+use crate::{ulid::Ulid, NexoraResult};
 use axum::{
     async_trait,
     extract::{FromRequestParts, Request},
@@ -145,6 +145,6 @@ pub async fn tenant_resolution_middleware(
 /// Trait for tenant resolution.
 #[async_trait]
 pub trait TenantResolver: Send + Sync {
-    async fn resolve_tenant(&self, tenant_id: Ulid) -> AosResult<Option<TenantContext>>;
-    async fn resolve_by_slug(&self, slug: &str) -> AosResult<Option<TenantContext>>;
+    async fn resolve_tenant(&self, tenant_id: Ulid) -> NexoraResult<Option<TenantContext>>;
+    async fn resolve_by_slug(&self, slug: &str) -> NexoraResult<Option<TenantContext>>;
 }

@@ -18,7 +18,7 @@
 //! and when the transaction ends the GUCs are discarded — isolation by
 //! construction, with no per-request reset step that can be forgotten.
 
-use crate::{config::Config, ulid::Ulid, AosError};
+use crate::{config::Config, ulid::Ulid, NexoraError};
 use axum::{
     extract::{FromRequestParts, Request, State},
     http::request::Parts,
@@ -57,9 +57,9 @@ impl DbConn {
     ///
     /// The transaction is automatically returned to the guard (and finalized by
     /// the middleware at request end) when the returned [`DbConnGuard`] is dropped.
-    pub async fn acquire(&self) -> Result<DbConnGuard, AosError> {
+    pub async fn acquire(&self) -> Result<DbConnGuard, NexoraError> {
         let conn = self.inner.lock().await.take().ok_or_else(|| {
-            AosError::Internal("RLS database connection already consumed for this request".into())
+            NexoraError::Internal("RLS database connection already consumed for this request".into())
         })?;
         Ok(DbConnGuard {
             conn: Some(conn),
@@ -169,7 +169,7 @@ pub async fn rls_middleware(
     State(state): State<RlsState>,
     mut request: Request,
     next: Next,
-) -> Result<Response, AosError> {
+) -> Result<Response, NexoraError> {
     // Extract auth context from request extensions (set by auth middleware)
     let ctx = request.extensions().get::<AuthContext>().cloned();
 
@@ -183,7 +183,7 @@ pub async fn rls_middleware(
     // so they persist for the handler's queries and are discarded afterwards.
     let mut tx = state.pool.begin().await.map_err(|e| {
         error!(error = %e, "failed to begin RLS transaction");
-        AosError::ServiceUnavailable("database connection failed".into())
+        NexoraError::ServiceUnavailable("database connection failed".into())
     })?;
 
     // Set the tenant GUC for RLS using parameterized query
@@ -194,7 +194,7 @@ pub async fn rls_middleware(
         .await
     {
         error!(error = %e, tenant_id = %tenant_ulid, "failed to set nexora.current_tenant_id");
-        return Err(AosError::Internal("RLS tenant GUC setup failed".into()));
+        return Err(NexoraError::Internal("RLS tenant GUC setup failed".into()));
     }
 
     // Set the system GUC
@@ -205,7 +205,7 @@ pub async fn rls_middleware(
         .await
     {
         error!(error = %e, is_system = ctx.is_system, "failed to set nexora.is_system");
-        return Err(AosError::Internal("RLS system GUC setup failed".into()));
+        return Err(NexoraError::Internal("RLS system GUC setup failed".into()));
     }
 
     debug!(tenant_id = %tenant_ulid, is_system = ctx.is_system, "RLS GUCs activated");
@@ -249,14 +249,14 @@ pub async fn rls_middleware(
 /// ```
 #[axum::async_trait]
 impl<S> FromRequestParts<S> for AuthContext {
-    type Rejection = AosError;
+    type Rejection = NexoraError;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         parts
             .extensions
             .get::<AuthContext>()
             .cloned()
-            .ok_or_else(|| AosError::Unauthorized("auth context not found".into()))
+            .ok_or_else(|| NexoraError::Unauthorized("auth context not found".into()))
     }
 }
 
@@ -267,7 +267,7 @@ impl<S> FromRequestParts<S> for AuthContext {
 /// `DbConn` (not a raw pool) so queries run under the tenant's RLS context:
 ///
 /// ```ignore
-/// async fn list_employees(db: DbConn) -> Result<Json<Vec<Employee>>, AosError> {
+/// async fn list_employees(db: DbConn) -> Result<Json<Vec<Employee>>, NexoraError> {
 ///     let mut conn = db.acquire().await?;
 ///     let rows = sqlx::query_as::<_, Employee>("SELECT * FROM employees")
 ///         .fetch_all(&mut *conn)
@@ -277,11 +277,11 @@ impl<S> FromRequestParts<S> for AuthContext {
 /// ```
 #[axum::async_trait]
 impl<S> FromRequestParts<S> for DbConn {
-    type Rejection = AosError;
+    type Rejection = NexoraError;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         parts.extensions.get::<DbConn>().cloned().ok_or_else(|| {
-            AosError::Internal(
+            NexoraError::Internal(
                 "RLS database connection not available; is rls_middleware mounted?".into(),
             )
         })

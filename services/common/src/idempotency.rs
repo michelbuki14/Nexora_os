@@ -3,7 +3,7 @@
 //! Provides an Axum middleware that checks for an `Idempotency-Key` header
 //! and deduplicates requests by caching responses in the `idempotency_records` table.
 
-use crate::{AosError, AosResult, AuthContext};
+use crate::{NexoraError, NexoraResult, AuthContext};
 use axum::{
     body::{to_bytes, Body},
     extract::{Request, State},
@@ -50,7 +50,7 @@ pub async fn idempotency_middleware(
     State(state): State<IdempotencyState>,
     request: Request,
     next: Next,
-) -> Result<Response, AosError> {
+) -> Result<Response, NexoraError> {
     // Only apply to mutating methods
     let method = request.method().clone();
     if !matches!(
@@ -112,7 +112,7 @@ pub async fn idempotency_middleware(
                     operation = %operation,
                     "Concurrent request with same idempotency key"
                 );
-                return Err(AosError::IdempotencyConflict(format!(
+                return Err(NexoraError::IdempotencyConflict(format!(
                     "Request with idempotency key '{}' is already being processed",
                     idempotency_key
                 )));
@@ -227,7 +227,7 @@ async fn lookup_idempotency_record(
     tenant_id: String,
     idempotency_key: &str,
     operation: &str,
-) -> AosResult<Option<IdempotencyRecord>> {
+) -> NexoraResult<Option<IdempotencyRecord>> {
     let row = sqlx::query_as::<_, IdempotencyRecord>(
         r#"
         SELECT id, tenant_id, org_id, requestor_id, idempotency_key, operation,
@@ -253,7 +253,7 @@ async fn create_pending_idempotency_record(
     requestor_id: String,
     idempotency_key: &str,
     operation: &str,
-) -> AosResult<Uuid> {
+) -> NexoraResult<Uuid> {
     let id = sqlx::query_scalar::<_, Uuid>(
         r#"
         INSERT INTO idempotency_records (tenant_id, org_id, requestor_id, idempotency_key, operation, status)
@@ -274,7 +274,7 @@ async fn create_pending_idempotency_record(
 
 /// Capture header names/values and body from a response safely.
 /// Stores headers as (String, String) for serialization.
-async fn capture_response_parts(response: Response) -> AosResult<(Vec<(String, String)>, Vec<u8>)> {
+async fn capture_response_parts(response: Response) -> NexoraResult<(Vec<(String, String)>, Vec<u8>)> {
     let mut headers = Vec::new();
 
     for (name, value) in response.headers() {
@@ -293,7 +293,7 @@ async fn capture_response_parts(response: Response) -> AosResult<(Vec<(String, S
     // to_bytes consumes the body
     let body_bytes = to_bytes(response.into_body(), 10 * 1024 * 1024)
         .await
-        .map_err(|e| AosError::Internal(format!("Failed to read response body: {}", e)))?;
+        .map_err(|e| NexoraError::Internal(format!("Failed to read response body: {}", e)))?;
 
     Ok((headers, body_bytes.to_vec()))
 }
@@ -304,7 +304,7 @@ async fn update_idempotency_record(
     record_id: &Uuid,
     cached: &CachedResponse,
     status: &str,
-) -> AosResult<()> {
+) -> NexoraResult<()> {
     let completed_at = if status == "completed" {
         Some(chrono::Utc::now())
     } else {
@@ -338,7 +338,7 @@ async fn update_idempotency_record_status(
     pool: &sqlx::PgPool,
     record_id: &Uuid,
     status: &str,
-) -> AosResult<()> {
+) -> NexoraResult<()> {
     sqlx::query(
         r#"
         UPDATE idempotency_records

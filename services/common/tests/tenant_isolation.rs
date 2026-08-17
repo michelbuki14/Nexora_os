@@ -37,7 +37,7 @@ use nexora_common::audit::{compute_chain_hash, GENESIS_HASH};
 use nexora_common::config::Config;
 use nexora_common::tenant_context::{rls_middleware, AuthContext, DbConn, RlsState};
 use nexora_common::ulid::{new_ulid, Ulid};
-use nexora_common::AosError;
+use nexora_common::NexoraError;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::sync::Arc;
@@ -271,7 +271,7 @@ async fn run_probe(pool: PgPool, ctx: AuthContext, uri: &str) -> axum::response:
     tower::ServiceExt::oneshot(app, req).await.unwrap()
 }
 
-async fn probe_tenant_ulids(db: DbConn) -> Result<Json<Vec<String>>, AosError> {
+async fn probe_tenant_ulids(db: DbConn) -> Result<Json<Vec<String>>, NexoraError> {
     let mut conn = db.acquire().await?;
     let rows: Vec<(String,)> = sqlx::query_as("SELECT ulid FROM tenants ORDER BY ulid")
         .fetch_all(conn.as_mut())
@@ -284,7 +284,7 @@ async fn probe_tenant_ulids(db: DbConn) -> Result<Json<Vec<String>>, AosError> {
 async fn probe_tenant_by_ulid(
     db: DbConn,
     Path(ulid): Path<String>,
-) -> Result<Json<Option<String>>, AosError> {
+) -> Result<Json<Option<String>>, NexoraError> {
     let mut conn = db.acquire().await?;
     let found: Option<(String,)> = sqlx::query_as("SELECT ulid FROM tenants WHERE ulid = $1")
         .bind(&ulid)
@@ -293,7 +293,7 @@ async fn probe_tenant_by_ulid(
     Ok(Json(found.map(|(u,)| u)))
 }
 
-async fn probe_user_emails(db: DbConn) -> Result<Json<Vec<String>>, AosError> {
+async fn probe_user_emails(db: DbConn) -> Result<Json<Vec<String>>, NexoraError> {
     let mut conn = db.acquire().await?;
     let rows: Vec<(String,)> = sqlx::query_as("SELECT email FROM users ORDER BY email")
         .fetch_all(conn.as_mut())
@@ -301,7 +301,7 @@ async fn probe_user_emails(db: DbConn) -> Result<Json<Vec<String>>, AosError> {
     Ok(Json(rows.into_iter().map(|(e,)| e).collect()))
 }
 
-async fn probe_audit_actions(db: DbConn) -> Result<Json<Vec<String>>, AosError> {
+async fn probe_audit_actions(db: DbConn) -> Result<Json<Vec<String>>, NexoraError> {
     let mut conn = db.acquire().await?;
     let rows: Vec<(String,)> = sqlx::query_as("SELECT action FROM audit_events ORDER BY action")
         .fetch_all(conn.as_mut())

@@ -5,7 +5,7 @@
 //! owned by the `nexora-migrate` binary, not by service startup, so exactly one
 //! process applies schema changes (see `services/migrate`).
 
-use crate::{AosError, AosResult, DatabaseConfig};
+use crate::{NexoraError, NexoraResult, DatabaseConfig};
 use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 use std::str::FromStr;
 use std::time::Duration;
@@ -14,7 +14,7 @@ use std::time::Duration;
 ///
 /// Applies pool sizing and timeout values from `DatabaseConfig`; all values
 /// fall back to sensible defaults when unset.
-pub async fn connect(config: &DatabaseConfig) -> AosResult<PgPool> {
+pub async fn connect(config: &DatabaseConfig) -> NexoraResult<PgPool> {
     connect_url(config.url.expose(), config.max_connections, config).await
 }
 
@@ -26,7 +26,7 @@ pub async fn connect_url(
     url: &str,
     max_connections: u32,
     config: &DatabaseConfig,
-) -> AosResult<PgPool> {
+) -> NexoraResult<PgPool> {
     let options = parse_options(url)?;
 
     PgPoolOptions::new()
@@ -37,24 +37,24 @@ pub async fn connect_url(
         .max_lifetime(Duration::from_secs(config.max_lifetime_secs))
         .connect_with(options)
         .await
-        .map_err(|e| AosError::Internal(format!("database connection failed: {e}")))
+        .map_err(|e| NexoraError::Internal(format!("database connection failed: {e}")))
 }
 
 /// Parse a connection string into `PgConnectOptions`, surfacing malformed
 /// values as a config error rather than a panic. Public so tooling and tests
 /// can validate URLs without opening a connection.
-pub fn parse_options(url: &str) -> AosResult<PgConnectOptions> {
+pub fn parse_options(url: &str) -> NexoraResult<PgConnectOptions> {
     PgConnectOptions::from_str(url)
-        .map_err(|e| AosError::Config(format!("invalid DATABASE_URL: {e}")))
+        .map_err(|e| NexoraError::Config(format!("invalid DATABASE_URL: {e}")))
 }
 
 /// Cheap round-trip proving the pool is connected and healthy.
-pub async fn ping(pool: &PgPool) -> AosResult<()> {
+pub async fn ping(pool: &PgPool) -> NexoraResult<()> {
     sqlx::query("SELECT 1")
         .execute(pool)
         .await
         .map(|_| ())
-        .map_err(|e| AosError::Internal(format!("database ping failed: {e}")))
+        .map_err(|e| NexoraError::Internal(format!("database ping failed: {e}")))
 }
 
 #[cfg(test)]
@@ -65,7 +65,7 @@ mod tests {
     fn garbage_url_is_a_config_error_not_a_panic() {
         assert!(matches!(
             parse_options("not a postgres url"),
-            Err(AosError::Config(_))
+            Err(NexoraError::Config(_))
         ));
     }
 

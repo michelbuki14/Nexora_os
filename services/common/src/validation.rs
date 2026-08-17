@@ -1,6 +1,6 @@
 //! Validation utilities and custom validators.
 
-use crate::{AosError, AosResult};
+use crate::{NexoraError, NexoraResult};
 use validator::{Validate, ValidationError, ValidationErrors};
 
 /// Validate email format.
@@ -91,11 +91,11 @@ pub fn validate_password(password: &str) -> Result<(), ValidationError> {
 
 /// Trait for domain-specific validation.
 pub trait DomainValidate {
-    fn domain_validate(&self) -> AosResult<()>;
+    fn domain_validate(&self) -> NexoraResult<()>;
 }
 
-/// Combine validator errors into AosError.
-pub fn combine_errors(errors: ValidationErrors) -> AosError {
+/// Combine validator errors into NexoraError.
+pub fn combine_errors(errors: ValidationErrors) -> NexoraError {
     let messages: Vec<String> = errors
         .field_errors()
         .iter()
@@ -106,14 +106,14 @@ pub fn combine_errors(errors: ValidationErrors) -> AosError {
             })
         })
         .collect();
-    AosError::Validation(messages.join("; "))
+    NexoraError::Validation(messages.join("; "))
 }
 
 /// Validated wrapper for types that implement Validate.
 pub struct Validated<T>(pub T);
 
 impl<T: Validate> Validated<T> {
-    pub fn new(value: T) -> AosResult<Self> {
+    pub fn new(value: T) -> NexoraResult<Self> {
         value.validate().map_err(combine_errors)?;
         Ok(Self(value))
     }

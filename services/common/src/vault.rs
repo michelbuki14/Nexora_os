@@ -8,7 +8,7 @@
 //! Vault is the primary secrets source. Environment variables are the fallback.
 //! The config loader merges both sources with Vault taking priority.
 
-use crate::{config::RedactedSecret, AosError, AosResult};
+use crate::{config::RedactedSecret, NexoraError, NexoraResult};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
@@ -151,7 +151,7 @@ impl VaultClient {
     }
 
     /// Read a secret, falling back to environment variables if not found in Vault.
-    pub async fn read_secret(&self, key: &str) -> AosResult<VaultSecret> {
+    pub async fn read_secret(&self, key: &str) -> NexoraResult<VaultSecret> {
         // Try Vault first
         let vault_path = format!("{}{}", self.config.secret_path, key);
         match self.vault_read(&vault_path).await {
@@ -172,12 +172,12 @@ impl VaultClient {
                     Err(_) => {
                         // Secret not found in either Vault or env
                         if self.config.fallback_to_env {
-                            return Err(AosError::Config(format!(
+                            return Err(NexoraError::Config(format!(
                                 "Secret {} not found in Vault or environment variable {}",
                                 key, env_var
                             )));
                         }
-                        return Err(AosError::Config(format!(
+                        return Err(NexoraError::Config(format!(
                             "Secret {} not found in Vault",
                             key
                         )));
@@ -198,7 +198,7 @@ impl VaultClient {
                         });
                     }
                     Err(_) => {
-                        return Err(AosError::Config(format!(
+                        return Err(NexoraError::Config(format!(
                             "Secret {} not found in Vault or environment variable {}",
                             key, env_var
                         )));
@@ -206,29 +206,29 @@ impl VaultClient {
                 }
             }
             Err(VaultError::ServerUnreachable(_)) => {
-                return Err(AosError::Config(format!(
+                return Err(NexoraError::Config(format!(
                     "Vault server unreachable at {}",
                     self.config.address
                 )));
             }
-            Err(e) => return Err(AosError::Config(format!("Vault error: {}", e))),
+            Err(e) => return Err(NexoraError::Config(format!("Vault error: {}", e))),
         }
     }
 
     /// Read database URL from Vault, falling back to env var.
-    pub async fn read_database_url(&self) -> AosResult<String> {
+    pub async fn read_database_url(&self) -> NexoraResult<String> {
         let secret = self.read_secret("database_url").await?;
         Ok(secret.value)
     }
 
     /// Read Redis URL from Vault, falling back to env var.
-    pub async fn read_redis_url(&self) -> AosResult<String> {
+    pub async fn read_redis_url(&self) -> NexoraResult<String> {
         let secret = self.read_secret("redis_url").await?;
         Ok(secret.value)
     }
 
     /// Read S3 credentials from Vault, falling back to env vars.
-    pub async fn read_s3_credentials(&self) -> AosResult<(String, String)> {
+    pub async fn read_s3_credentials(&self) -> NexoraResult<(String, String)> {
         let access_key = self.read_secret("s3_access_key_id").await?;
         let secret_key = self.read_secret("s3_secret_access_key").await?;
 
@@ -236,7 +236,7 @@ impl VaultClient {
     }
 
     /// Read Keycloak configuration from Vault, falling back to env vars.
-    pub async fn read_keycloak_config(&self) -> AosResult<(String, String, String)> {
+    pub async fn read_keycloak_config(&self) -> NexoraResult<(String, String, String)> {
         let url = self.read_secret("keycloak_url").await?;
         let realm = self.read_secret("keycloak_realm").await?;
         let audience = self.read_secret("keycloak_audience").await?;
@@ -274,7 +274,7 @@ struct VaultSecretData {
 pub async fn init_vault(
     vault_config: &VaultConfig,
     required: bool,
-) -> Result<Option<VaultClient>, AosError> {
+) -> Result<Option<VaultClient>, NexoraError> {
     // Check if Vault is available by attempting a health check
     let client = VaultClient::new(vault_config.clone());
 
@@ -302,7 +302,7 @@ pub async fn init_vault(
 pub async fn load_secret_from_vault(
     vault_client: &VaultClient,
     key: &str,
-) -> AosResult<String> {
+) -> NexoraResult<String> {
     let secret = vault_client.read_secret(key).await?;
     Ok(secret.value)
 }

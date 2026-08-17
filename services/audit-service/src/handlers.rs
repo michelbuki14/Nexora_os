@@ -16,7 +16,7 @@ use axum::{
     Json,
 };
 use nexora_common::audit::{compute_chain_hash, GENESIS_HASH};
-use nexora_common::{AosError, AuthContext, DbConn};
+use nexora_common::{NexoraError, AuthContext, DbConn};
 use serde::Serialize;
 use tracing::warn;
 
@@ -47,17 +47,17 @@ pub async fn create_audit_event(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Json(req): Json<CreateAuditRequest>,
-) -> Result<impl IntoResponse, AosError> {
+) -> Result<impl IntoResponse, NexoraError> {
     // Reject empty action / resource_type early — these are NOT NULL in DB.
     if req.action.trim().is_empty() {
-        return Err(AosError::Validation("action is required".into()));
+        return Err(NexoraError::Validation("action is required".into()));
     }
     if req.resource_type.trim().is_empty() {
-        return Err(AosError::Validation("resource_type is required".into()));
+        return Err(NexoraError::Validation("resource_type is required".into()));
     }
     if let Some(ref ip) = req.ip_address {
         ip.parse::<std::net::IpAddr>()
-            .map_err(|e| AosError::Validation(format!("invalid ip_address: {e}")))?;
+            .map_err(|e| NexoraError::Validation(format!("invalid ip_address: {e}")))?;
     }
 
     let mut conn = db.acquire().await?;
@@ -141,7 +141,7 @@ pub async fn list_audit_events(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Query(query): Query<AuditListQuery>,
-) -> Result<Json<AuditEventListResponse>, AosError> {
+) -> Result<Json<AuditEventListResponse>, NexoraError> {
     let query = query.sanitized();
 
     // Validate filter strings against the DB CHECK constraints before binding.
@@ -158,13 +158,13 @@ pub async fn list_audit_events(
         .as_deref()
         .map(|s| s.parse::<chrono::DateTime<chrono::Utc>>())
         .transpose()
-        .map_err(|e| AosError::Validation(format!("invalid since date: {e}")))?;
+        .map_err(|e| NexoraError::Validation(format!("invalid since date: {e}")))?;
     let until = query
         .until
         .as_deref()
         .map(|s| s.parse::<chrono::DateTime<chrono::Utc>>())
         .transpose()
-        .map_err(|e| AosError::Validation(format!("invalid until date: {e}")))?;
+        .map_err(|e| NexoraError::Validation(format!("invalid until date: {e}")))?;
 
     let mut conn = db.acquire().await?;
     let tenant_id = resolve_tenant_id(&mut conn, &auth).await?;
@@ -251,7 +251,7 @@ pub async fn get_audit_event(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Path(event_id): Path<i64>,
-) -> Result<Json<AuditEventResponse>, AosError> {
+) -> Result<Json<AuditEventResponse>, NexoraError> {
     let mut conn = db.acquire().await?;
     let tenant_id = resolve_tenant_id(&mut conn, &auth).await?;
 
@@ -265,7 +265,7 @@ pub async fn get_audit_event(
         .bind(tenant_id)
         .fetch_optional(conn.as_mut())
         .await?
-        .ok_or_else(|| AosError::NotFound(format!("audit event {event_id} not found")))?;
+        .ok_or_else(|| NexoraError::NotFound(format!("audit event {event_id} not found")))?;
 
     Ok(Json(AuditEventResponse::from(row)))
 }
@@ -287,7 +287,7 @@ pub async fn verify_hash_chain(
     auth: AuthContext,
     db: DbConn,
     Path(event_id): Path<i64>,
-) -> Result<Json<HashChainVerification>, AosError> {
+) -> Result<Json<HashChainVerification>, NexoraError> {
     let mut conn = db.acquire().await?;
     let tenant_id = resolve_tenant_id(&mut conn, &auth).await?;
 
@@ -364,14 +364,14 @@ pub async fn verify_hash_chain(
 async fn resolve_tenant_id(
     conn: &mut sqlx::PgConnection,
     auth: &AuthContext,
-) -> Result<uuid::Uuid, AosError> {
+) -> Result<uuid::Uuid, NexoraError> {
     let tenant_ulid = auth.tenant_id.to_string();
     let row: Option<(uuid::Uuid,)> = sqlx::query_as("SELECT id FROM tenants WHERE ulid = $1")
         .bind(&tenant_ulid)
         .fetch_optional(conn)
         .await?;
     row.map(|(id,)| id).ok_or_else(|| {
-        AosError::TenantIsolation(format!(
+        NexoraError::TenantIsolation(format!(
             "tenant {tenant_ulid} not visible in current RLS context"
         ))
     })
@@ -381,14 +381,14 @@ async fn resolve_tenant_id(
 async fn resolve_org_id(
     conn: &mut sqlx::PgConnection,
     auth: &AuthContext,
-) -> Result<uuid::Uuid, AosError> {
+) -> Result<uuid::Uuid, NexoraError> {
     let org_ulid = auth.org_id.to_string();
     let row: Option<(uuid::Uuid,)> = sqlx::query_as("SELECT id FROM organizations WHERE ulid = $1")
         .bind(&org_ulid)
         .fetch_optional(conn)
         .await?;
     row.map(|(id,)| id).ok_or_else(|| {
-        AosError::TenantIsolation(format!(
+        NexoraError::TenantIsolation(format!(
             "organization {org_ulid} not visible in current RLS context"
         ))
     })
@@ -398,7 +398,7 @@ async fn resolve_org_id(
 async fn latest_hash_for_tenant(
     conn: &mut sqlx::PgConnection,
     tenant_id: uuid::Uuid,
-) -> Result<String, AosError> {
+) -> Result<String, NexoraError> {
     let row: Option<(String,)> = sqlx::query_as(
         "SELECT hash FROM audit_events WHERE tenant_id = $1 ORDER BY id DESC LIMIT 1",
     )
@@ -479,17 +479,17 @@ fn serialize_canonical(value: &serde_json::Value) -> String {
     String::from_utf8_lossy(&buf).to_string()
 }
 
-fn validate_actor_type(s: &str) -> Result<(), AosError> {
+fn validate_actor_type(s: &str) -> Result<(), NexoraError> {
     match s {
         "user" | "system" | "service" | "api_key" => Ok(()),
-        other => Err(AosError::Validation(format!("invalid actor_type: {other}"))),
+        other => Err(NexoraError::Validation(format!("invalid actor_type: {other}"))),
     }
 }
 
-fn validate_result(s: &str) -> Result<(), AosError> {
+fn validate_result(s: &str) -> Result<(), NexoraError> {
     match s {
         "success" | "failure" | "partial" => Ok(()),
-        other => Err(AosError::Validation(format!("invalid result: {other}"))),
+        other => Err(NexoraError::Validation(format!("invalid result: {other}"))),
     }
 }
 

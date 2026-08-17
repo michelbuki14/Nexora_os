@@ -10,12 +10,12 @@ use thiserror::Error;
 use utoipa::ToSchema;
 
 /// Result type alias for AOS services.
-pub type AosResult<T> = Result<T, AosError>;
+pub type NexoraResult<T> = Result<T, NexoraError>;
 
 /// Application error types with HTTP status mapping.
 #[derive(Debug, Error, ToSchema)]
 #[serde(tag = "error", content = "details")]
-pub enum AosError {
+pub enum NexoraError {
     #[error("Internal server error: {0}")]
     #[schema(example = json!({"error": "Internal", "details": "database connection failed"}))]
     Internal(String),
@@ -89,52 +89,52 @@ pub enum AosError {
     Compliance(String),
 }
 
-impl AosError {
+impl NexoraError {
     /// Get the HTTP status code for this error.
     pub fn status_code(&self) -> StatusCode {
         match self {
-            AosError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            AosError::Config(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            AosError::NotFound(_) => StatusCode::NOT_FOUND,
-            AosError::Conflict(_) => StatusCode::CONFLICT,
-            AosError::Validation(_) => StatusCode::UNPROCESSABLE_ENTITY,
-            AosError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
-            AosError::Forbidden(_) => StatusCode::FORBIDDEN,
-            AosError::RateLimited(_) => StatusCode::TOO_MANY_REQUESTS,
-            AosError::BadRequest(_) => StatusCode::BAD_REQUEST,
-            AosError::ServiceUnavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
-            AosError::GatewayTimeout(_) => StatusCode::GATEWAY_TIMEOUT,
-            AosError::ExternalService(_) => StatusCode::BAD_GATEWAY,
-            AosError::Migration(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            AosError::Serialization(_) => StatusCode::BAD_REQUEST,
-            AosError::TenantIsolation(_) => StatusCode::FORBIDDEN,
-            AosError::IdempotencyConflict(_) => StatusCode::CONFLICT,
-            AosError::InsufficientFunds(_) => StatusCode::UNPROCESSABLE_ENTITY,
-            AosError::Compliance(_) => StatusCode::FORBIDDEN,
+            NexoraError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            NexoraError::Config(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            NexoraError::NotFound(_) => StatusCode::NOT_FOUND,
+            NexoraError::Conflict(_) => StatusCode::CONFLICT,
+            NexoraError::Validation(_) => StatusCode::UNPROCESSABLE_ENTITY,
+            NexoraError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
+            NexoraError::Forbidden(_) => StatusCode::FORBIDDEN,
+            NexoraError::RateLimited(_) => StatusCode::TOO_MANY_REQUESTS,
+            NexoraError::BadRequest(_) => StatusCode::BAD_REQUEST,
+            NexoraError::ServiceUnavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
+            NexoraError::GatewayTimeout(_) => StatusCode::GATEWAY_TIMEOUT,
+            NexoraError::ExternalService(_) => StatusCode::BAD_GATEWAY,
+            NexoraError::Migration(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            NexoraError::Serialization(_) => StatusCode::BAD_REQUEST,
+            NexoraError::TenantIsolation(_) => StatusCode::FORBIDDEN,
+            NexoraError::IdempotencyConflict(_) => StatusCode::CONFLICT,
+            NexoraError::InsufficientFunds(_) => StatusCode::UNPROCESSABLE_ENTITY,
+            NexoraError::Compliance(_) => StatusCode::FORBIDDEN,
         }
     }
 
     /// Get a stable error code for client handling.
     pub fn error_code(&self) -> &'static str {
         match self {
-            AosError::Internal(_) => "INTERNAL_ERROR",
-            AosError::Config(_) => "CONFIG_ERROR",
-            AosError::NotFound(_) => "NOT_FOUND",
-            AosError::Conflict(_) => "CONFLICT",
-            AosError::Validation(_) => "VALIDATION_ERROR",
-            AosError::Unauthorized(_) => "UNAUTHORIZED",
-            AosError::Forbidden(_) => "FORBIDDEN",
-            AosError::RateLimited(_) => "RATE_LIMITED",
-            AosError::BadRequest(_) => "BAD_REQUEST",
-            AosError::ServiceUnavailable(_) => "SERVICE_UNAVAILABLE",
-            AosError::GatewayTimeout(_) => "GATEWAY_TIMEOUT",
-            AosError::ExternalService(_) => "EXTERNAL_SERVICE_ERROR",
-            AosError::Migration(_) => "MIGRATION_ERROR",
-            AosError::Serialization(_) => "SERIALIZATION_ERROR",
-            AosError::TenantIsolation(_) => "TENANT_ISOLATION_VIOLATION",
-            AosError::IdempotencyConflict(_) => "IDEMPOTENCY_CONFLICT",
-            AosError::InsufficientFunds(_) => "INSUFFICIENT_FUNDS",
-            AosError::Compliance(_) => "COMPLIANCE_VIOLATION",
+            NexoraError::Internal(_) => "INTERNAL_ERROR",
+            NexoraError::Config(_) => "CONFIG_ERROR",
+            NexoraError::NotFound(_) => "NOT_FOUND",
+            NexoraError::Conflict(_) => "CONFLICT",
+            NexoraError::Validation(_) => "VALIDATION_ERROR",
+            NexoraError::Unauthorized(_) => "UNAUTHORIZED",
+            NexoraError::Forbidden(_) => "FORBIDDEN",
+            NexoraError::RateLimited(_) => "RATE_LIMITED",
+            NexoraError::BadRequest(_) => "BAD_REQUEST",
+            NexoraError::ServiceUnavailable(_) => "SERVICE_UNAVAILABLE",
+            NexoraError::GatewayTimeout(_) => "GATEWAY_TIMEOUT",
+            NexoraError::ExternalService(_) => "EXTERNAL_SERVICE_ERROR",
+            NexoraError::Migration(_) => "MIGRATION_ERROR",
+            NexoraError::Serialization(_) => "SERIALIZATION_ERROR",
+            NexoraError::TenantIsolation(_) => "TENANT_ISOLATION_VIOLATION",
+            NexoraError::IdempotencyConflict(_) => "IDEMPOTENCY_CONFLICT",
+            NexoraError::InsufficientFunds(_) => "INSUFFICIENT_FUNDS",
+            NexoraError::Compliance(_) => "COMPLIANCE_VIOLATION",
         }
     }
 
@@ -150,7 +150,7 @@ impl AosError {
                 })
             })
             .collect();
-        AosError::Validation(messages.join("; "))
+        NexoraError::Validation(messages.join("; "))
     }
 }
 
@@ -165,7 +165,7 @@ pub struct ErrorResponse {
     pub timestamp: String,
 }
 
-impl IntoResponse for AosError {
+impl IntoResponse for NexoraError {
     fn into_response(self) -> Response {
         let status = self.status_code();
         let error_code = self.error_code();
@@ -184,69 +184,69 @@ impl IntoResponse for AosError {
     }
 }
 
-impl AosError {
+impl NexoraError {
     fn variant_name(&self) -> &'static str {
         match self {
-            AosError::Internal(_) => "Internal",
-            AosError::Config(_) => "Config",
-            AosError::NotFound(_) => "NotFound",
-            AosError::Conflict(_) => "Conflict",
-            AosError::Validation(_) => "Validation",
-            AosError::Unauthorized(_) => "Unauthorized",
-            AosError::Forbidden(_) => "Forbidden",
-            AosError::RateLimited(_) => "RateLimited",
-            AosError::BadRequest(_) => "BadRequest",
-            AosError::ServiceUnavailable(_) => "ServiceUnavailable",
-            AosError::GatewayTimeout(_) => "GatewayTimeout",
-            AosError::ExternalService(_) => "ExternalService",
-            AosError::Migration(_) => "Migration",
-            AosError::Serialization(_) => "Serialization",
-            AosError::TenantIsolation(_) => "TenantIsolation",
-            AosError::IdempotencyConflict(_) => "IdempotencyConflict",
-            AosError::InsufficientFunds(_) => "InsufficientFunds",
-            AosError::Compliance(_) => "Compliance",
+            NexoraError::Internal(_) => "Internal",
+            NexoraError::Config(_) => "Config",
+            NexoraError::NotFound(_) => "NotFound",
+            NexoraError::Conflict(_) => "Conflict",
+            NexoraError::Validation(_) => "Validation",
+            NexoraError::Unauthorized(_) => "Unauthorized",
+            NexoraError::Forbidden(_) => "Forbidden",
+            NexoraError::RateLimited(_) => "RateLimited",
+            NexoraError::BadRequest(_) => "BadRequest",
+            NexoraError::ServiceUnavailable(_) => "ServiceUnavailable",
+            NexoraError::GatewayTimeout(_) => "GatewayTimeout",
+            NexoraError::ExternalService(_) => "ExternalService",
+            NexoraError::Migration(_) => "Migration",
+            NexoraError::Serialization(_) => "Serialization",
+            NexoraError::TenantIsolation(_) => "TenantIsolation",
+            NexoraError::IdempotencyConflict(_) => "IdempotencyConflict",
+            NexoraError::InsufficientFunds(_) => "InsufficientFunds",
+            NexoraError::Compliance(_) => "Compliance",
         }
     }
 }
 
-impl From<anyhow::Error> for AosError {
+impl From<anyhow::Error> for NexoraError {
     fn from(err: anyhow::Error) -> Self {
-        AosError::Internal(err.to_string())
+        NexoraError::Internal(err.to_string())
     }
 }
 
-impl From<sqlx::Error> for AosError {
+impl From<sqlx::Error> for NexoraError {
     fn from(err: sqlx::Error) -> Self {
         match err {
-            sqlx::Error::RowNotFound => AosError::NotFound("record not found".to_string()),
+            sqlx::Error::RowNotFound => NexoraError::NotFound("record not found".to_string()),
             sqlx::Error::Database(db_err) => {
                 if db_err.is_unique_violation() {
-                    AosError::Conflict("unique constraint violation".to_string())
+                    NexoraError::Conflict("unique constraint violation".to_string())
                 } else if db_err.is_foreign_key_violation() {
-                    AosError::Conflict("foreign key violation".to_string())
+                    NexoraError::Conflict("foreign key violation".to_string())
                 } else {
-                    AosError::Internal(db_err.to_string())
+                    NexoraError::Internal(db_err.to_string())
                 }
             }
-            _ => AosError::Internal(err.to_string()),
+            _ => NexoraError::Internal(err.to_string()),
         }
     }
 }
 
-impl From<serde_json::Error> for AosError {
+impl From<serde_json::Error> for NexoraError {
     fn from(err: serde_json::Error) -> Self {
-        AosError::Serialization(err.to_string())
+        NexoraError::Serialization(err.to_string())
     }
 }
 
-impl From<validator::ValidationErrors> for AosError {
+impl From<validator::ValidationErrors> for NexoraError {
     fn from(err: validator::ValidationErrors) -> Self {
-        AosError::from_validation_errors(err)
+        NexoraError::from_validation_errors(err)
     }
 }
 
-impl From<uuid::Error> for AosError {
+impl From<uuid::Error> for NexoraError {
     fn from(err: uuid::Error) -> Self {
-        AosError::Internal(format!("UUID error: {}", err))
+        NexoraError::Internal(format!("UUID error: {}", err))
     }
 }

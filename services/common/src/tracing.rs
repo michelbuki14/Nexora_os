@@ -1,6 +1,6 @@
 //! OpenTelemetry tracing initialization and utilities.
 
-use crate::{config::TracingConfig, AosError, AosResult};
+use crate::{config::TracingConfig, NexoraError, NexoraResult};
 use opentelemetry::global;
 use opentelemetry::trace::TracerProvider as _;
 use opentelemetry::KeyValue;
@@ -17,7 +17,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 /// The OTLP layer is installed only if no global subscriber is set yet; when
 /// `init_logging` has already installed a subscriber, callers must compose
 /// layers instead (see the service bootstrap in Phase 1 gateway hardening).
-pub fn init_tracing(config: &TracingConfig) -> AosResult<Option<sdktrace::SdkTracerProvider>> {
+pub fn init_tracing(config: &TracingConfig) -> NexoraResult<Option<sdktrace::SdkTracerProvider>> {
     if !config.enabled {
         return Ok(None);
     }
@@ -34,7 +34,7 @@ pub fn init_tracing(config: &TracingConfig) -> AosResult<Option<sdktrace::SdkTra
         .with_endpoint(&config.otlp_endpoint)
         .with_timeout(std::time::Duration::from_secs(config.export_timeout_secs))
         .build()
-        .map_err(|e| AosError::Internal(format!("Failed to build OTLP span exporter: {e}")))?;
+        .map_err(|e| NexoraError::Internal(format!("Failed to build OTLP span exporter: {e}")))?;
 
     // Batch export settings use SDK defaults; tune via Config if needed.
     let tracer_provider = sdktrace::SdkTracerProvider::builder()

@@ -2,7 +2,7 @@
 //!
 //! Uses Figment for multi-source configuration (files, environment variables, secrets).
 
-use crate::{AosError, AosResult};
+use crate::{NexoraError, NexoraResult};
 use figment::{
     providers::{Env, Format, Toml},
     Figment,
@@ -292,7 +292,7 @@ impl Default for GatewayConfig {
 impl Config {
     /// Load configuration from file and environment.
     /// Priority: defaults < config.toml < environment variables < secrets
-    pub fn load() -> AosResult<Self> {
+    pub fn load() -> NexoraResult<Self> {
         let env = std::env::var("NEXORA_ENV").unwrap_or_else(|_| "development".to_string());
         let config_file = format!("config.{env}.toml");
 
@@ -302,7 +302,7 @@ impl Config {
 
         figment
             .extract()
-            .map_err(|e| AosError::Config(e.to_string()))
+            .map_err(|e| NexoraError::Config(e.to_string()))
     }
 
     /// Get the database URL as a plain string (for sqlx).

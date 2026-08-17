@@ -87,4 +87,4 @@ USER aos
 EXPOSE 3000
 
 # Default entrypoint is the gateway; override in docker-compose per service.
-ENTRYPOINT ["aos-api-gateway"]
+ENTRYPOINT ["nexora-api-gateway"]

@@ -1,6 +1,6 @@
 //! Authentication middleware bridging JWT claims to AuthContext.
 
-use crate::{jwt::JwtValidator, tenant_context::AuthContext, ulid::Ulid, AosError};
+use crate::{jwt::JwtValidator, tenant_context::AuthContext, ulid::Ulid, NexoraError};
 use axum::{
     extract::{FromRequestParts, Request, State},
     http::{header::AUTHORIZATION, request::Parts},
@@ -47,34 +47,34 @@ pub async fn auth_middleware(
     State(state): State<AuthState>,
     mut request: Request,
     next: Next,
-) -> Result<Response, AosError> {
+) -> Result<Response, NexoraError> {
     // Extract token from Authorization header
     let auth_header = request
         .headers()
         .get(AUTHORIZATION)
         .and_then(|h| h.to_str().ok())
-        .ok_or_else(|| AosError::Unauthorized("Missing Authorization header".into()))?;
+        .ok_or_else(|| NexoraError::Unauthorized("Missing Authorization header".into()))?;
 
     let token = auth_header
         .strip_prefix("Bearer ")
-        .ok_or_else(|| AosError::Unauthorized("Invalid Authorization header format".into()))?;
+        .ok_or_else(|| NexoraError::Unauthorized("Invalid Authorization header format".into()))?;
 
     // Validate token using the JWKS validator
     let mut claims = state.validator.validate(token).await.map_err(|e| {
         warn!("JWT validation failed: {}", e);
-        AosError::Unauthorized("Invalid token".into())
+        NexoraError::Unauthorized("Invalid token".into())
     })?;
 
     // Build AuthContext from claims
     let tenant_id = claims
         .tenant_id
         .as_ref()
-        .ok_or_else(|| AosError::Unauthorized("Token missing tenant_id claim".into()))?
+        .ok_or_else(|| NexoraError::Unauthorized("Token missing tenant_id claim".into()))?
         .clone();
     let org_id = claims
         .org_id
         .as_ref()
-        .ok_or_else(|| AosError::Unauthorized("Token missing org_id claim".into()))?
+        .ok_or_else(|| NexoraError::Unauthorized("Token missing org_id claim".into()))?
         .clone();
     let user_id = claims.sub.clone();
     // Clone `sub` before moving it into `keycloak_sub` so the subsequent
@@ -87,10 +87,10 @@ pub async fn auth_middleware(
     let auth_ctx = AuthContext {
         tenant_id: tenant_id
             .parse()
-            .map_err(|_| AosError::Unauthorized("Invalid tenant_id format".into()))?,
+            .map_err(|_| NexoraError::Unauthorized("Invalid tenant_id format".into()))?,
         org_id: org_id
             .parse()
-            .map_err(|_| AosError::Unauthorized("Invalid org_id format".into()))?,
+            .map_err(|_| NexoraError::Unauthorized("Invalid org_id format".into()))?,
         user_id: user_id_from_sub(&user_id),
         keycloak_sub,
         is_system,

@@ -3,7 +3,7 @@
 //! Authorization is deny-by-default. Protected routes must configure an
 //! explicit permission in [`RbacState`] or check [`AuthContextExt`] inline.
 
-use crate::{tenant_context::AuthContext, AosError};
+use crate::{tenant_context::AuthContext, NexoraError};
 use axum::{
     extract::{Request, State},
     middleware::Next,
@@ -31,7 +31,7 @@ impl RbacState {
 /// Trait for custom authorization logic beyond static permissions.
 #[async_trait::async_trait]
 pub trait PermissionResolver: Send + Sync {
-    async fn resolve(&self, context: &AuthContext) -> Result<bool, AosError>;
+    async fn resolve(&self, context: &AuthContext) -> Result<bool, NexoraError>;
 }
 
 /// Middleware enforcing the permission configured in [`RbacState`].
@@ -39,11 +39,11 @@ pub async fn require_permission_middleware(
     State(state): State<RbacState>,
     request: Request,
     next: Next,
-) -> Result<Response, AosError> {
+) -> Result<Response, NexoraError> {
     let auth_ctx = request
         .extensions()
         .get::<AuthContext>()
-        .ok_or_else(|| AosError::Unauthorized("Authentication required".into()))?;
+        .ok_or_else(|| NexoraError::Unauthorized("Authentication required".into()))?;
 
     let granted = if let Some(resolver) = &state.permission_resolver {
         resolver.resolve(auth_ctx).await?
@@ -58,7 +58,7 @@ pub async fn require_permission_middleware(
             permission = state.required_permission,
             "Permission denied"
         );
-        return Err(AosError::Forbidden(format!(
+        return Err(NexoraError::Forbidden(format!(
             "Permission required: {}",
             state.required_permission
         )));
@@ -85,59 +85,59 @@ pub fn require_permission(
 
 /// Inline authorization checks for handlers and service methods.
 pub trait AuthContextExt {
-    fn require_permission(&self, perm: &str) -> Result<(), AosError>;
-    fn require_any_permission(&self, perms: &[&str]) -> Result<(), AosError>;
-    fn require_all_permissions(&self, perms: &[&str]) -> Result<(), AosError>;
-    fn require_role(&self, role: &str) -> Result<(), AosError>;
-    fn require_any_role(&self, roles: &[&str]) -> Result<(), AosError>;
+    fn require_permission(&self, perm: &str) -> Result<(), NexoraError>;
+    fn require_any_permission(&self, perms: &[&str]) -> Result<(), NexoraError>;
+    fn require_all_permissions(&self, perms: &[&str]) -> Result<(), NexoraError>;
+    fn require_role(&self, role: &str) -> Result<(), NexoraError>;
+    fn require_any_role(&self, roles: &[&str]) -> Result<(), NexoraError>;
 }
 
 impl AuthContextExt for AuthContext {
-    fn require_permission(&self, perm: &str) -> Result<(), AosError> {
+    fn require_permission(&self, perm: &str) -> Result<(), NexoraError> {
         self.has_permission(perm)
             .then_some(())
-            .ok_or_else(|| AosError::Forbidden(format!("Permission required: {perm}")))
+            .ok_or_else(|| NexoraError::Forbidden(format!("Permission required: {perm}")))
     }
 
-    fn require_any_permission(&self, perms: &[&str]) -> Result<(), AosError> {
+    fn require_any_permission(&self, perms: &[&str]) -> Result<(), NexoraError> {
         perms
             .iter()
             .any(|p| self.has_permission(p))
             .then_some(())
             .ok_or_else(|| {
-                AosError::Forbidden(format!(
+                NexoraError::Forbidden(format!(
                     "One of these permissions required: {}",
                     perms.join(", ")
                 ))
             })
     }
 
-    fn require_all_permissions(&self, perms: &[&str]) -> Result<(), AosError> {
+    fn require_all_permissions(&self, perms: &[&str]) -> Result<(), NexoraError> {
         perms
             .iter()
             .all(|p| self.has_permission(p))
             .then_some(())
             .ok_or_else(|| {
-                AosError::Forbidden(format!(
+                NexoraError::Forbidden(format!(
                     "All of these permissions required: {}",
                     perms.join(", ")
                 ))
             })
     }
 
-    fn require_role(&self, role: &str) -> Result<(), AosError> {
+    fn require_role(&self, role: &str) -> Result<(), NexoraError> {
         self.has_role(role)
             .then_some(())
-            .ok_or_else(|| AosError::Forbidden(format!("Role required: {role}")))
+            .ok_or_else(|| NexoraError::Forbidden(format!("Role required: {role}")))
     }
 
-    fn require_any_role(&self, roles: &[&str]) -> Result<(), AosError> {
+    fn require_any_role(&self, roles: &[&str]) -> Result<(), NexoraError> {
         roles
             .iter()
             .any(|r| self.has_role(r))
             .then_some(())
             .ok_or_else(|| {
-                AosError::Forbidden(format!("One of these roles required: {}", roles.join(", ")))
+                NexoraError::Forbidden(format!("One of these roles required: {}", roles.join(", ")))
             })
     }
 }

@@ -17,7 +17,7 @@ use std::time::Duration;
 use tokio::time::sleep;
 
 use crate::config::S3Config;
-use crate::error::{AosError, AosResult};
+use crate::error::{NexoraError, NexoraResult};
 
 /// Wrapper to make `tokio::time::sleep` implement `AsyncSleep`.
 #[derive(Debug)]
@@ -74,7 +74,7 @@ pub async fn put_document(
     object_key: &str,
     bytes: Vec<u8>,
     mime_type: &str,
-) -> AosResult<()> {
+) -> NexoraResult<()> {
     client
         .put_object()
         .bucket(bucket)
@@ -83,7 +83,7 @@ pub async fn put_document(
         .body(bytes.into())
         .send()
         .await
-        .map_err(|e| AosError::Internal(format!("s3 put_object failed: {e}")))?;
+        .map_err(|e| NexoraError::Internal(format!("s3 put_object failed: {e}")))?;
     Ok(())
 }
 
@@ -95,9 +95,9 @@ pub async fn presign_get(
     bucket: &str,
     object_key: &str,
     ttl_secs: u64,
-) -> AosResult<String> {
+) -> NexoraResult<String> {
     let presigning = PresigningConfig::expires_in(Duration::from_secs(ttl_secs))
-        .map_err(|e| AosError::Internal(format!("presign config error: {e}")))?;
+        .map_err(|e| NexoraError::Internal(format!("presign config error: {e}")))?;
 
     let req = client
         .get_object()
@@ -105,7 +105,7 @@ pub async fn presign_get(
         .key(object_key)
         .presigned(presigning)
         .await
-        .map_err(|e| AosError::Internal(format!("s3 presign failed: {e}")))?;
+        .map_err(|e| NexoraError::Internal(format!("s3 presign failed: {e}")))?;
 
     Ok(req.uri().to_string())
 }
@@ -113,13 +113,13 @@ pub async fn presign_get(
 /// Delete a document from object storage. Used when a document is deactivated
 /// and the tenant requests data erasure (GDPR). Soft-delete first (`is_active=false`),
 /// hard-delete only after compliance review.
-pub async fn delete_document(client: &Client, bucket: &str, object_key: &str) -> AosResult<()> {
+pub async fn delete_document(client: &Client, bucket: &str, object_key: &str) -> NexoraResult<()> {
     client
         .delete_object()
         .bucket(bucket)
         .key(object_key)
         .send()
         .await
-        .map_err(|e| AosError::Internal(format!("s3 delete_object failed: {e}")))?;
+        .map_err(|e| NexoraError::Internal(format!("s3 delete_object failed: {e}")))?;
     Ok(())
 }

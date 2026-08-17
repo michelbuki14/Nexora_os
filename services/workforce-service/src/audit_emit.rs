@@ -18,7 +18,7 @@
 
 use nexora_common::{
     audit::{compute_chain_hash, GENESIS_HASH},
-    error::{AosError, AosResult},
+    error::{NexoraError, NexoraResult},
     tenant_context::AuthContext,
     ulid::new_ulid,
 };
@@ -49,7 +49,7 @@ pub async fn emit_workforce_event(
     resource_ulid: &str,
     action: &str,
     changes: Value,
-) -> AosResult<()> {
+) -> NexoraResult<()> {
     emit_workforce_event_with_uuid(
         conn,
         auth,
@@ -77,7 +77,7 @@ pub async fn emit_workforce_event_with_uuid(
     resource_uuid: uuid::Uuid,
     action: &str,
     changes: Value,
-) -> AosResult<()> {
+) -> NexoraResult<()> {
     let event_ulid = new_ulid();
     let actor_id = auth.user_id.to_string();
     let tenant_ulid = auth.tenant_id.to_string();
@@ -153,10 +153,10 @@ pub async fn emit_workforce_event_with_uuid(
 ///
 /// Matches the `serialize_canonical` in audit-service. Keeping both in sync
 /// is important: if the format diverges the hash chain breaks at verify time.
-pub fn serialize_canonical(value: &Value) -> AosResult<String> {
+pub fn serialize_canonical(value: &Value) -> NexoraResult<String> {
     let sorted = sort_keys(value);
     serde_json::to_string(&sorted)
-        .map_err(|e| AosError::Internal(format!("canonical serialization failed: {e}")))
+        .map_err(|e| NexoraError::Internal(format!("canonical serialization failed: {e}")))
 }
 
 fn sort_keys(value: &Value) -> Value {

@@ -1,6 +1,6 @@
 //! JWT token validation and claims extraction.
 
-use crate::{config::AuthConfig, AosError, AosResult};
+use crate::{config::AuthConfig, NexoraError, NexoraResult};
 use axum::{
     async_trait,
     extract::{FromRequestParts, Request},
@@ -113,7 +113,7 @@ impl JwtValidator {
     }
 
     /// Get or fetch JWKS.
-    async fn get_jwks(&self) -> AosResult<JwkSet> {
+    async fn get_jwks(&self) -> NexoraResult<JwkSet> {
         let now = SystemTime::now();
         let should_refresh = {
             let last = self.last_fetch.read().await;
@@ -127,11 +127,11 @@ impl JwtValidator {
             debug!("Fetching JWKS from {}", self.config.jwks_url);
             let response = reqwest::get(&self.config.jwks_url)
                 .await
-                .map_err(|e| AosError::ExternalService(format!("Failed to fetch JWKS: {}", e)))?;
+                .map_err(|e| NexoraError::ExternalService(format!("Failed to fetch JWKS: {}", e)))?;
             let jwks = response
                 .json::<JwkSet>()
                 .await
-                .map_err(|e| AosError::ExternalService(format!("Invalid JWKS: {}", e)))?;
+                .map_err(|e| NexoraError::ExternalService(format!("Invalid JWKS: {}", e)))?;
 
             *self.jwks.write().await = Some(jwks.clone());
             *self.last_fetch.write().await = Some(now);
@@ -141,26 +141,26 @@ impl JwtValidator {
                 .read()
                 .await
                 .clone()
-                .ok_or_else(|| AosError::Internal("JWKS not available".to_string()))
+                .ok_or_else(|| NexoraError::Internal("JWKS not available".to_string()))
         }
     }
 
     /// Validate a JWT token and extract claims.
-    pub async fn validate(&self, token: &str) -> AosResult<AosClaims> {
+    pub async fn validate(&self, token: &str) -> NexoraResult<AosClaims> {
         let header = decode_header(token)
-            .map_err(|e| AosError::Unauthorized(format!("Invalid token header: {}", e)))?;
+            .map_err(|e| NexoraError::Unauthorized(format!("Invalid token header: {}", e)))?;
 
         let kid = header
             .kid
-            .ok_or_else(|| AosError::Unauthorized("Missing key ID".to_string()))?;
+            .ok_or_else(|| NexoraError::Unauthorized("Missing key ID".to_string()))?;
 
         let jwks = self.get_jwks().await?;
         let jwk = jwks
             .find(&kid)
-            .ok_or_else(|| AosError::Unauthorized("Key not found in JWKS".to_string()))?;
+            .ok_or_else(|| NexoraError::Unauthorized("Key not found in JWKS".to_string()))?;
 
         let decoding_key = DecodingKey::from_jwk(jwk)
-            .map_err(|e| AosError::Internal(format!("Invalid JWK: {}", e)))?;
+            .map_err(|e| NexoraError::Internal(format!("Invalid JWK: {}", e)))?;
 
         let mut validation = Validation::new(Algorithm::RS256);
         validation.set_audience(&[&self.config.audience]);
@@ -170,10 +170,10 @@ impl JwtValidator {
         validation.leeway = 30;
 
         let token_data: TokenData<AosClaims> = decode(token, &decoding_key, &validation)
-            .map_err(|e| AosError::Unauthorized(format!("Token validation failed: {}", e)))?;
+            .map_err(|e| NexoraError::Unauthorized(format!("Token validation failed: {}", e)))?;
 
         if token_data.claims.is_expired() {
-            return Err(AosError::Unauthorized("Token expired".to_string()));
+            return Err(NexoraError::Unauthorized("Token expired".to_string()));
         }
 
         Ok(token_data.claims)

@@ -25,7 +25,7 @@
 use aws_sdk_s3::Client as S3Client;
 use nexora_common::{
     config::S3Config,
-    error::{AosError, AosResult},
+    error::{NexoraError, NexoraResult},
     s3::{delete_document, document_object_key, presign_get, put_document},
 };
 use sha2::{Digest, Sha256};
@@ -51,7 +51,7 @@ pub async fn upload_to_storage(
     s3: &S3Client,
     s3_cfg: &S3Config,
     ctx: UploadContext<'_>,
-) -> AosResult<(String, String)> {
+) -> NexoraResult<(String, String)> {
     let object_key = document_object_key(ctx.tenant_ulid, ctx.employee_ulid, ctx.doc_ulid);
 
     // Compute SHA-256 before upload.
@@ -80,9 +80,9 @@ pub async fn presigned_url_for_doc(
     s3: &S3Client,
     s3_cfg: &S3Config,
     row: &DocumentRow,
-) -> AosResult<(String, u64)> {
+) -> NexoraResult<(String, u64)> {
     if !row.is_active {
-        return Err(AosError::NotFound(format!(
+        return Err(NexoraError::NotFound(format!(
             "document {} is no longer active",
             row.ulid
         )));
@@ -101,7 +101,7 @@ pub async fn deactivate_document_storage(
     s3: &S3Client,
     s3_cfg: &S3Config,
     object_key: &str,
-) -> AosResult<()> {
+) -> NexoraResult<()> {
     delete_document(s3, &s3_cfg.bucket, object_key).await
 }
 

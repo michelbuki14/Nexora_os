@@ -6,7 +6,7 @@ use tracing_appender::rolling;
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
 
 /// Initialize structured JSON logging.
-pub fn init_logging(config: &TracingConfig) -> crate::AosResult<()> {
+pub fn init_logging(config: &TracingConfig) -> crate::NexoraResult<()> {
     let env_filter = EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| EnvFilter::new("info,nexora=debug,tower_http=debug"));
 
@@ -33,7 +33,7 @@ pub fn init_logging(config: &TracingConfig) -> crate::AosResult<()> {
 }
 
 /// Initialize file-based logging for production.
-pub fn init_file_logging(log_dir: &Path, service_name: &str) -> crate::AosResult<()> {
+pub fn init_file_logging(log_dir: &Path, service_name: &str) -> crate::NexoraResult<()> {
     let file_appender = rolling::daily(log_dir, format!("{service_name}.log"));
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
 

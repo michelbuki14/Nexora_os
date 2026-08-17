@@ -7,7 +7,7 @@
 
 use crate::models::{CreateTenantRequest, TenantResponse, TenantRow, VALID_TIERS};
 use axum::{extract::Path, http::StatusCode, response::IntoResponse, Json};
-use nexora_common::{ulid::new_ulid, AosError, AuthContext, DbConn};
+use nexora_common::{ulid::new_ulid, NexoraError, AuthContext, DbConn};
 use tracing::debug;
 
 /// Column list shared by tenant SELECTs. Joins `organizations` so the
@@ -39,14 +39,14 @@ pub async fn create_tenant(
     auth: AuthContext,
     db: DbConn,
     Json(req): Json<CreateTenantRequest>,
-) -> Result<impl IntoResponse, AosError> {
+) -> Result<impl IntoResponse, NexoraError> {
     validate_create_request(&req)?;
 
     // Creating a tenant is a cross-tenant operation: the new tenant's ULID can
     // never match the caller's RLS context, so the `tenants` WITH CHECK policy
     // would reject it. Fail fast with a clean 403 instead of a DB error.
     if !auth.is_system {
-        return Err(AosError::Forbidden(
+        return Err(NexoraError::Forbidden(
             "tenant creation requires system privileges".into(),
         ));
     }
@@ -117,7 +117,7 @@ pub async fn create_tenant(
 pub async fn list_tenants(
     _auth: AuthContext,
     db: DbConn,
-) -> Result<Json<Vec<TenantResponse>>, AosError> {
+) -> Result<Json<Vec<TenantResponse>>, NexoraError> {
     let mut conn = db.acquire().await?;
     let rows: Vec<TenantRow> = sqlx::query_as(&format!("{TENANT_SELECT}\nORDER BY t.created_at"))
         .fetch_all(conn.as_mut())
@@ -143,29 +143,29 @@ pub async fn get_tenant(
     _auth: AuthContext,
     db: DbConn,
     Path(ulid): Path<String>,
-) -> Result<Json<TenantResponse>, AosError> {
+) -> Result<Json<TenantResponse>, NexoraError> {
     let mut conn = db.acquire().await?;
     let row: Option<TenantRow> = sqlx::query_as(&format!("{TENANT_SELECT}\nWHERE t.ulid = $1"))
         .bind(&ulid)
         .fetch_optional(conn.as_mut())
         .await?;
-    let row = row.ok_or_else(|| AosError::NotFound(format!("tenant {ulid} not found")))?;
+    let row = row.ok_or_else(|| NexoraError::NotFound(format!("tenant {ulid} not found")))?;
     Ok(Json(row.into()))
 }
 
 /// Validate tenant create input before touching the database.
-fn validate_create_request(req: &CreateTenantRequest) -> Result<(), AosError> {
+fn validate_create_request(req: &CreateTenantRequest) -> Result<(), NexoraError> {
     if req.name.trim().is_empty() {
-        return Err(AosError::Validation("name is required".into()));
+        return Err(NexoraError::Validation("name is required".into()));
     }
     if !is_valid_slug(&req.slug) {
-        return Err(AosError::Validation(format!(
+        return Err(NexoraError::Validation(format!(
             "invalid slug {:?}: expected 1-64 chars of [a-z0-9-] starting with a letter or digit",
             req.slug
         )));
     }
     if !VALID_TIERS.contains(&req.tier.as_str()) {
-        return Err(AosError::Validation(format!(
+        return Err(NexoraError::Validation(format!(
             "invalid tier {:?}: expected one of {VALID_TIERS:?}",
             req.tier
         )));

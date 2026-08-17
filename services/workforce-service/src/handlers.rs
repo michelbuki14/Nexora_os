@@ -29,7 +29,7 @@ use sha2::{Digest, Sha256};
 use tracing::{info, warn};
 
 use nexora_common::{
-    error::{AosError, AosResult, ErrorResponse},
+    error::{NexoraError, NexoraResult, ErrorResponse},
     rbac::AuthContextExt,
     tenant_context::{AuthContext, DbConn},
     ulid::new_ulid,
@@ -49,25 +49,25 @@ use crate::{
 async fn resolve_tenant_id(
     conn: &mut sqlx::PgConnection,
     auth: &AuthContext,
-) -> AosResult<uuid::Uuid> {
+) -> NexoraResult<uuid::Uuid> {
     let ulid = auth.tenant_id.to_string();
     sqlx::query_scalar::<_, uuid::Uuid>("SELECT id FROM tenants WHERE ulid = $1")
         .bind(&ulid)
         .fetch_optional(conn)
         .await?
-        .ok_or_else(|| AosError::TenantIsolation(format!("tenant {ulid} not visible in RLS ctx")))
+        .ok_or_else(|| NexoraError::TenantIsolation(format!("tenant {ulid} not visible in RLS ctx")))
 }
 
 async fn resolve_org_id(
     conn: &mut sqlx::PgConnection,
     auth: &AuthContext,
-) -> AosResult<uuid::Uuid> {
+) -> NexoraResult<uuid::Uuid> {
     let ulid = auth.org_id.to_string();
     sqlx::query_scalar::<_, uuid::Uuid>("SELECT id FROM organizations WHERE ulid = $1")
         .bind(&ulid)
         .fetch_optional(conn)
         .await?
-        .ok_or_else(|| AosError::TenantIsolation(format!("org {ulid} not visible in RLS ctx")))
+        .ok_or_else(|| NexoraError::TenantIsolation(format!("org {ulid} not visible in RLS ctx")))
 }
 
 /// Resolve a ULID to a UUID for a given table. Returns 404 if not found.
@@ -75,13 +75,13 @@ async fn resolve_ulid(
     conn: &mut sqlx::PgConnection,
     table: &str,
     ulid: &str,
-) -> AosResult<uuid::Uuid> {
+) -> NexoraResult<uuid::Uuid> {
     let sql = format!("SELECT id FROM {table} WHERE ulid = $1");
     sqlx::query_scalar::<_, uuid::Uuid>(&sql)
         .bind(ulid)
         .fetch_optional(conn)
         .await?
-        .ok_or_else(|| AosError::NotFound(format!("{table} not found: {ulid}")))
+        .ok_or_else(|| NexoraError::NotFound(format!("{table} not found: {ulid}")))
 }
 
 // ---------------------------------------------------------------------------
@@ -104,7 +104,7 @@ pub async fn create_legal_entity(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Json(req): Json<CreateLegalEntityRequest>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("legal_entity.write")?;
 
     let ulid = new_ulid();
@@ -177,7 +177,7 @@ pub async fn list_legal_entities(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("legal_entity.read")?;
     let q = q.sanitized();
     let mut conn = db.acquire().await?;
@@ -248,7 +248,7 @@ pub async fn create_location(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Json(req): Json<CreateLocationRequest>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("location.write")?;
 
     let ulid = new_ulid();
@@ -316,7 +316,7 @@ pub async fn list_locations(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("location.read")?;
     let q = q.sanitized();
     let mut conn = db.acquire().await?;
@@ -388,7 +388,7 @@ pub async fn create_department(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Json(req): Json<CreateDepartmentRequest>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("department.write")?;
 
     let ulid = new_ulid();
@@ -459,7 +459,7 @@ pub async fn list_departments(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("department.read")?;
     let q = q.sanitized();
     let mut conn = db.acquire().await?;
@@ -529,7 +529,7 @@ pub async fn create_team(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Json(req): Json<CreateTeamRequest>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("team.write")?;
 
     let ulid = new_ulid();
@@ -588,7 +588,7 @@ pub async fn list_teams(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("team.read")?;
     let q = q.sanitized();
     let mut conn = db.acquire().await?;
@@ -655,7 +655,7 @@ pub async fn create_position(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Json(req): Json<CreatePositionRequest>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("position.write")?;
 
     let ulid = new_ulid();
@@ -732,7 +732,7 @@ pub async fn list_positions(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("position.read")?;
     let q = q.sanitized();
     let mut conn = db.acquire().await?;
@@ -808,7 +808,7 @@ pub async fn create_employee(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Json(req): Json<CreateEmployeeRequest>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("employee.write")?;
 
     let ulid = new_ulid();
@@ -960,7 +960,7 @@ pub async fn list_employees(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Query(q): Query<PageQuery>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     // MANAGERs and above may list; EMPLOYEE role may only get their own record.
     auth.require_any_permission(&["employee.read", "employee.export"])?;
     let q = q.sanitized();
@@ -1066,7 +1066,7 @@ pub async fn get_employee(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
     Path(employee_ulid): Path<String>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     let mut conn = db.acquire().await?;
 
     let row = fetch_employee_row(conn.as_mut(), &employee_ulid).await?;
@@ -1096,7 +1096,7 @@ pub async fn update_employee_status(
     Extension(db): Extension<DbConn>,
     Path(employee_ulid): Path<String>,
     Json(req): Json<UpdateEmployeeStatusRequest>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     if req.status == EmployeeStatus::Terminated {
         auth.require_permission("employee.terminate")?;
     } else {
@@ -1160,7 +1160,7 @@ pub async fn update_employment(
     db: DbConn,
     Path(employee_ulid): Path<String>,
     Json(req): Json<UpdateEmploymentRequest>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("employee.write")?;
 
     let mut conn = db.acquire().await?;
@@ -1266,7 +1266,7 @@ pub async fn create_compensation(
     db: DbConn,
     Path(employee_ulid): Path<String>,
     Json(req): Json<CreateCompensationRequest>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("employee.compensation.write")?;
 
     let mut conn = db.acquire().await?;
@@ -1279,7 +1279,7 @@ pub async fn create_compensation(
         .bind(&req.currency_code)
         .fetch_optional(conn.as_mut())
         .await?
-        .ok_or_else(|| AosError::Validation(format!("unknown currency: {}", req.currency_code)))?;
+        .ok_or_else(|| NexoraError::Validation(format!("unknown currency: {}", req.currency_code)))?;
 
     // Close the current open compensation record.
     sqlx::query(
@@ -1357,7 +1357,7 @@ pub async fn get_compensation(
     auth: AuthContext,
     db: DbConn,
     Path(employee_ulid): Path<String>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("employee.compensation.read")?;
 
     let mut conn = db.acquire().await?;
@@ -1375,7 +1375,7 @@ pub async fn get_compensation(
     .bind(row.id)
     .fetch_optional(conn.as_mut())
     .await?
-    .ok_or_else(|| AosError::NotFound("no active compensation record".to_string()))?;
+    .ok_or_else(|| NexoraError::NotFound("no active compensation record".to_string()))?;
 
     Ok(Json(CompensationResponse {
         ulid: comp.ulid,
@@ -1414,7 +1414,7 @@ pub async fn create_document(
     db: DbConn,
     Path(employee_ulid): Path<String>,
     body: axum::body::Bytes,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("employee.documents.write")?;
 
     // Body format: JSON metadata line\n<raw file bytes>
@@ -1423,14 +1423,14 @@ pub async fn create_document(
 
     // Split at first newline: metadata JSON | file bytes.
     let newline_pos = body_bytes.iter().position(|&b| b == b'\n').ok_or_else(|| {
-        AosError::Validation("body must be: JSON metadata\\n<file bytes>".to_string())
+        NexoraError::Validation("body must be: JSON metadata\\n<file bytes>".to_string())
     })?;
 
     let meta_json = &body_bytes[..newline_pos];
     let file_bytes = body_bytes[newline_pos + 1..].to_vec();
 
     let req: CreateDocumentMetadataRequest = serde_json::from_slice(meta_json)
-        .map_err(|e| AosError::Validation(format!("metadata parse error: {e}")))?;
+        .map_err(|e| NexoraError::Validation(format!("metadata parse error: {e}")))?;
 
     let mut conn = db.acquire().await?;
     let emp_row = fetch_employee_row(conn.as_mut(), &employee_ulid).await?;
@@ -1456,7 +1456,7 @@ pub async fn create_document(
     // Mismatch means the request was corrupted or tampered with — reject it.
     if let Some(ref client_hash) = req.sha256 {
         if client_hash != &sha256 {
-            return Err(AosError::Validation(
+            return Err(NexoraError::Validation(
                 "sha256 mismatch: supplied hash does not match received bytes".to_string(),
             ));
         }
@@ -1534,7 +1534,7 @@ pub async fn list_documents(
     db: DbConn,
     Path(employee_ulid): Path<String>,
     Query(q): Query<PageQuery>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("employee.documents.read")?;
     let q = q.sanitized();
     let mut conn = db.acquire().await?;
@@ -1591,7 +1591,7 @@ pub async fn get_document_url(
     auth: AuthContext,
     db: DbConn,
     Path((employee_ulid, doc_ulid)): Path<(String, String)>,
-) -> AosResult<impl IntoResponse> {
+) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("employee.documents.read")?;
 
     let mut conn = db.acquire().await?;
@@ -1608,7 +1608,7 @@ pub async fn get_document_url(
     .bind(emp_row.id)
     .fetch_optional(conn.as_mut())
     .await?
-    .ok_or_else(|| AosError::NotFound(format!("document {doc_ulid} not found")))?;
+    .ok_or_else(|| NexoraError::NotFound(format!("document {doc_ulid} not found")))?;
 
     // IDOR defence-in-depth: if the doc's employee_id doesn't match, that's a
     // suspicious pattern (RLS should have prevented it — log as security event).
@@ -1643,7 +1643,7 @@ pub async fn get_document_url(
 async fn fetch_employee_row(
     conn: &mut sqlx::PgConnection,
     employee_ulid: &str,
-) -> AosResult<EmployeeRow> {
+) -> NexoraResult<EmployeeRow> {
     sqlx::query_as::<_, EmployeeRow>(
         r#"SELECT id, ulid, employee_number, legal_name, preferred_name, email, phone,
                   gender, national_id_last4, status, hire_date,
@@ -1654,7 +1654,7 @@ async fn fetch_employee_row(
     .bind(employee_ulid)
     .fetch_optional(conn)
     .await?
-    .ok_or_else(|| AosError::NotFound(format!("employee {employee_ulid} not found")))
+    .ok_or_else(|| NexoraError::NotFound(format!("employee {employee_ulid} not found")))
 }
 
 /// IDOR check: the caller may see this employee iff:
@@ -1668,7 +1668,7 @@ async fn check_employee_access(
     auth: &AuthContext,
     row: &EmployeeRow,
     conn: &mut sqlx::PgConnection,
-) -> AosResult<()> {
+) -> NexoraResult<()> {
     // Broad HR/admin read.
     if auth.has_permission("employee.write") || auth.has_permission("employee.read") {
         return Ok(());
@@ -1693,7 +1693,7 @@ async fn check_employee_access(
         }
     }
 
-    Err(AosError::Forbidden(
+    Err(NexoraError::Forbidden(
         "not authorized to view this employee record".to_string(),
     ))
 }
@@ -1703,7 +1703,7 @@ async fn check_employee_access(
 async fn resolve_actor_uuid(
     conn: &mut sqlx::PgConnection,
     auth: &AuthContext,
-) -> AosResult<Option<uuid::Uuid>> {
+) -> NexoraResult<Option<uuid::Uuid>> {
     Ok(sqlx::query_scalar("SELECT id FROM users WHERE ulid = $1")
         .bind(auth.user_id.to_string())
         .fetch_optional(conn)
@@ -1714,7 +1714,7 @@ async fn resolve_opt(
     conn: &mut sqlx::PgConnection,
     table: &str,
     ulid: Option<&str>,
-) -> AosResult<Option<uuid::Uuid>> {
+) -> NexoraResult<Option<uuid::Uuid>> {
     match ulid {
         Some(u) => Ok(Some(resolve_ulid(conn, table, u).await?)),
         None => Ok(None),
