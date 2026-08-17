@@ -13,6 +13,7 @@ pub mod jwt;
 pub mod logging;
 pub mod money;
 pub use rust_decimal::Decimal;
+pub mod idempotency;
 pub mod rbac;
 pub mod s3;
 pub mod tenant;
@@ -21,13 +22,13 @@ pub mod time;
 pub mod tracing;
 pub mod ulid;
 pub mod validation;
-pub mod idempotency;
 
 pub use auth_middleware::{auth_middleware, AuthState, OptionalAuthContext};
 pub use config::*;
 pub use db::*;
 pub use error::*;
 pub use health::*;
+pub use idempotency::{add_idempotency_middleware, IdempotencyState, IDEMPOTENCY_KEY_HEADER};
 pub use jwt::*;
 pub use logging::*;
 pub use money::*;
@@ -37,4 +38,3 @@ pub use tenant_context::{add_rls_middleware, AuthContext, DbConn, DbConnGuard, R
 pub use time::*;
 pub use ulid::*;
 pub use validation::*;
-pub use idempotency::{IdempotencyState, add_idempotency_middleware, IDEMPOTENCY_KEY_HEADER};

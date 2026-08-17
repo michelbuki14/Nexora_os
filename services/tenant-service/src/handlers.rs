@@ -6,8 +6,8 @@
 //! RLS-protected paths.
 
 use crate::models::{CreateTenantRequest, TenantResponse, TenantRow, VALID_TIERS};
-use nexora_common::{ulid::new_ulid, AosError, AuthContext, DbConn};
 use axum::{extract::Path, http::StatusCode, response::IntoResponse, Json};
+use nexora_common::{ulid::new_ulid, AosError, AuthContext, DbConn};
 use tracing::debug;
 
 /// Column list shared by tenant SELECTs. Joins `organizations` so the

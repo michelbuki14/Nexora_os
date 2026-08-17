@@ -35,15 +35,21 @@ async function request<T>(
       : {}),
     ...headers,
   };
+  let reqBody: BodyInit | null | undefined = undefined;
+  if (body !== undefined) {
+    if (body instanceof Uint8Array) {
+      reqBody = body as unknown as BodyInit;
+    } else if (typeof body === "object" && body !== null) {
+      reqBody = JSON.stringify(body);
+    } else {
+      reqBody = body as BodyInit;
+    }
+  }
+
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers: reqHeaders,
-    body:
-      body === undefined
-        ? undefined
-        : body instanceof Uint8Array
-          ? body
-          : JSON.stringify(body),
+    body: reqBody,
   });
   if (!res.ok) {
     let message = res.statusText;

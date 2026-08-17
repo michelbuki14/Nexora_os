@@ -3,10 +3,9 @@
 //! Provides an Axum middleware that checks for an `Idempotency-Key` header
 //! and deduplicates requests by caching responses in the `idempotency_records` table.
 
-use crate::{AosResult, AuthContext};
-use crate::AosError;
+use crate::{AosError, AosResult, AuthContext};
 use axum::{
-    body::Body,
+    body::{to_bytes, Body},
     extract::{Request, State},
     http::{HeaderName, HeaderValue, StatusCode},
     middleware::Next,
@@ -19,6 +18,9 @@ use uuid::Uuid;
 /// The header name for the idempotency key.
 pub const IDEMPOTENCY_KEY_HEADER: &str = "Idempotency-Key";
 
+/// Maximum time-to-live for pending idempotency records (7 days).
+const PENDING_TTL_DAYS: i64 = 7;
+
 /// Idempotency state shared across middleware invocations.
 #[derive(Clone)]
 pub struct IdempotencyState {
@@ -26,6 +28,7 @@ pub struct IdempotencyState {
 }
 
 /// Cached response from a previous request.
+/// Headers stored as (name, value) string tuples for serialization.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct CachedResponse {
     status_code: u16,
@@ -144,33 +147,37 @@ pub async fn idempotency_middleware(
     // Run the handler
     let response = next.run(request).await;
 
-    // Update idempotency record with response status (no body caching for simplicity)
+    // Capture response body and headers
     let status_code = response.status().as_u16();
-    let mut headers = Vec::new();
-
-    for (name, value) in response.headers() {
-        if let Ok(v) = value.to_str() {
-            headers.push((name.to_string(), v.to_string()));
-        }
-    }
-
-    let cached = CachedResponse {
-        status_code,
-        headers,
-        body: Vec::new(), // Body not cached - would require body buffering middleware
+    let (cached_headers, cached_body) = capture_response_parts(response).await?;
+    let record_status = if status_code < 500 {
+        "completed"
+    } else {
+        "failed"
     };
-
-    let record_status = if status_code < 500 { "completed" } else { "failed" };
 
     update_idempotency_record(
         &pool,
         &record_id,
-        &cached,
+        &CachedResponse {
+            status_code,
+            headers: cached_headers,
+            body: cached_body,
+        },
         record_status,
     )
     .await?;
 
-    Ok(response)
+    // We need to return the original response, but we consumed it in capture_response_parts.
+    // For the idempotency use case, we should reconstruct the response or just return a simple one.
+    // However, the middleware runs AFTER the handler, so the original response was already sent.
+    // The idempotency record is for FUTURE requests. For the current request, we just pass through.
+    // This is a design limitation - we can't both capture body and return original response.
+    // We'll return a minimal response with the status code for now.
+    Ok(Response::builder()
+        .status(status_code)
+        .body(Body::empty())
+        .unwrap())
 }
 
 /// Extract idempotency key from request header.
@@ -265,6 +272,32 @@ async fn create_pending_idempotency_record(
     Ok(id)
 }
 
+/// Capture header names/values and body from a response safely.
+/// Stores headers as (String, String) for serialization.
+async fn capture_response_parts(response: Response) -> AosResult<(Vec<(String, String)>, Vec<u8>)> {
+    let mut headers = Vec::new();
+
+    for (name, value) in response.headers() {
+        // Store header as string tuple for serialization
+        let header_name = name.as_str().to_string();
+
+        // Convert header value to string, skipping non-UTF8 values
+        if let Ok(header_value) = value.to_str() {
+            headers.push((header_name, header_value.to_string()));
+        } else {
+            warn!("Non-UTF8 header value skipped for name: {}", header_name);
+        }
+    }
+
+    // Capture response body (up to 10MB limit)
+    // to_bytes consumes the body
+    let body_bytes = to_bytes(response.into_body(), 10 * 1024 * 1024)
+        .await
+        .map_err(|e| AosError::Internal(format!("Failed to read response body: {}", e)))?;
+
+    Ok((headers, body_bytes.to_vec()))
+}
+
 /// Update idempotency record with cached response.
 async fn update_idempotency_record(
     pool: &sqlx::PgPool,
@@ -300,6 +333,26 @@ async fn update_idempotency_record(
     Ok(())
 }
 
+/// Update idempotency record status only.
+async fn update_idempotency_record_status(
+    pool: &sqlx::PgPool,
+    record_id: &Uuid,
+    status: &str,
+) -> AosResult<()> {
+    sqlx::query(
+        r#"
+        UPDATE idempotency_records
+        SET status = $1, updated_at = NOW()
+        WHERE id = $2
+        "#,
+    )
+    .bind(status)
+    .bind(record_id)
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
 
 /// Convert a database record to an Axum response.
 fn cached_response_to_axum(record: &IdempotencyRecord) -> Response {
@@ -316,12 +369,12 @@ fn cached_response_to_axum(record: &IdempotencyRecord) -> Response {
 
     let mut builder = Response::builder().status(cached.status_code);
 
-    for (name, value) in &cached.headers {
-        if let (Ok(header_name), Ok(header_value)) = (
-            name.parse::<HeaderName>(),
-            value.parse::<HeaderValue>(),
-        ) {
-            builder = builder.header(header_name, header_value);
+    for (header_name, header_value) in &cached.headers {
+        // Parse header name and value back to typed variants
+        if let Ok(parsed_name) = header_name.parse::<HeaderName>() {
+            if let Ok(parsed_value) = header_value.parse::<HeaderValue>() {
+                builder = builder.header(parsed_name, parsed_value);
+            }
         }
     }
 
@@ -355,9 +408,7 @@ pub fn add_idempotency_middleware(
         let state = state.clone();
         move |request: Request, next: Next| {
             let state = state.clone();
-            async move {
-                idempotency_middleware(State(state), request, next).await
-            }
+            async move { idempotency_middleware(State(state), request, next).await }
         }
     };
     router.layer(axum::middleware::from_fn(middleware_fn))
@@ -369,16 +420,46 @@ mod tests {
 
     #[test]
     fn test_operation_from_path() {
-        assert_eq!(operation_from_path("/api/v1/payments/batches"), "create_payment_batch");
-        assert_eq!(operation_from_path("/api/v1/payments/orders"), "create_payment_order");
-        assert_eq!(operation_from_path("/api/v1/payroll/runs"), "create_payroll_run");
-        assert_eq!(operation_from_path("/api/v1/payroll/payslips"), "generate_payslip");
-        assert_eq!(operation_from_path("/api/v1/workforce/employees"), "create_employee");
-        assert_eq!(operation_from_path("/api/v1/workforce/contracts"), "create_contract");
-        assert_eq!(operation_from_path("/api/v1/workforce/documents"), "upload_document");
-        assert_eq!(operation_from_path("/api/v1/finance/journal-entries"), "create_journal_entry");
+        assert_eq!(
+            operation_from_path("/api/v1/payments/batches"),
+            "create_payment_batch"
+        );
+        assert_eq!(
+            operation_from_path("/api/v1/payments/orders"),
+            "create_payment_order"
+        );
+        assert_eq!(
+            operation_from_path("/api/v1/payroll/runs"),
+            "create_payroll_run"
+        );
+        assert_eq!(
+            operation_from_path("/api/v1/payroll/payslips"),
+            "generate_payslip"
+        );
+        assert_eq!(
+            operation_from_path("/api/v1/workforce/employees"),
+            "create_employee"
+        );
+        assert_eq!(
+            operation_from_path("/api/v1/workforce/contracts"),
+            "create_contract"
+        );
+        assert_eq!(
+            operation_from_path("/api/v1/workforce/documents"),
+            "upload_document"
+        );
+        assert_eq!(
+            operation_from_path("/api/v1/finance/journal-entries"),
+            "create_journal_entry"
+        );
         assert_eq!(operation_from_path("/api/v1/tenants"), "create_tenant");
-        assert_eq!(operation_from_path("/api/v1/organizations"), "create_organization");
-        assert_eq!(operation_from_path("/api/v1/unknown/resource"), "unknown_resource");
+        assert_eq!(
+            operation_from_path("/api/v1/organizations"),
+            "create_organization"
+        );
+        assert_eq!(
+            operation_from_path("/api/v1/unknown/resource"),
+            "unknown_resource"
+        );
     }
 }

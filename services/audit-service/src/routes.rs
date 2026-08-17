@@ -10,12 +10,12 @@
 //! populates the request extensions that `rls_middleware` reads.
 
 use crate::handlers::{create_audit_event, get_audit_event, list_audit_events, verify_hash_chain};
-use nexora_common::{auth_middleware, tenant_context::rls_middleware, AuthState, RlsState};
 use axum::{
     middleware,
     routing::{get, post},
     Router,
 };
+use nexora_common::{auth_middleware, tenant_context::rls_middleware, AuthState, RlsState};
 
 /// Protected audit routes with auth + RLS middleware applied.
 ///

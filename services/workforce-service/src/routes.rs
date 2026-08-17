@@ -3,14 +3,14 @@
 //! Middleware order matches audit-service (load-bearing): auth middleware is
 //! added LAST so it is outermost and populates extensions before RLS reads them.
 
-use nexora_common::{
-    auth_middleware::{auth_middleware, AuthState},
-    tenant_context::{rls_middleware, RlsState},
-};
 use axum::{
     middleware,
     routing::{get, patch, post},
     Router,
+};
+use nexora_common::{
+    auth_middleware::{auth_middleware, AuthState},
+    tenant_context::{rls_middleware, RlsState},
 };
 
 use crate::{handlers::*, AppState};

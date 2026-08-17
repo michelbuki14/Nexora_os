@@ -9,14 +9,14 @@ use crate::models::{
     AuditEventListResponse, AuditEventResponse, AuditEventRow, AuditListQuery, CreateAuditRequest,
     HashChainVerification,
 };
-use nexora_common::audit::{compute_chain_hash, GENESIS_HASH};
-use nexora_common::{AosError, AuthContext, DbConn};
 use axum::{
     extract::{Extension, Path, Query},
     http::StatusCode,
     response::IntoResponse,
     Json,
 };
+use nexora_common::audit::{compute_chain_hash, GENESIS_HASH};
+use nexora_common::{AosError, AuthContext, DbConn};
 use serde::Serialize;
 use tracing::warn;
 
@@ -497,8 +497,8 @@ fn validate_result(s: &str) -> Result<(), AosError> {
 mod tests {
     use super::*;
     use crate::models::{ActorType, AuditEventRow, AuditResult};
-    use nexora_common::{ulid::Ulid, AuthContext};
     use chrono::Utc;
+    use nexora_common::{ulid::Ulid, AuthContext};
     use uuid::Uuid;
 
     #[test]

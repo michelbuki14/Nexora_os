@@ -5,7 +5,6 @@
 //! live services (workforce) are reverse-proxied to the upstream service;
 //! not-yet-built verticals render an honest "planned" boundary.
 
-use nexora_common::{config::Config, health::health_router, logging::init_logging};
 use axum::{
     body::{to_bytes, Body},
     extract::State,
@@ -14,6 +13,7 @@ use axum::{
     routing::any,
     Json, Router,
 };
+use nexora_common::{config::Config, health::health_router, logging::init_logging};
 use serde::Serialize;
 use std::{net::SocketAddr, sync::Arc, time::Duration};
 use tower_http::{
@@ -265,22 +265,21 @@ async fn main() -> anyhow::Result<()> {
     // `Router<()>` before merging.
     let health_routes = health_router(config.clone());
     let api_routes: Router<AppState> = Router::new()
-        .route("/", any(api_metadata))
         .route("/api/v1", any(api_metadata))
         .nest("/api/v1/identity", placeholder_router("identity"))
         .nest("/api/v1/organizations", placeholder_router("organizations"))
         // Live services are reverse-proxied to their upstream, which owns its
         // own auth+RLS stack (Authorization is forwarded). Not-yet-built
         // verticals render an honest "planned" boundary instead.
-        .route("/api/v1/audit", any(audit_proxy))
-        .route("/api/v1/audit/{*rest}", any(audit_proxy))
-        .route("/api/v1/workforce", any(workforce_proxy))
-        .route("/api/v1/workforce/{*rest}", any(workforce_proxy))
-        .route("/api/v1/tenants", any(tenant_proxy))
-        .route("/api/v1/tenants/{*rest}", any(tenant_proxy))
+        // Use Router fallback to catch all sub-paths within each prefix.
+        .nest("/api/v1/audit", Router::new().fallback(audit_proxy))
+        .nest("/api/v1/workforce", Router::new().fallback(workforce_proxy))
+        .nest("/api/v1/tenants", Router::new().fallback(tenant_proxy))
         // Admin tenant management endpoint (tenant-service serves at /api/v1/admin/tenants)
-        .route("/api/v1/admin/tenants", any(tenant_proxy))
-        .route("/api/v1/admin/tenants/{*rest}", any(tenant_proxy))
+        .nest(
+            "/api/v1/admin/tenants",
+            Router::new().fallback(tenant_proxy),
+        )
         .nest("/api/v1/commerce", placeholder_router("commerce"))
         .nest("/api/v1/finance", placeholder_router("finance"))
         .nest("/api/v1/government", placeholder_router("government"));

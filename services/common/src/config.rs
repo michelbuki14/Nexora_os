@@ -238,7 +238,8 @@ pub struct AuthConfig {
 impl Default for AuthConfig {
     fn default() -> Self {
         Self {
-            jwks_url: "http://localhost:8080/realms/nexora/protocol/openid-connect/certs".to_string(),
+            jwks_url: "http://localhost:8080/realms/nexora/protocol/openid-connect/certs"
+                .to_string(),
             issuer: "http://localhost:8080/realms/nexora".to_string(),
             audience: "nexora-api".to_string(),
             jwks_cache_ttl_secs: 300,

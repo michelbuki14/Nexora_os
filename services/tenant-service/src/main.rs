@@ -10,6 +10,11 @@
 mod handlers;
 mod models;
 
+use axum::{
+    middleware,
+    routing::{get, post},
+    Router,
+};
 use nexora_common::{
     auth_middleware::{auth_middleware, AuthState},
     config::Config,
@@ -18,11 +23,6 @@ use nexora_common::{
     logging::init_logging,
     rbac::{require_permission_middleware, RbacState},
     tenant_context::{rls_middleware, RlsState},
-};
-use axum::{
-    middleware,
-    routing::{get, post},
-    Router,
 };
 use std::{net::SocketAddr, sync::Arc};
 use tower_http::{

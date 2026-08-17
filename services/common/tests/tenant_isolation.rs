@@ -25,11 +25,6 @@
 //! panic ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â the integration tests are a correctness gate and MUST run against a
 //! real PostgreSQL. Vacuous passes are a false-green security risk.
 
-use nexora_common::audit::{compute_chain_hash, GENESIS_HASH};
-use nexora_common::config::Config;
-use nexora_common::tenant_context::{rls_middleware, AuthContext, DbConn, RlsState};
-use nexora_common::ulid::{new_ulid, Ulid};
-use nexora_common::AosError;
 use axum::{
     body::Body,
     extract::{Path, Request},
@@ -38,6 +33,11 @@ use axum::{
     routing::get,
     Json, Router,
 };
+use nexora_common::audit::{compute_chain_hash, GENESIS_HASH};
+use nexora_common::config::Config;
+use nexora_common::tenant_context::{rls_middleware, AuthContext, DbConn, RlsState};
+use nexora_common::ulid::{new_ulid, Ulid};
+use nexora_common::AosError;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::sync::Arc;

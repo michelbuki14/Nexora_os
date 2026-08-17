@@ -25,7 +25,7 @@ const DOC_TYPES: { value: DocType; label: string }[] = [
 const schema = z.object({ doc_type: z.string().min(1, "Document type is required") });
 type FormValues = z.infer<typeof schema>;
 
-function formatBytes(bytes: number | null): string {
+function formatBytes(bytes: number | null | undefined): string {
   if (!bytes) return "—";
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
