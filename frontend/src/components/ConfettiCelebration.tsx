@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
+import { useReducedMotion } from "../utils/use-reduced-motion";
 
 /**
  * SSR-safe confetti celebration
@@ -11,15 +12,18 @@ interface ConfettiCelebrationProps {
   trigger: boolean;
   duration?: number;
   colors?: string[];
+  reducedMotion?: boolean;
 }
 
 export const ConfettiCelebration = ({
   trigger,
   duration = 3000,
   colors = ["#4F46E5", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899"],
+  reducedMotion: propReducedMotion,
 }: ConfettiCelebrationProps) => {
+  const hookReducedMotion = useReducedMotion();
   const isBrowser = typeof window !== "undefined";
-  const reducedMotion = false; // Will be injected from parent
+  const reducedMotion = hookReducedMotion || propReducedMotion;
 
   // Skip entirely if not in browser or reduced motion preferred
   if (!isBrowser || !trigger) return null;
@@ -36,13 +40,9 @@ export const ConfettiCelebration = ({
       return; // Skip confetti entirely
     }
 
-    const defaults = {
-      origin: { y: 0.6 },
-      colors,
-      scalar: 1.2,
-    };
+    const origin = { y: 0.6 };
 
-    function shootParticle(particle: any, defaults: any) {
+    function shootParticle(particle: any) {
       particle.velocity = {
         x: (Math.random() - 0.5) * 10,
         y: (Math.random() - 0.5) * 10 + 3,
@@ -56,7 +56,7 @@ export const ConfettiCelebration = ({
     const particles: any[] = [];
     for (let i = 0; i < particleCount; i++) {
       const particle = {};
-      shootParticle(particle, defaults);
+      shootParticle(particle);
       particles.push(particle);
     }
 
@@ -72,7 +72,7 @@ export const ConfettiCelebration = ({
               x: (b / 4) * 0.6 - 0.15,
               y: (b % 2 === 0 ? -0.1 : 0.1),
             };
-      bursts.push({ ...defaults, origin: { ...defaults.origin, ...originOffset } });
+      bursts.push({ origin: { ...origin, ...originOffset }, colors, scalar: 1.2 });
     }
 
     const timeouts = bursts.map((burst, index) =>

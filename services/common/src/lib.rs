@@ -28,6 +28,7 @@ pub use config::*;
 pub use db::*;
 pub use error::*;
 pub use health::*;
+pub use audit::{compute_chain_hash, derive_signing_key, GENESIS_HASH, verify_chain};
 pub use idempotency::{add_idempotency_middleware, IdempotencyState, IDEMPOTENCY_KEY_HEADER};
 pub use jwt::*;
 pub use logging::*;

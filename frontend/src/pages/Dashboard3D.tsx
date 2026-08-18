@@ -1,13 +1,14 @@
-import { DesignCanvas } from "@/components/DesignCanvas";
-import { ProductCard3D } from "@/components/ProductCard3D";
-import { WorkforceBarChart3D } from "@/components/WorkforceBarChart3D";
-import { PayrollTimeline3D } from "@/components/PayrollTimeline3D";
-import { TenantDonut3D } from "@/components/TenantDonut3D";
-import { ConfettiCelebration } from "@/components/ConfettiCelebration";
+import { DesignCanvas } from "../components/DesignCanvas";
+import { ProductCard3D } from "../components/ProductCard3D";
+import { WorkforceBarChart3D } from "../components/WorkforceBarChart3D";
+import { PayrollTimeline3D } from "../components/PayrollTimeline3D";
+import { TenantDonut3D } from "../components/TenantDonut3D";
+import { ConfettiCelebration } from "../components/ConfettiCelebration";
 import { useState, useCallback, useEffect } from "react";
-import { useReducedMotion } from "@/utils/use-reduced-motion";
-import { useIsMobile, useViewport } from "@/utils/is-mobile";
-import { useHasAnyPermission } from "@/auth/usePermission";
+import { useReducedMotion } from "../utils/use-reduced-motion";
+import { useIsMobile, useViewport } from "../utils/is-mobile";
+import { useHasAnyPermission } from "../auth/usePermission";
+import { PayrollRun, CountryData } from "../types/dashboard";
 
 export const Dashboard3D = () => {
   const [selected, setSelected] = useState<string | null>(null);
@@ -47,9 +48,10 @@ export const Dashboard3D = () => {
   }, []);
 
   // Real data placeholders (would come from API state)
+  // Populated by useEffect data fetch (see lines 41-47)
   const employeeCount = 124; // Would come from API
-  const payrollRuns = []; // Would come from API
-  const countryData = []; // Would come from API
+  const payrollRuns: PayrollRun[] = [];
+  const countryData: CountryData[] = [];
 
   // If no real data loaded yet, show skeleton
   if (payrollRuns.length === 0 && countryData.length === 0) {

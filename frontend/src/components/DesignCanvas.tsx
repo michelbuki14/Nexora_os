@@ -1,8 +1,8 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useRef, useEffect } from "react";
-import { useReducedMotion } from "@/utils/use-reduced-motion";
-import { useIsMobile } from "@/utils/is-mobile";
+import { useReducedMotion } from "../utils/use-reduced-motion";
+import { useIsMobile } from "../utils/is-mobile";
 
 /**
  * Debounced resize handler using requestAnimationFrame

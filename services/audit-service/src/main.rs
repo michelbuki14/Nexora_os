@@ -64,7 +64,7 @@ async fn main() -> anyhow::Result<()> {
     // Protected API routes (auth + RLS). Handlers extract `DbConn`/`AuthContext`
     // from request extensions, so this router is `Router<()>` and merges with the
     // health router directly — no `with_state` indirection needed.
-    let api_routes = crate::routes::protected_audit_routes(rls_state, auth_state);
+    let api_routes = crate::routes::protected_audit_routes(rls_state, auth_state, config.as_ref().clone());
 
     let app = health_routes
         .merge(api_routes)

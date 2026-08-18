@@ -24,6 +24,9 @@ pub struct AppState {
     pub s3_cfg: S3Config,
 }
 
+/// Extension type for passing Config to audit emission
+pub type ConfigExt = std::sync::Arc<Config>;
+
 impl AppState {
     pub fn placeholder() -> Self {
         let cfg = Config::load().unwrap();

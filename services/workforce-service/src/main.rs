@@ -60,7 +60,7 @@ async fn main() -> anyhow::Result<()> {
 
     let request_id = MakeRequestUuid;
     let health = health_router(config.clone());
-    let wf_routes: axum::Router<AppState> = workforce_router(rls_state, auth_state);
+    let wf_routes: axum::Router<AppState> = workforce_router(rls_state, auth_state, config.as_ref().clone());
 
     let app = health
         .merge(wf_routes.with_state(state))

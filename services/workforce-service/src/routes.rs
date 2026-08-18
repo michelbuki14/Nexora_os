@@ -10,13 +10,14 @@ use axum::{
 };
 use nexora_common::{
     auth_middleware::{auth_middleware, AuthState},
+    config::Config,
     tenant_context::{rls_middleware, RlsState},
 };
 
 use crate::{handlers::*, AppState};
 
 /// Returns a `Router<AppState>` — caller must call `.with_state(state)`.
-pub fn workforce_router(rls_state: RlsState, auth_state: AuthState) -> Router<AppState> {
+pub fn workforce_router(rls_state: RlsState, auth_state: AuthState, config: Config) -> Router<AppState> {
     Router::new()
         // Legal entities
         .route("/legal-entities", post(create_legal_entity))
@@ -63,4 +64,6 @@ pub fn workforce_router(rls_state: RlsState, auth_state: AuthState) -> Router<Ap
         .layer(middleware::from_fn_with_state(rls_state, rls_middleware))
         // Auth is outermost (runs first).
         .layer(middleware::from_fn_with_state(auth_state, auth_middleware))
+        // Config extension for audit emission
+        .layer(axum::Extension(config))
 }

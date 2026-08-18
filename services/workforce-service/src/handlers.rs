@@ -30,6 +30,7 @@ use tracing::{info, warn};
 
 use nexora_common::{
     error::{NexoraError, NexoraResult, ErrorResponse},
+    config::Config,
     rbac::AuthContextExt,
     tenant_context::{AuthContext, DbConn},
     ulid::new_ulid,
@@ -100,9 +101,10 @@ async fn resolve_ulid(
     security(("bearerAuth" = []))
 )]
 pub async fn create_legal_entity(
-    State(_state): State<AppState>,
+    State(state): State<AppState>,
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Json(req): Json<CreateLegalEntityRequest>,
 ) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("legal_entity.write")?;
@@ -137,6 +139,7 @@ pub async fn create_legal_entity(
 
     emit_workforce_event(
         conn.as_mut(),
+        &config,
         &auth,
         tenant_id,
         org_id,
@@ -247,6 +250,7 @@ pub async fn create_location(
     State(_state): State<AppState>,
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Json(req): Json<CreateLocationRequest>,
 ) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("location.write")?;
@@ -280,6 +284,7 @@ pub async fn create_location(
 
     emit_workforce_event(
         conn.as_mut(),
+        &config,
         &auth,
         tenant_id,
         org_id,
@@ -387,6 +392,7 @@ pub async fn create_department(
     State(_state): State<AppState>,
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Json(req): Json<CreateDepartmentRequest>,
 ) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("department.write")?;
@@ -424,6 +430,7 @@ pub async fn create_department(
 
     emit_workforce_event(
         conn.as_mut(),
+        &config,
         &auth,
         tenant_id,
         org_id,
@@ -528,6 +535,7 @@ pub async fn create_team(
     State(_state): State<AppState>,
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Json(req): Json<CreateTeamRequest>,
 ) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("team.write")?;
@@ -553,6 +561,7 @@ pub async fn create_team(
 
     emit_workforce_event(
         conn.as_mut(),
+        &config,
         &auth,
         tenant_id,
         org_id,
@@ -654,6 +663,7 @@ pub async fn create_position(
     State(_state): State<AppState>,
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Json(req): Json<CreatePositionRequest>,
 ) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("position.write")?;
@@ -695,6 +705,7 @@ pub async fn create_position(
 
     emit_workforce_event(
         conn.as_mut(),
+        &config,
         &auth,
         tenant_id,
         org_id,
@@ -807,6 +818,7 @@ pub async fn create_employee(
     State(_state): State<AppState>,
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Json(req): Json<CreateEmployeeRequest>,
 ) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("employee.write")?;
@@ -907,6 +919,7 @@ pub async fn create_employee(
     // Audit: redact all sensitive fields.
     emit_workforce_event(
         conn.as_mut(),
+        &config,
         &auth,
         tenant_id,
         org_id,
@@ -959,6 +972,7 @@ pub async fn list_employees(
     State(_state): State<AppState>,
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Query(q): Query<PageQuery>,
 ) -> NexoraResult<impl IntoResponse> {
     // MANAGERs and above may list; EMPLOYEE role may only get their own record.
@@ -1029,6 +1043,7 @@ pub async fn list_employees(
         let org_id = resolve_org_id(conn.as_mut(), &auth).await?;
         emit_workforce_event(
             conn.as_mut(),
+            &config,
             &auth,
             tenant_id,
             org_id,
@@ -1065,6 +1080,7 @@ pub async fn get_employee(
     State(_state): State<AppState>,
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Path(employee_ulid): Path<String>,
 ) -> NexoraResult<impl IntoResponse> {
     let mut conn = db.acquire().await?;
@@ -1094,6 +1110,7 @@ pub async fn update_employee_status(
     State(_state): State<AppState>,
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Path(employee_ulid): Path<String>,
     Json(req): Json<UpdateEmployeeStatusRequest>,
 ) -> NexoraResult<impl IntoResponse> {
@@ -1122,6 +1139,7 @@ pub async fn update_employee_status(
 
     emit_workforce_event(
         conn.as_mut(),
+        &config,
         &auth,
         tenant_id,
         org_id,
@@ -1156,8 +1174,9 @@ pub async fn update_employee_status(
 )]
 pub async fn update_employment(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Path(employee_ulid): Path<String>,
     Json(req): Json<UpdateEmploymentRequest>,
 ) -> NexoraResult<impl IntoResponse> {
@@ -1232,6 +1251,7 @@ pub async fn update_employment(
 
     emit_workforce_event(
         conn.as_mut(),
+        &config,
         &auth,
         tenant_id,
         org_id,
@@ -1262,8 +1282,9 @@ pub async fn update_employment(
 )]
 pub async fn create_compensation(
     State(_state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Path(employee_ulid): Path<String>,
     Json(req): Json<CreateCompensationRequest>,
 ) -> NexoraResult<impl IntoResponse> {
@@ -1313,6 +1334,7 @@ pub async fn create_compensation(
     warn!(employee_ulid = %employee_ulid, actor = %auth.user_id, "salary.changed — see audit log");
     emit_workforce_event(
         conn.as_mut(),
+        &config,
         &auth,
         tenant_id,
         org_id,
@@ -1410,8 +1432,9 @@ pub async fn get_compensation(
 )]
 pub async fn create_document(
     State(state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Path(employee_ulid): Path<String>,
     body: axum::body::Bytes,
 ) -> NexoraResult<impl IntoResponse> {
@@ -1486,6 +1509,7 @@ pub async fn create_document(
 
     emit_workforce_event(
         conn.as_mut(),
+        &config,
         &auth,
         tenant_id,
         org_id,
@@ -1588,8 +1612,9 @@ pub async fn list_documents(
 )]
 pub async fn get_document_url(
     State(state): State<AppState>,
-    auth: AuthContext,
-    db: DbConn,
+    Extension(auth): Extension<AuthContext>,
+    Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Path((employee_ulid, doc_ulid)): Path<(String, String)>,
 ) -> NexoraResult<impl IntoResponse> {
     auth.require_permission("employee.documents.read")?;
@@ -1620,6 +1645,7 @@ pub async fn get_document_url(
     let org_id = resolve_org_id(conn.as_mut(), &auth).await?;
     emit_workforce_event(
         conn.as_mut(),
+        &config,
         &auth,
         tenant_id,
         org_id,

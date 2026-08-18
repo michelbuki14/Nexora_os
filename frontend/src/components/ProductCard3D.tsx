@@ -2,7 +2,7 @@ import { BoxGeometry, MeshStandardMaterial, Group, useRef, useClock } from "thre
 import { Mesh } from "@react-three/fiber";
 import { useSpring, useVelocity } from "@react-three/drei";
 import { useState } from "react";
-import { useReducedMotion } from "@/utils/use-reduced-motion";
+import { useReducedMotion } from "../utils/use-reduced-motion";
 
 export const ProductCard3D = ({
   title,

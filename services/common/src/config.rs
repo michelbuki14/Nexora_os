@@ -81,6 +81,8 @@ pub struct Config {
     #[serde(default)]
     pub gateway: GatewayConfig,
     #[serde(default)]
+    pub audit: AuditConfig,
+    #[serde(default)]
     pub features: HashMap<String, bool>,
 }
 
@@ -267,6 +269,23 @@ impl Default for TracingConfig {
             service_name: "nexora-service".to_string(),
             sample_rate: 1.0,
             export_timeout_secs: 10,
+        }
+    }
+}
+
+/// Audit service configuration.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct AuditConfig {
+    /// Signing secret for HMAC hash chain. In production, this should be
+    /// loaded from a vault/HSM. Minimum 32 bytes for HMAC-SHA-256.
+    pub signing_secret: RedactedSecret,
+}
+
+impl Default for AuditConfig {
+    fn default() -> Self {
+        Self {
+            // Dev default - in production, MUST be overridden via NEXORA_AUDIT__SIGNING_SECRET
+            signing_secret: RedactedSecret::new("dev-audit-signing-secret-min-32-bytes-long!!"),
         }
     }
 }

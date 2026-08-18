@@ -1,16 +1,11 @@
 import { Group, Mesh, CylinderGeometry, MeshStandardMaterial, ConeGeometry } from "three";
 import { useSpring, useVelocity, Text } from "@react-three/drei";
 import { useState, useMemo } from "react";
-
-interface PayrollRun {
-  id: string;
-  period: string;
-  status: "draft" | "confirmed" | "paid";
-  amount: number;
-}
+import { PayrollRun } from "../types/dashboard";
 
 interface PayrollTimeline3DProps {
   payrollRuns: PayrollRun[];
+  reducedMotion?: boolean;
 }
 
 const STATUS_COLORS = {

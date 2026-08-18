@@ -17,7 +17,8 @@
 //! through this same helper — the `action` string IS the signal.
 
 use nexora_common::{
-    audit::{compute_chain_hash, GENESIS_HASH},
+    audit::{compute_chain_hash, GENESIS_HASH, serialize_canonical},
+    config::Config,
     error::{NexoraError, NexoraResult},
     tenant_context::AuthContext,
     ulid::new_ulid,
@@ -42,6 +43,7 @@ use sqlx::PgConnection;
 #[allow(clippy::too_many_arguments)]
 pub async fn emit_workforce_event(
     conn: &mut PgConnection,
+    config: &Config,
     auth: &AuthContext,
     tenant_uuid: uuid::Uuid,
     org_uuid: uuid::Uuid,
@@ -52,6 +54,7 @@ pub async fn emit_workforce_event(
 ) -> NexoraResult<()> {
     emit_workforce_event_with_uuid(
         conn,
+        config,
         auth,
         tenant_uuid,
         org_uuid,
@@ -69,6 +72,7 @@ pub async fn emit_workforce_event(
 #[allow(clippy::too_many_arguments)]
 pub async fn emit_workforce_event_with_uuid(
     conn: &mut PgConnection,
+    config: &Config,
     auth: &AuthContext,
     tenant_uuid: uuid::Uuid,
     org_uuid: uuid::Uuid,
@@ -100,7 +104,7 @@ pub async fn emit_workforce_event_with_uuid(
         "resource_ulid": resource_ulid,
     });
     let canonical = serialize_canonical(&payload_value)?;
-    let hash = compute_chain_hash(&prev_hash, &canonical);
+    let hash = compute_chain_hash(config, &tenant_uuid, &prev_hash, &canonical);
 
     // --- 2. Insert audit_events row ------------------------------------
     sqlx::query(
@@ -147,30 +151,4 @@ pub async fn emit_workforce_event_with_uuid(
     .await?;
 
     Ok(())
-}
-
-/// Serialize a JSON value with keys sorted (deterministic / canonical).
-///
-/// Matches the `serialize_canonical` in audit-service. Keeping both in sync
-/// is important: if the format diverges the hash chain breaks at verify time.
-pub fn serialize_canonical(value: &Value) -> NexoraResult<String> {
-    let sorted = sort_keys(value);
-    serde_json::to_string(&sorted)
-        .map_err(|e| NexoraError::Internal(format!("canonical serialization failed: {e}")))
-}
-
-fn sort_keys(value: &Value) -> Value {
-    match value {
-        Value::Object(map) => {
-            let mut sorted: serde_json::Map<String, Value> = serde_json::Map::new();
-            let mut keys: Vec<&str> = map.keys().map(|s| s.as_str()).collect();
-            keys.sort_unstable();
-            for k in keys {
-                sorted.insert(k.to_string(), sort_keys(&map[k]));
-            }
-            Value::Object(sorted)
-        }
-        Value::Array(arr) => Value::Array(arr.iter().map(sort_keys).collect()),
-        other => other.clone(),
-    }
 }

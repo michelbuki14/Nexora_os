@@ -1,15 +1,11 @@
 import { Group, Mesh, TorusGeometry, MeshStandardMaterial } from "three";
 import { useSpring, useVelocity, Text } from "@react-three/drei";
 import { useState, useMemo } from "react";
-
-interface CountryData {
-  country: string;
-  count: number;
-  color: string;
-}
+import { CountryData } from "../types/dashboard";
 
 interface TenantDonut3DProps {
   countryData: CountryData[];
+  reducedMotion?: boolean;
 }
 
 export const TenantDonut3D = ({ countryData }: TenantDonut3DProps) => {

@@ -2338,6 +2338,7 @@ dependencies = [
  "chrono",
  "figment",
  "hex",
+ "hmac 0.12.1",
  "jsonwebtoken",
  "opentelemetry",
  "opentelemetry-otlp",

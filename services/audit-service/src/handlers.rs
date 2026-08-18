@@ -15,8 +15,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use nexora_common::audit::{compute_chain_hash, GENESIS_HASH};
-use nexora_common::{NexoraError, AuthContext, DbConn};
+use nexora_common::{audit::{compute_chain_hash, GENESIS_HASH}, Config, NexoraError, AuthContext, DbConn};
 use serde::Serialize;
 use tracing::warn;
 
@@ -46,6 +45,7 @@ const SELECT_COLUMNS: &str = r#"
 pub async fn create_audit_event(
     Extension(auth): Extension<AuthContext>,
     Extension(db): Extension<DbConn>,
+    Extension(config): Extension<Config>,
     Json(req): Json<CreateAuditRequest>,
 ) -> Result<impl IntoResponse, NexoraError> {
     // Reject empty action / resource_type early — these are NOT NULL in DB.
@@ -70,10 +70,10 @@ pub async fn create_audit_event(
     // Resolve the organization UUID from the auth-context org ULID.
     let org_id = resolve_org_id(&mut conn, &auth).await?;
 
-    // Compute the SHA-256 chain hash: prev_hash || canonical_payload.
+    // Compute the HMAC-SHA-256 chain hash using per-tenant signing key.
     let prev_hash = latest_hash_for_tenant(conn.as_mut(), tenant_id).await?;
     let payload = canonical_payload(&auth, &tenant_id, &org_id, &req);
-    let hash = compute_chain_hash(&prev_hash, &payload);
+    let hash = compute_chain_hash(&config, &tenant_id, &prev_hash, &payload);
 
     let event_ulid = nexora_common::ulid::new_ulid();
     // Bind `ip_address` as text and let Postgres cast it to `INET`. sqlx's
@@ -270,7 +270,7 @@ pub async fn get_audit_event(
     Ok(Json(AuditEventResponse::from(row)))
 }
 
-/// Verify the hash-chain integrity of audit events for the caller's tenant,
+/// Verify the HMAC-SHA-256 hash-chain integrity of audit events for the caller's tenant,
 /// walking from the first event through the requested event.
 #[utoipa::path(
     get,
@@ -287,6 +287,7 @@ pub async fn verify_hash_chain(
     auth: AuthContext,
     db: DbConn,
     Path(event_id): Path<i64>,
+    Extension(config): Extension<Config>,
 ) -> Result<Json<HashChainVerification>, NexoraError> {
     let mut conn = db.acquire().await?;
     let tenant_id = resolve_tenant_id(&mut conn, &auth).await?;
@@ -318,7 +319,7 @@ pub async fn verify_hash_chain(
     for row in &rows {
         events_checked += 1;
         let payload = canonical_payload_from_row(row);
-        let computed = compute_chain_hash(&prev_hash, &payload);
+        let computed = compute_chain_hash(&config, &tenant_id, &prev_hash, &payload);
         if computed != row.hash {
             if first_mismatch.is_none() {
                 first_mismatch = Some(row.id);
