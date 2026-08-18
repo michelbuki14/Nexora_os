@@ -1,7 +1,6 @@
 import { Group, Mesh, CylinderGeometry, MeshStandardMaterial, ConeGeometry } from "three";
-import { useSpring, useVelocity, Text } from "@react-three/drei";
+import { Text } from "@react-three/drei";
 import { useState, useMemo } from "react";
-import { PayrollRun } from "../types/dashboard";
 
 interface PayrollTimeline3DProps {
   payrollRuns: PayrollRun[];
@@ -20,22 +19,20 @@ const STATUS_LABELS = {
   draft: "DRAFT",
 };
 
-export const PayrollTimeline3D = ({ payrollRuns }: PayrollTimeline3DProps) => {
+export const PayrollTimeline3D = ({ payrollRuns, reducedMotion = false }: PayrollTimeline3DProps) => {
   const [hovered, setHovered] = useState(-1);
   const maxAmount = useMemo(
     () => Math.max(...payrollRuns.map((r) => r.amount), 1),
     [payrollRuns]
   );
 
-  const scale = useSpring(
-    hovered >= 0 ? 1.2 : 1.0,
-    useVelocity(0.15)
-  );
+  // Simple scale on hover - respect reduced motion
+  const hoveredScale = hovered >= 0 && !reducedMotion ? 1.2 : 1.0;
 
   return (
-    <Group>
+    <group scale={hoveredScale}>
       {/* Timeline track */}
-      <Mesh
+      <mesh
         position={[0, 0, (payrollRuns.length - 1) * 0.6]}
         rotation={[-Math.PI / 2, 0, 0]}
       >
@@ -43,22 +40,21 @@ export const PayrollTimeline3D = ({ payrollRuns }: PayrollTimeline3DProps) => {
           args={[0.05, 0.05, (payrollRuns.length - 1) * 1.2, 8]}
         />
         <meshStandardMaterial color="#9CA3AF" depthWrite />
-      </Mesh>
+      </mesh>
 
       {payrollRuns.map((run, i) => {
         const z = i * 1.2;
         const radius = Math.max(0.3, (run.amount / maxAmount) * 1.5);
 
         return (
-          <Group
+          <group
             key={run.id}
-            position={[0, 0, z]}
-            scale={scale}
+            position={[0, 0, z)}
             onPointerEnter={() => setHovered(i)}
             onPointerLeave={() => setHovered(-1)}
           >
             {/* Cone/Column representing amount */}
-            <Mesh position={[0, radius / 2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <mesh position={[0, radius / 2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
               <coneGeometry
                 args={[radius, radius, radius, 12]}
                 radialSegments={12}
@@ -69,16 +65,16 @@ export const PayrollTimeline3D = ({ payrollRuns }: PayrollTimeline3DProps) => {
                 depthWrite
                 transparent
               />
-            </Mesh>
+            </mesh>
 
             {/* Base platform */}
-            <Mesh position={[0, -0.1, 0]}>
+            <mesh position={[0, -0.1, 0]}>
               <cylinderGeometry args={[radius + 0.2, radius + 0.2, 0.1, 16]} />
               <meshStandardMaterial color="#E5E7EB" depthWrite />
-            </Mesh>
+            </mesh>
 
             {/* Status indicator ring */}
-            <Mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
               <cylinderGeometry args={[radius + 0.3, radius + 0.3, 0.05, 16]} />
               <meshStandardMaterial
                 color={STATUS_COLORS[run.status]}
@@ -86,7 +82,7 @@ export const PayrollTimeline3D = ({ payrollRuns }: PayrollTimeline3DProps) => {
                 depthWrite
                 transparent
               />
-            </Mesh>
+            </mesh>
 
             {/* Period label */}
             <Text position={[2, 0, z]} fontSize={0.35} color="#374151">
@@ -113,9 +109,9 @@ export const PayrollTimeline3D = ({ payrollRuns }: PayrollTimeline3DProps) => {
                 {(run.amount / 1000).toFixed(0)}K CDF
               </Text>
             )}
-          </Group>
+          </group>
         );
       })}
-    </Group>
+    </group>
   );
 };

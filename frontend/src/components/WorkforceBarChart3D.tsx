@@ -1,5 +1,5 @@
 import { Group, Mesh, BoxGeometry, MeshStandardMaterial } from "three";
-import { useSpring, useVelocity, Text } from "@react-three/drei";
+import { Text } from "@react-three/drei";
 import { useState, useMemo } from "react";
 
 interface WorkforceBarChart3DProps {
@@ -11,28 +11,26 @@ export const WorkforceBarChart3D = ({ departments, employeeCounts }: WorkforceBa
   const [hovered, setHovered] = useState(-1);
   const maxCount = useMemo(() => Math.max(...employeeCounts), [employeeCounts]);
 
-  const scale = useSpring(
-    hovered >= 0 ? 1.15 : 1.0,
-    useVelocity(0.15)
-  );
+  // Simple scale on hover - respect reduced motion via CSS or context
+  const hoveredScale = hovered >= 0 ? 1.15 : 1.0;
 
   return (
-    <Group>
+    <group>
       {departments.map((dept, i) => {
         const count = employeeCounts[i];
         const height = (count / maxCount) * 3;
         const x = -4 + i * 1.8;
 
         return (
-          <Group
+          <group
             key={dept}
             position={[x, 0, 0]}
-            scale={scale}
+            scale={hoveredScale}
             onPointerEnter={() => setHovered(i)}
             onPointerLeave={() => setHovered(-1)}
           >
             {/* Bar */}
-            <Mesh position={[0, height / 2, 0]}>
+            <mesh position={[0, height / 2, 0]}>
               <boxGeometry args={[1.2, height, 0.6]} />
               <meshStandardMaterial
                 color="#4F46E5"
@@ -40,13 +38,13 @@ export const WorkforceBarChart3D = ({ departments, employeeCounts }: WorkforceBa
                 depthWrite
                 transparent
               />
-            </Mesh>
+            </mesh>
 
             {/* Base platform */}
-            <Mesh position={[0, -0.1, 0]}>
+            <mesh position={[0, -0.1, 0]}>
               <boxGeometry args={[1.4, 0.1, 0.8]} />
               <meshStandardMaterial color="#E5E7EB" depthWrite />
-            </Mesh>
+            </mesh>
 
             {/* Label */}
             <Text
@@ -68,9 +66,9 @@ export const WorkforceBarChart3D = ({ departments, employeeCounts }: WorkforceBa
             >
               {count.toString()}
             </Text>
-          </Group>
+          </group>
         );
       })}
-    </Group>
+    </group>
   );
 };

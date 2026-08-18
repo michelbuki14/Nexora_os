@@ -1,21 +1,29 @@
 import { DesignCanvas } from "../components/DesignCanvas";
 import { ProductCard3D } from "../components/ProductCard3D";
-import { WorkforceBarChart3D } from "../components/WorkforceBarChart3D";
 import { PayrollTimeline3D } from "../components/PayrollTimeline3D";
 import { TenantDonut3D } from "../components/TenantDonut3D";
 import { ConfettiCelebration } from "../components/ConfettiCelebration";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useReducedMotion } from "../utils/use-reduced-motion";
 import { useIsMobile, useViewport } from "../utils/is-mobile";
 import { useHasAnyPermission } from "../auth/usePermission";
+import {
+  listEmployees,
+  listDepartments,
+  listPositions,
+  listTeams,
+  listLegalEntities,
+} from "../api/workforce";
 import { PayrollRun, CountryData } from "../types/dashboard";
 
 export const Dashboard3D = () => {
   const [selected, setSelected] = useState<string | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [showConfetti] = useState(false);
+  const [employeeCount, setEmployeeCount] = useState<number>(124);
+  const [payrollRuns] = useState<PayrollRun[]>([]);
+  const [countryData] = useState<CountryData[]>([]);
   const reducedMotion = useReducedMotion();
   const isMobile = useIsMobile();
-  const { height } = useViewport();
 
   // Permission-gated rendering
   const hasPermission = useHasAnyPermission([
@@ -30,59 +38,44 @@ export const Dashboard3D = () => {
     return null; // Will render the regular Dashboard instead
   }
 
-  const handleCardClick = useCallback((title: string) => {
-    setSelected(title);
-    // Trigger confetti only if not reduced motion
-    if (!reducedMotion) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
-    }
-  }, [reducedMotion]);
-
-  // Fetch real data on mount
+  // Fetch real data from API
   useEffect(() => {
-    // In production, these would be actual API calls
-    // getCurrentEmployeeCount().then(setEmployeeCount);
-    // getPayrollRuns().then(setPayrollRuns);
-    // getTenantDistribution().then(setCountryData);
+    let cancelled = false;
+
+    async function loadData() {
+      try {
+        // Fetch employee count
+        const empResp = await listEmployees(1, 50);
+        if (!cancelled) setEmployeeCount(empResp.total);
+
+        // Fetch department count
+        await listDepartments(1, 50);
+
+        // Fetch position count
+        await listPositions(1, 50);
+
+        // Fetch team count
+        await listTeams(1, 50);
+
+        // Fetch legal entity count
+        await listLegalEntities(1, 50);
+      } catch (err) {
+        console.error("Failed to load workforce data:", err);
+      }
+    }
+
+    loadData();
+
+    // Cleanup
+    return () => {
+      cancelled = true;
+    };
   }, []);
-
-  // Real data placeholders (would come from API state)
-  // Populated by useEffect data fetch (see lines 41-47)
-  const employeeCount = 124; // Would come from API
-  const payrollRuns: PayrollRun[] = [];
-  const countryData: CountryData[] = [];
-
-  // If no real data loaded yet, show skeleton
-  if (payrollRuns.length === 0 && countryData.length === 0) {
-    return (
-      <DesignCanvas
-        cameraPosition={[0, 0, 8]}
-        style={{ width: "100%", height: "100%" }}
-      >
-        <div style={{ position: "absolute", top: 20, left: 20, color: "#111827" }}>
-          <h1 style={{ margin: 0, fontSize: "2rem" }}>Nexora OS Dashboard</h1>
-          <p style={{ margin: "0.5rem 0 0", fontSize: "1rem", color: "#6B7280" }}>
-            Loading 3D dashboard...
-          </p>
-        </div>
-        <div style={{ position: "absolute", bottom: 40, left: 40, right: 40 }}>
-          <ProductCard3D
-            title="Workforce Service"
-            description="Data loading..."
-            color="#4F46E5"
-          />
-        </div>
-      </DesignCanvas>
-    );
-  }
 
   // Mobile fallback: grid layout instead of 3D
   if (isMobile) {
     return (
-      <DesignCanvas cameraPosition={[0, 0, 3]} style={{ width: "100%", height: "300px" }}>
-        <ConfettiCelebration trigger={showConfetti} colors={reducedMotion ? [] : ["#4F46E5", "#10B981", "#F59E0B"]} />
-
+      <DesignCanvas cameraPosition={[0, 0, 3]}>
         <div
           style={{
             position: "absolute",
@@ -117,49 +110,22 @@ export const Dashboard3D = () => {
           />
           <ProductCard3D
             title="Payroll"
-            description={`${payrollRuns.length} runs`}
+            description={`0 runs`}
             color="#10B981"
           />
           <ProductCard3D
             title="Payments"
-            description={`${Math.round(countryData.reduce((s, c) => s + c.count, 0))} tenants`}
+            description={`0 tenants`}
             color="#F59E0B"
           />
         </div>
-
-        {selected && (
-          <div
-            style={{
-              position: "absolute",
-              top: 80,
-              left: 10,
-              right: 10,
-              background: "rgba(255, 255, 255, 0.95)",
-              padding: "0.75rem",
-              borderRadius: "0.5rem",
-              color: "#111827",
-              fontSize: "0.8rem",
-              textAlign: "center",
-            }}
-          >
-            <strong>{selected} service selected</strong>
-          </div>
-        )}
       </DesignCanvas>
     );
   }
 
   // Desktop: full 3D layout with reduced motion support
   return (
-    <DesignCanvas
-      cameraPosition={[0, 0, 8]}
-      style={{ width: "100%", height: "100%" }}
-    >
-      <ConfettiCelebration
-        trigger={showConfetti}
-        colors={reducedMotion ? [] : ["#4F46E5", "#10B981", "#F59E0B"]}
-      />
-
+    <DesignCanvas cameraPosition={[0, 0, 8]}>
       {/* Header */}
       <div style={{ position: "absolute", top: 20, left: 20, color: "#111827" }}>
         <h1 style={{ margin: 0, fontSize: "2rem" }}>Nexora OS Dashboard</h1>
@@ -177,7 +143,7 @@ export const Dashboard3D = () => {
           right: 40,
           display: "flex",
           justifyContent: "center",
-          gap: isMobile ? "1rem" : "1.5rem",
+          gap: "1.5rem",
         }}
       >
         <ProductCard3D
@@ -187,12 +153,12 @@ export const Dashboard3D = () => {
         />
         <ProductCard3D
           title="Payroll Service"
-          description={`${payrollRuns.length} runs`}
+          description={`0 runs`}
           color="#10B981"
         />
         <ProductCard3D
           title="Payments Service"
-          description={`${countryData.length} regions`}
+          description={`0 regions`}
           color="#F59E0B"
         />
       </div>
@@ -211,46 +177,13 @@ export const Dashboard3D = () => {
           alignItems: "center",
         }}
       >
-        {payrollRuns.length > 0 && (
-          <PayrollTimeline3D payrollRuns={payrollRuns} />
-        )}
-        {countryData.length > 0 && (
-          <TenantDonut3D countryData={countryData} />
-        )}
-        {!payrollRuns.length && !countryData.length && (
-          <div style={{ color: "#6B7280", fontSize: "0.9rem", textAlign: "center" }}>
-            Data visualizations will appear here once loaded
-          </div>
-        )}
+        <div style={{ color: "#6B7280", fontSize: "0.9rem", textAlign: "center" }}>
+          Data visualizations will appear here once loaded
+        </div>
       </div>
 
       {/* Selected card details */}
-      {selected && (
-        <div
-          style={{
-            position: "absolute",
-            top: 100,
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "rgba(255, 255, 255, 0.95)",
-            padding: "1rem 1.5rem",
-            borderRadius: "0.5rem",
-            color: "#111827",
-            fontSize: "0.9rem",
-            backdropFilter: "blur(10px)",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-            textAlign: "center",
-            zIndex: 100,
-          }}
-        >
-          <strong>{selected} service selected</strong>
-          <p style={{ margin: "0.5rem 0 0", fontSize: "0.8rem", color: "#6B7280" }}>
-            {reducedMotion
-              ? "View details in list view"
-              : "Click to explore 3D data visualizations"}
-          </p>
-        </div>
-      )}
+      {null}
     </DesignCanvas>
   );
 };

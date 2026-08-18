@@ -406,7 +406,7 @@ fn test_audit_emit_canonical_payload_stable() {
         "resource_ulid": "01HXZ_EMP_ULID_1234567890",
     });
 
-    use nexora_workforce_service::audit_emit::serialize_canonical;
+    use nexora_common::audit::serialize_canonical;
     let a = serialize_canonical(&value).unwrap();
     let b = serialize_canonical(&value).unwrap();
     assert_eq!(a, b, "canonical serialization must be deterministic");
