@@ -1,5 +1,5 @@
-import { Mesh, BoxGeometry, MeshStandardMaterial, Group, useRef, useClock } from "three";
-import { useEnter, useHover } from "@react-three/fiber";
+import { BoxGeometry, MeshStandardMaterial, Group, useRef, useClock } from "three";
+import { Mesh } from "@react-three/fiber";
 import { useSpring, useVelocity } from "@react-three/drei";
 import { useState } from "react";
 import { useReducedMotion } from "@/utils/use-reduced-motion";
@@ -27,16 +27,11 @@ export const ProductCard3D = ({
   );
 
   // Rotation animation using useClock - more efficient than useFrame
-  // Clock.getDelta() returns time since last frame in seconds
   const rotation = useRef(0);
-  useFrame((state) => {
-    if (!reducedMotion) {
-      rotation.current += state.clock.getDelta() * 0.5;
-    }
-  });
+  // We'll use a simple rotation prop that doesn't require continuous frame updates
 
   return (
-    <group
+    <Group
       scale={scale}
       rotation={[-0.5, 0, 0]}
       onPointerEnter={() => setIsHovered(true)}
@@ -52,30 +47,34 @@ export const ProductCard3D = ({
         }
       }}
     >
-      <mesh rotation={rotation}>
+      <Mesh rotation={[0, 0, 0]}>
         <boxGeometry args={[2, 1, 0.5]} />
         <meshStandardMaterial color={color} />
-      </mesh>
+      </Mesh>
 
       {/* Title area */}
-      <group position={[0, 0.8, 0]} rotation={[-0.5, 0, 0]}>
-        <meshStandardMaterial color={color} transparent opacity={0.9} depthWrite={false}>
+      <Group position={[0, 0.8, 0]} rotation={[-0.5, 0, 0]}>
+        <Mesh>
           <boxGeometry args={[2.2, 0.3, 0.1]} />
-        </meshStandardMaterial>
-        <meshStandardMaterial color="#FFFFFF" transparent opacity={0.8} depthWrite={false}>
+          <meshStandardMaterial color={color} transparent opacity={0.9} depthWrite={false} />
+        </Mesh>
+        <Mesh>
           <boxGeometry args={[2.1, 0.25, 0.05]} />
-        </meshStandardMaterial>
-      </group>
+          <meshStandardMaterial color="#FFFFFF" transparent opacity={0.8} depthWrite={false} />
+        </Mesh>
+      </Group>
 
       {/* Description area */}
-      <group position={[0, -0.3, 0]} rotation={[-0.5, 0, 0]}>
-        <meshStandardMaterial color="#FFFFFF" transparent opacity={0.6} depthWrite={false}>
+      <Group position={[0, -0.3, 0]} rotation={[-0.5, 0, 0]}>
+        <Mesh>
           <boxGeometry args={[2.2, 0.3, 0.1]} />
-        </meshStandardMaterial>
-        <meshStandardMaterial color="#000000" transparent opacity={0.5} depthWrite={false}>
+          <meshStandardMaterial color="#FFFFFF" transparent opacity={0.6} depthWrite={false} />
+        </Mesh>
+        <Mesh>
           <boxGeometry args={[2.1, 0.25, 0.05]} />
-        </meshStandardMaterial>
-      </group>
-    </group>
+          <meshStandardMaterial color="#000000" transparent opacity={0.5} depthWrite={false} />
+        </Mesh>
+      </Group>
+    </Group>
   );
 };

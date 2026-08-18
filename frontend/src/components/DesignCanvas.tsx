@@ -9,8 +9,8 @@ import { useIsMobile } from "@/utils/is-mobile";
  * Prevents layout thrashing from rapid resize events
  */
 const useDebouncedResize = (callback: () => void, wait = 150) => {
-  let raf: number;
-  let timeout: NodeJS.Timeout;
+  let raf: number | undefined;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
 
   return () => {
     if (timeout) {
@@ -84,7 +84,7 @@ export const DesignCanvas = ({
         enablePan={true}
         enableRotate={!isMobile}
         autoRotate={false}
-        damping={damping}
+        dampingFactor={damping}
         // Keyboard shortcuts for accessibility
         keys={{
           LEFT: "ArrowLeft",
@@ -101,19 +101,19 @@ export const DesignCanvas = ({
       <directionalLight
         position={[5, 5, 5]}
         intensity={directionalIntensity}
-        shadow={true}
+        castShadow
       />
       <directionalLight
         position={[-5, -5, -5]}
         intensity={directionalIntensity}
-        shadow={true}
+        castShadow
       />
 
       {/* Hemi light for better illumination */}
-      <hemisphereLight skyColor="#7F8C8D" groundColor="#F3F4F6" intensity={0.3} />
+      <hemisphereLight intensity={0.3} groundColor="#F3F4F6" skyColor="#7F8C8D" />
 
       {/* Fog for atmospheric depth */}
-      <fog args={[0.01, 5, "#F3F4F6"]} />
+      <fog attach="fog" args={[0.01, 5, "#F3F4F6"]} />
 
       {/* Children rendered in 3D space */}
       {children}

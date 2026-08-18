@@ -1,5 +1,5 @@
-import { Group, Mesh, TorusGeometry, MeshStandardMaterial, Text } from "three";
-import { useSpring, useVelocity } from "@react-three/drei";
+import { Group, Mesh, TorusGeometry, MeshStandardMaterial } from "three";
+import { useSpring, useVelocity, Text } from "@react-three/drei";
 import { useState, useMemo } from "react";
 
 interface CountryData {
@@ -22,7 +22,7 @@ export const TenantDonut3D = ({ countryData }: TenantDonut3DProps) => {
   );
 
   return (
-    <group rotation={[-0.4, 0, 0]} scale={scale}>
+    <Group rotation={[-0.4, 0, 0]} scale={scale}>
       {countryData.map((country, i) => {
         const previousCountries = countryData.slice(0, i);
         const startAngle = previousCountries.reduce((sum, c) => sum + (c.count / total) * Math.PI * 2, 0);
@@ -41,15 +41,10 @@ export const TenantDonut3D = ({ countryData }: TenantDonut3DProps) => {
           >
             {/* Donut segment */}
             <Mesh>
-              <TorusGeometry
-                radius={1.8}
-                tube={0.4}
-                radialSegments={8}
-                tubularSegments={32}
-                arc={arc}
-                args={[1.8, 0.4, 8, 32, 0, arc]}
+              <torusGeometry
+                args={[1.8, 0.4, 8, 32, startAngle, arc]}
               />
-              <MeshStandardMaterial
+              <meshStandardMaterial
                 color={country.color}
                 opacity={0.9}
                 depthWrite
@@ -59,14 +54,10 @@ export const TenantDonut3D = ({ countryData }: TenantDonut3DProps) => {
 
             {/* Inner ring for depth */}
             <Mesh>
-              <TorusGeometry
-                radius={1.4}
-                tube={0.2}
-                radialSegments={8}
-                tubularSegments={32}
-                arc={arc}
+              <torusGeometry
+                args={[1.4, 0.2, 8, 32, startAngle, arc]}
               />
-              <MeshStandardMaterial
+              <meshStandardMaterial
                 color={country.color}
                 opacity={0.5}
                 depthWrite
@@ -75,25 +66,25 @@ export const TenantDonut3D = ({ countryData }: TenantDonut3DProps) => {
             </Mesh>
 
             {/* Label */}
-            <Mesh position={[x * 1.5, 0, z * 1.5]}>
-              <Text
-                text={`${country.country}: ${country.count}`}
-                fontSize={0.35}
-                anchorX="center"
-                color="#374151"
-              />
-            </Mesh>
+            <Text
+              position={[x * 1.5, 0, z * 1.5]}
+              fontSize={0.35}
+              anchorX="center"
+              color="#374151"
+            >
+              {country.country}: {country.count}
+            </Text>
 
             {/* Percentage on hover */}
             {hovered === i && (
-              <Mesh position={[x * 1.5, 1, z * 1.5]}>
-                <Text
-                  text={`${((country.count / total) * 100).toFixed(1)}%`}
-                  fontSize={0.5}
-                  anchorX="center"
-                  color="#1F2937"
-                />
-              </Mesh>
+              <Text
+                position={[x * 1.5, 1, z * 1.5]}
+                fontSize={0.5}
+                anchorX="center"
+                color="#1F2937"
+              >
+                {((country.count / total) * 100).toFixed(1)}%
+              </Text>
             )}
           </Group>
         );
@@ -101,8 +92,15 @@ export const TenantDonut3D = ({ countryData }: TenantDonut3DProps) => {
 
       {/* Center text */}
       <Mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <Text text={`${total} tenants`} fontSize={0.5} anchorX="center" anchorY="middle" color="#1F2937" />
+        <Text
+          fontSize={0.5}
+          anchorX="center"
+          anchorY="middle"
+          color="#1F2937"
+        >
+          {total} tenants
+        </Text>
       </Mesh>
-    </group>
+    </Group>
   );
 };

@@ -1,5 +1,5 @@
-import { Group, Mesh, BoxGeometry, MeshStandardMaterial, Text } from "three";
-import { useSpring, useVelocity } from "@react-three/drei";
+import { Group, Mesh, BoxGeometry, MeshStandardMaterial } from "three";
+import { useSpring, useVelocity, Text } from "@react-three/drei";
 import { useState, useMemo } from "react";
 
 interface WorkforceBarChart3DProps {
@@ -17,7 +17,7 @@ export const WorkforceBarChart3D = ({ departments, employeeCounts }: WorkforceBa
   );
 
   return (
-    <group>
+    <Group>
       {departments.map((dept, i) => {
         const count = employeeCounts[i];
         const height = (count / maxCount) * 3;
@@ -33,8 +33,8 @@ export const WorkforceBarChart3D = ({ departments, employeeCounts }: WorkforceBa
           >
             {/* Bar */}
             <Mesh position={[0, height / 2, 0]}>
-              <BoxGeometry args={[1.2, height, 0.6]} />
-              <MeshStandardMaterial
+              <boxGeometry args={[1.2, height, 0.6]} />
+              <meshStandardMaterial
                 color="#4F46E5"
                 opacity={0.9}
                 depthWrite
@@ -44,22 +44,33 @@ export const WorkforceBarChart3D = ({ departments, employeeCounts }: WorkforceBa
 
             {/* Base platform */}
             <Mesh position={[0, -0.1, 0]}>
-              <BoxGeometry args={[1.4, 0.1, 0.8]} />
-              <MeshStandardMaterial color="#E5E7EB" depthWrite />
+              <boxGeometry args={[1.4, 0.1, 0.8]} />
+              <meshStandardMaterial color="#E5E7EB" depthWrite />
             </Mesh>
 
             {/* Label */}
-            <Mesh position={[x, -2.2, 0.5]}>
-              <Text text={dept} fontSize={0.4} maxWidth={1.5} anchorX="center" color="#374151" />
-            </Mesh>
+            <Text
+              position={[x, -2.2, 0.5]}
+              fontSize={0.4}
+              maxWidth={1.5}
+              anchorX="center"
+              color="#374151"
+            >
+              {dept}
+            </Text>
 
             {/* Value label */}
-            <Mesh position={[x, height + 0.5, 0]}>
-              <Text text={count.toString()} fontSize={0.5} anchorX="center" color="#1F2937" />
-            </Mesh>
+            <Text
+              position={[x, height + 0.5, 0]}
+              fontSize={0.5}
+              anchorX="center"
+              color="#1F2937"
+            >
+              {count.toString()}
+            </Text>
           </Group>
         );
       })}
-    </group>
+    </Group>
   );
 };

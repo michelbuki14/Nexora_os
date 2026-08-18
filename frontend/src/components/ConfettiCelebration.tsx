@@ -22,7 +22,7 @@ export const ConfettiCelebration = ({
   const reducedMotion = false; // Will be injected from parent
 
   // Skip entirely if not in browser or reduced motion preferred
-  if (!isBrowser || !trigger) return;
+  if (!isBrowser || !trigger) return null;
 
   useEffect(() => {
     if (!trigger) return;
@@ -91,4 +91,6 @@ export const ConfettiCelebration = ({
       clearTimeout(stopTimeout);
     };
   }, [trigger, duration, colors, reducedMotion]);
+
+  return null;
 };

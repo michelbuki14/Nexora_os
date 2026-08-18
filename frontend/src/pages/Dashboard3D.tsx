@@ -69,7 +69,6 @@ export const Dashboard3D = () => {
             title="Workforce Service"
             description="Data loading..."
             color="#4F46E5"
-            disabled
           />
         </div>
       </DesignCanvas>
@@ -80,7 +79,7 @@ export const Dashboard3D = () => {
   if (isMobile) {
     return (
       <DesignCanvas cameraPosition={[0, 0, 3]} style={{ width: "100%", height: "300px" }}>
-        <ConfettiCelebration trigger={showConfetti} reducedMotion={reducedMotion} />
+        <ConfettiCelebration trigger={showConfetti} colors={reducedMotion ? [] : ["#4F46E5", "#10B981", "#F59E0B"]} />
 
         <div
           style={{
@@ -116,12 +115,12 @@ export const Dashboard3D = () => {
           />
           <ProductCard3D
             title="Payroll"
-            description={`{payrollRuns.length} runs`}
+            description={`${payrollRuns.length} runs`}
             color="#10B981"
           />
           <ProductCard3D
             title="Payments"
-            description={`{Math.round(countryData.reduce((s, c) => s + c.count, 0))} tenants`}
+            description={`${Math.round(countryData.reduce((s, c) => s + c.count, 0))} tenants`}
             color="#F59E0B"
           />
         </div>
@@ -156,7 +155,6 @@ export const Dashboard3D = () => {
     >
       <ConfettiCelebration
         trigger={showConfetti}
-        reducedMotion={reducedMotion}
         colors={reducedMotion ? [] : ["#4F46E5", "#10B981", "#F59E0B"]}
       />
 
@@ -184,19 +182,16 @@ export const Dashboard3D = () => {
           title="Workforce Service"
           description={`${employeeCount} employees`}
           color="#4F46E5"
-          reducedMotion={reducedMotion}
         />
         <ProductCard3D
           title="Payroll Service"
           description={`${payrollRuns.length} runs`}
           color="#10B981"
-          reducedMotion={reducedMotion}
         />
         <ProductCard3D
           title="Payments Service"
           description={`${countryData.length} regions`}
           color="#F59E0B"
-          reducedMotion={reducedMotion}
         />
       </div>
 
@@ -215,10 +210,10 @@ export const Dashboard3D = () => {
         }}
       >
         {payrollRuns.length > 0 && (
-          <PayrollTimeline3D payrollRuns={payrollRuns} reducedMotion={reducedMotion} />
+          <PayrollTimeline3D payrollRuns={payrollRuns} />
         )}
         {countryData.length > 0 && (
-          <TenantDonut3D countryData={countryData} reducedMotion={reducedMotion} />
+          <TenantDonut3D countryData={countryData} />
         )}
         {!payrollRuns.length && !countryData.length && (
           <div style={{ color: "#6B7280", fontSize: "0.9rem", textAlign: "center" }}>
