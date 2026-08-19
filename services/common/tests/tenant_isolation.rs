@@ -137,7 +137,7 @@ impl Cluster {
             &org_a_id,
             &tenant_a_id,
             "tenant.a.created",
-            &compute_chain_hash(GENESIS_HASH, "{\"actor\":\"system\",\"op\":\"a\"}"),
+            &compute_chain_hash(&Config::default(), &tenant_a_id, GENESIS_HASH, "{\"actor\":\"system\",\"op\":\"a\"}"),
         )
         .await?;
         insert_audit_event(
@@ -145,7 +145,7 @@ impl Cluster {
             &org_b_id,
             &tenant_b_id,
             "tenant.b.created",
-            &compute_chain_hash(GENESIS_HASH, "{\"actor\":\"system\",\"op\":\"b\"}"),
+            &compute_chain_hash(&Config::default(), &tenant_b_id, GENESIS_HASH, "{\"actor\":\"system\",\"op\":\"b\"}"),
         )
         .await?;
 
@@ -585,9 +585,9 @@ async fn audit_hash_chain_detects_tampering() {
 
     // Build and persist a two-event chain using the shared primitive.
     let payload1 = format!(r#"{{"op":"first","tenant":"{tenant_c_ulid}"}}"#);
-    let h1 = compute_chain_hash(GENESIS_HASH, &payload1);
+    let h1 = compute_chain_hash(&Config::default(), &tenant_c_id, GENESIS_HASH, &payload1);
     let payload2 = format!(r#"{{"op":"second","tenant":"{tenant_c_ulid}"}}"#);
-    let h2 = compute_chain_hash(&h1, &payload2);
+    let h2 = compute_chain_hash(&Config::default(), &tenant_c_id, &h1, &payload2);
 
     insert_audit_event(&c.super_pool, &org_c_id, &tenant_c_id, "chain.first", &h1)
         .await
@@ -631,7 +631,7 @@ async fn chain_verified(pool: &PgPool, tenant_id: sqlx::types::Uuid, tenant_ulid
     let mut prev = GENESIS_HASH.to_string();
     for (action, stored) in rows {
         let payload = format!(r#"{{"op":"{action}","tenant":"{tenant_ulid}"}}"#);
-        let expected = compute_chain_hash(&prev, &payload);
+        let expected = compute_chain_hash(&Config::default(), &tenant_id, &prev, &payload);
         if expected != stored {
             return false;
         }
