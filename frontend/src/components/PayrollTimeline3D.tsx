@@ -49,7 +49,7 @@ export const PayrollTimeline3D = ({ payrollRuns, reducedMotion = false }: Payrol
         return (
           <group
             key={run.id}
-            position={[0, 0, z)}
+            position={[0, 0, z]}
             onPointerEnter={() => setHovered(i)}
             onPointerLeave={() => setHovered(-1)}
           >
