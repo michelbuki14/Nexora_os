@@ -2411,6 +2411,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "nexora-payroll-service"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "chrono",
+ "nexora-common",
+ "rust_decimal",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror 1.0.69",
+ "tokio",
+ "tower-http",
+ "tracing",
+ "utoipa",
+ "utoipa-swagger-ui",
+ "uuid",
+]
+
+[[package]]
 name = "nexora-retail-service"
 version = "0.1.0"
 dependencies = [

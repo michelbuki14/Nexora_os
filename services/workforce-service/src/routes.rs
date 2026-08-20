@@ -17,7 +17,11 @@ use nexora_common::{
 use crate::{handlers::*, AppState};
 
 /// Returns a `Router<AppState>` — caller must call `.with_state(state)`.
-pub fn workforce_router(rls_state: RlsState, auth_state: AuthState, config: Config) -> Router<AppState> {
+pub fn workforce_router(
+    rls_state: RlsState,
+    auth_state: AuthState,
+    config: Config,
+) -> Router<AppState> {
     Router::new()
         // Legal entities
         .route("/legal-entities", post(create_legal_entity))

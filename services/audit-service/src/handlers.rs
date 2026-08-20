@@ -15,7 +15,10 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use nexora_common::{audit::{compute_chain_hash, GENESIS_HASH}, Config, NexoraError, AuthContext, DbConn};
+use nexora_common::{
+    audit::{compute_chain_hash, GENESIS_HASH},
+    AuthContext, Config, DbConn, NexoraError,
+};
 use serde::Serialize;
 use tracing::warn;
 
@@ -483,7 +486,9 @@ fn serialize_canonical(value: &serde_json::Value) -> String {
 fn validate_actor_type(s: &str) -> Result<(), NexoraError> {
     match s {
         "user" | "system" | "service" | "api_key" => Ok(()),
-        other => Err(NexoraError::Validation(format!("invalid actor_type: {other}"))),
+        other => Err(NexoraError::Validation(format!(
+            "invalid actor_type: {other}"
+        ))),
     }
 }
 

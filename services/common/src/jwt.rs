@@ -125,9 +125,9 @@ impl JwtValidator {
 
         if should_refresh {
             debug!("Fetching JWKS from {}", self.config.jwks_url);
-            let response = reqwest::get(&self.config.jwks_url)
-                .await
-                .map_err(|e| NexoraError::ExternalService(format!("Failed to fetch JWKS: {}", e)))?;
+            let response = reqwest::get(&self.config.jwks_url).await.map_err(|e| {
+                NexoraError::ExternalService(format!("Failed to fetch JWKS: {}", e))
+            })?;
             let jwks = response
                 .json::<JwkSet>()
                 .await

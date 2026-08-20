@@ -1,13 +1,13 @@
-use nexora_workforce_service::models::{
-    CreateEmployeeRequest, UpdateEmployeeStatusRequest, UpdateEmploymentRequest,
-    CreateCompensationRequest, CreateLegalEntityRequest, CreateLocationRequest,
-    CreateDepartmentRequest, CreateTeamRequest, CreatePositionRequest,
-    CompensationFrequency, EmploymentType, EmployeeStatus, DocType,
-};
-use nexora_common::s3::document_object_key;
 use nexora_common::audit::serialize_canonical;
+use nexora_common::money::{CurrencyCode, Money, RoundingPolicy};
+use nexora_common::s3::document_object_key;
 use nexora_common::ulid::Ulid;
-use nexora_common::money::{Money, CurrencyCode, RoundingPolicy};
+use nexora_workforce_service::models::{
+    CompensationFrequency, CreateCompensationRequest, CreateDepartmentRequest,
+    CreateEmployeeRequest, CreateLegalEntityRequest, CreateLocationRequest, CreatePositionRequest,
+    CreateTeamRequest, DocType, EmployeeStatus, EmploymentType, UpdateEmployeeStatusRequest,
+    UpdateEmploymentRequest,
+};
 
 #[test]
 fn test_create_employee_request_deserialization() {
@@ -49,7 +49,10 @@ fn test_update_employee_status_request() {
         serde_json::from_value(json).expect("Should deserialize");
 
     assert_eq!(req.status, EmployeeStatus::Terminated);
-    assert_eq!(req.termination_date, Some(chrono::NaiveDate::from_ymd_opt(2024, 12, 31).unwrap()));
+    assert_eq!(
+        req.termination_date,
+        Some(chrono::NaiveDate::from_ymd_opt(2024, 12, 31).unwrap())
+    );
     assert_eq!(req.termination_reason, Some("Resigned".to_string()));
 }
 
@@ -67,9 +70,15 @@ fn test_update_employment_request() {
     let req: nexora_workforce_service::models::UpdateEmploymentRequest =
         serde_json::from_value(json).expect("Should deserialize");
 
-    assert_eq!(req.position_ulid, Some("01ABCDEFGHIJKLMNOPQRSTUV".to_string()));
+    assert_eq!(
+        req.position_ulid,
+        Some("01ABCDEFGHIJKLMNOPQRSTUV".to_string())
+    );
     assert_eq!(req.employment_type, Some(EmploymentType::Contract));
-    assert_eq!(req.effective_date, chrono::NaiveDate::from_ymd_opt(2024, 6, 1).unwrap());
+    assert_eq!(
+        req.effective_date,
+        chrono::NaiveDate::from_ymd_opt(2024, 6, 1).unwrap()
+    );
 }
 
 #[test]
@@ -88,7 +97,10 @@ fn test_create_compensation_request() {
     assert_eq!(req.gross_amount_minor, 5000000);
     assert_eq!(req.currency_code, "CDF");
     assert_eq!(req.frequency, CompensationFrequency::Monthly);
-    assert_eq!(req.effective_date, chrono::NaiveDate::from_ymd_opt(2024, 1, 1).unwrap());
+    assert_eq!(
+        req.effective_date,
+        chrono::NaiveDate::from_ymd_opt(2024, 1, 1).unwrap()
+    );
 }
 
 #[test]
@@ -234,7 +246,12 @@ fn test_serialize_canonical_deterministic() {
 
     // Keys should be sorted
     let parsed: serde_json::Value = serde_json::from_str(&a).unwrap();
-    let keys: Vec<&str> = parsed.as_object().unwrap().keys().map(|s| s.as_str()).collect();
+    let keys: Vec<&str> = parsed
+        .as_object()
+        .unwrap()
+        .keys()
+        .map(|s| s.as_str())
+        .collect();
     let mut sorted = keys.clone();
     sorted.sort_unstable();
     assert_eq!(keys, sorted);
@@ -242,7 +259,10 @@ fn test_serialize_canonical_deterministic() {
 
 #[test]
 fn test_money_creation() {
-    let m = nexora_common::money::Money::from_str_amount("125000.50", nexora_common::money::CurrencyCode::cdf());
+    let m = nexora_common::money::Money::from_str_amount(
+        "125000.50",
+        nexora_common::money::CurrencyCode::cdf(),
+    );
     assert!(m.is_ok());
     let m = m.unwrap();
     assert_eq!(m.amount().to_string(), "125000.50");
@@ -251,8 +271,16 @@ fn test_money_creation() {
 
 #[test]
 fn test_money_arithmetic() {
-    let a = nexora_common::money::Money::from_str_amount("100.00", nexora_common::money::CurrencyCode::cdf()).unwrap();
-    let b = nexora_common::money::Money::from_str_amount("50.00", nexora_common::money::CurrencyCode::cdf()).unwrap();
+    let a = nexora_common::money::Money::from_str_amount(
+        "100.00",
+        nexora_common::money::CurrencyCode::cdf(),
+    )
+    .unwrap();
+    let b = nexora_common::money::Money::from_str_amount(
+        "50.00",
+        nexora_common::money::CurrencyCode::cdf(),
+    )
+    .unwrap();
     let sum = a.checked_add(&b).unwrap();
     assert_eq!(sum.amount().to_string(), "150.00");
     assert_eq!(sum.currency().as_str(), "CDF");
@@ -263,14 +291,26 @@ fn test_money_arithmetic() {
 
 #[test]
 fn test_money_currency_mismatch() {
-    let a = nexora_common::money::Money::from_str_amount("100.00", nexora_common::money::CurrencyCode::cdf()).unwrap();
-    let b = nexora_common::money::Money::from_str_amount("50.00", nexora_common::money::CurrencyCode::new("USD").unwrap()).unwrap();
+    let a = nexora_common::money::Money::from_str_amount(
+        "100.00",
+        nexora_common::money::CurrencyCode::cdf(),
+    )
+    .unwrap();
+    let b = nexora_common::money::Money::from_str_amount(
+        "50.00",
+        nexora_common::money::CurrencyCode::new("USD").unwrap(),
+    )
+    .unwrap();
     assert!(a.checked_add(&b).is_err());
 }
 
 #[test]
 fn test_money_rounding() {
-    let m = nexora_common::money::Money::from_str_amount("125000.00005", nexora_common::money::CurrencyCode::cdf()).unwrap();
+    let m = nexora_common::money::Money::from_str_amount(
+        "125000.00005",
+        nexora_common::money::CurrencyCode::cdf(),
+    )
+    .unwrap();
     let rounded = m.rounded(nexora_common::money::RoundingPolicy::RoundHalfUp);
     assert_eq!(rounded.amount().to_string(), "125000.0001");
 }

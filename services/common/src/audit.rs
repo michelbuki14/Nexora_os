@@ -17,14 +17,19 @@ pub const GENESIS_HASH: &str = "000000000000000000000000000000000000000000000000
 ///
 /// Uses a per-tenant signing key derived from the tenant's secret to prevent
 /// cross-tenant hash collisions and enable tamper detection.
-pub fn compute_chain_hash(config: &Config, tenant_id: &uuid::Uuid, prev_hash: &str, payload: &str) -> String {
+pub fn compute_chain_hash(
+    config: &Config,
+    tenant_id: &uuid::Uuid,
+    prev_hash: &str,
+    payload: &str,
+) -> String {
     // Derive a per-tenant signing key from the config's audit signing secret
     // In production, this would come from a vault/HSM. For now, we derive from
     // a config secret combined with tenant ID.
     let signing_key = derive_signing_key(config, tenant_id);
 
-    let mut mac = Hmac::<Sha256>::new_from_slice(&signing_key)
-        .expect("HMAC key must be valid length");
+    let mut mac =
+        Hmac::<Sha256>::new_from_slice(&signing_key).expect("HMAC key must be valid length");
     mac.update(prev_hash.as_bytes());
     mac.update(payload.as_bytes());
     hex::encode(mac.finalize().into_bytes())
@@ -94,7 +99,9 @@ fn sort_keys(value: &serde_json::Value) -> serde_json::Value {
             }
             serde_json::Value::Object(sorted)
         }
-        serde_json::Value::Array(arr) => serde_json::Value::Array(arr.iter().map(sort_keys).collect()),
+        serde_json::Value::Array(arr) => {
+            serde_json::Value::Array(arr.iter().map(sort_keys).collect())
+        }
         other => other.clone(),
     }
 }

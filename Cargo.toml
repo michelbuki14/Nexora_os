@@ -10,6 +10,7 @@ members = [
     "services/fintech-service",
     "services/gov-service",
     "services/migrate",
+    "services/payroll-service",
 ]
 
 [workspace.package]
@@ -17,6 +18,7 @@ edition = "2021"
 version = "0.1.0"
 license = "Apache-2.0"
 repository = "https://github.com/michelbuki14/Nexora-OS"
+rust-version = "1.75"
 
 [workspace.dependencies]
 # Pin a concrete version on the path dep. Cargo tolerates an implicit `*` here,

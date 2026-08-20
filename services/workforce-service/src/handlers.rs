@@ -29,8 +29,8 @@ use sha2::{Digest, Sha256};
 use tracing::{info, warn};
 
 use nexora_common::{
-    error::{NexoraError, NexoraResult, ErrorResponse},
     config::Config,
+    error::{ErrorResponse, NexoraError, NexoraResult},
     rbac::AuthContextExt,
     tenant_context::{AuthContext, DbConn},
     ulid::new_ulid,
@@ -56,7 +56,9 @@ async fn resolve_tenant_id(
         .bind(&ulid)
         .fetch_optional(conn)
         .await?
-        .ok_or_else(|| NexoraError::TenantIsolation(format!("tenant {ulid} not visible in RLS ctx")))
+        .ok_or_else(|| {
+            NexoraError::TenantIsolation(format!("tenant {ulid} not visible in RLS ctx"))
+        })
 }
 
 async fn resolve_org_id(
@@ -1300,7 +1302,9 @@ pub async fn create_compensation(
         .bind(&req.currency_code)
         .fetch_optional(conn.as_mut())
         .await?
-        .ok_or_else(|| NexoraError::Validation(format!("unknown currency: {}", req.currency_code)))?;
+        .ok_or_else(|| {
+            NexoraError::Validation(format!("unknown currency: {}", req.currency_code))
+        })?;
 
     // Close the current open compensation record.
     sqlx::query(
