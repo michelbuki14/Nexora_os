@@ -1,8 +1,8 @@
-// Keycloak OIDC bootstrap for the AOS public client.
+// Keycloak OIDC bootstrap for the Nexora OS public client.
 //
 // Matches the backend contract (services/common/src/auth_middleware.rs):
 // the token carries `sub`, `tenant_id`, `org_id` (ULIDs), `roles[]`,
-// `permissions[]`. The backend validates `aud` == "aos-api"; if the
+// `permissions[]`. The backend validates `aud` == "nexora-os-api"; if the
 // dev-portal token is rejected, add a Keycloak client "audience" mapper
 // (plan Prerequisite — realm config, no Rust change).
 
