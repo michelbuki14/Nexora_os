@@ -5,7 +5,7 @@
 //! owned by the `nexora-migrate` binary, not by service startup, so exactly one
 //! process applies schema changes (see `services/migrate`).
 
-use crate::{NexoraError, NexoraResult, DatabaseConfig};
+use crate::{DatabaseConfig, NexoraError, NexoraResult};
 use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 use std::str::FromStr;
 use std::time::Duration;

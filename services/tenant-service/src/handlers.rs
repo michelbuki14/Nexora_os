@@ -7,7 +7,7 @@
 
 use crate::models::{CreateTenantRequest, TenantResponse, TenantRow, VALID_TIERS};
 use axum::{extract::Path, http::StatusCode, response::IntoResponse, Json};
-use nexora_common::{ulid::new_ulid, NexoraError, AuthContext, DbConn};
+use nexora_common::{ulid::new_ulid, AuthContext, DbConn, NexoraError};
 use tracing::debug;
 
 /// Column list shared by tenant SELECTs. Joins `organizations` so the

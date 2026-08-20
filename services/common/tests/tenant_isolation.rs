@@ -137,7 +137,12 @@ impl Cluster {
             &org_a_id,
             &tenant_a_id,
             "tenant.a.created",
-            &compute_chain_hash(&Config::default(), &tenant_a_id, GENESIS_HASH, "{\"actor\":\"system\",\"op\":\"a\"}"),
+            &compute_chain_hash(
+                &Config::default(),
+                &tenant_a_id,
+                GENESIS_HASH,
+                "{\"actor\":\"system\",\"op\":\"a\"}",
+            ),
         )
         .await?;
         insert_audit_event(
@@ -145,7 +150,12 @@ impl Cluster {
             &org_b_id,
             &tenant_b_id,
             "tenant.b.created",
-            &compute_chain_hash(&Config::default(), &tenant_b_id, GENESIS_HASH, "{\"actor\":\"system\",\"op\":\"b\"}"),
+            &compute_chain_hash(
+                &Config::default(),
+                &tenant_b_id,
+                GENESIS_HASH,
+                "{\"actor\":\"system\",\"op\":\"b\"}",
+            ),
         )
         .await?;
 

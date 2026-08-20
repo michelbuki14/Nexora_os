@@ -15,14 +15,20 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use nexora_common::{auth_middleware, config::Config, tenant_context::rls_middleware, AuthState, RlsState};
+use nexora_common::{
+    auth_middleware, config::Config, tenant_context::rls_middleware, AuthState, RlsState,
+};
 
 /// Protected audit routes with auth + RLS middleware applied.
 ///
 /// The returned router has no state bound yet — the caller pins `AppState`
 /// onto it (handlers extract `DbConn`/`AuthContext` from request extensions,
 /// not state, so any `S` works).
-pub fn protected_audit_routes(rls_state: RlsState, auth_state: AuthState, config: Config) -> Router<()> {
+pub fn protected_audit_routes(
+    rls_state: RlsState,
+    auth_state: AuthState,
+    config: Config,
+) -> Router<()> {
     Router::new()
         // Create an audit event (append-only).
         .route("/events", post(create_audit_event))

@@ -59,7 +59,9 @@ impl DbConn {
     /// the middleware at request end) when the returned [`DbConnGuard`] is dropped.
     pub async fn acquire(&self) -> Result<DbConnGuard, NexoraError> {
         let conn = self.inner.lock().await.take().ok_or_else(|| {
-            NexoraError::Internal("RLS database connection already consumed for this request".into())
+            NexoraError::Internal(
+                "RLS database connection already consumed for this request".into(),
+            )
         })?;
         Ok(DbConnGuard {
             conn: Some(conn),

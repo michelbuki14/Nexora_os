@@ -17,7 +17,7 @@
 //! through this same helper — the `action` string IS the signal.
 
 use nexora_common::{
-    audit::{compute_chain_hash, GENESIS_HASH, serialize_canonical},
+    audit::{compute_chain_hash, serialize_canonical, GENESIS_HASH},
     config::Config,
     error::{NexoraError, NexoraResult},
     tenant_context::AuthContext,

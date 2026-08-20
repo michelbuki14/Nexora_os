@@ -3,7 +3,7 @@
 //! Provides an Axum middleware that checks for an `Idempotency-Key` header
 //! and deduplicates requests by caching responses in the `idempotency_records` table.
 
-use crate::{NexoraError, NexoraResult, AuthContext};
+use crate::{AuthContext, NexoraError, NexoraResult};
 use axum::{
     body::{to_bytes, Body},
     extract::{Request, State},
@@ -296,7 +296,9 @@ async fn create_pending_idempotency_record(
 
 /// Capture header names/values and body from a response safely.
 /// Stores headers as (String, String) for serialization.
-async fn capture_response_parts(response: Response) -> NexoraResult<(Vec<(String, String)>, Vec<u8>)> {
+async fn capture_response_parts(
+    response: Response,
+) -> NexoraResult<(Vec<(String, String)>, Vec<u8>)> {
     let mut headers = Vec::new();
 
     for (name, value) in response.headers() {
