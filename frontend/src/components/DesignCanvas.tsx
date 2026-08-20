@@ -75,7 +75,7 @@ export const DesignCanvas = ({
     <Canvas
       ref={canvasRef}
       shadows
-      camera={{ position: cameraPos }}
+      camera={{ position: typeof cameraPos === 'number' ? cameraPos : new THREE.Vector3(...cameraPos) }}
       style={{ width: "100%", height: "100%", display: "block" }}
     >
       {/* Orbit controls for interaction */}

@@ -42,7 +42,14 @@ export const ConfettiCelebration = ({
 
     const origin = { y: 0.6 };
 
-    function shootParticle(particle: any) {
+    interface Particle {
+  velocity: { x: number; y: number; z: number };
+  gravity: number;
+  friction: number;
+  timeOut: number;
+}
+
+function shootParticle(particle: Partial<Particle>) {
       particle.velocity = {
         x: (Math.random() - 0.5) * 10,
         y: (Math.random() - 0.5) * 10 + 3,

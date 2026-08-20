@@ -2,14 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { API_BASE } from "../api/client";
 
 /**
- * AOS system status. Polls the live service's /health (in Phase 1 dev that's
+ * Nexora OS system status. Polls the live service's /health (in Phase 1 dev that's
  * the workforce service at VITE_API_BASE — the gateway at :3000 is not
  * proxying yet and shares the SPA port in dev). No token required; the
  * health router is merged at root.
  */
 export function StatusPill() {
   const { data } = useQuery({
-    queryKey: ["aos-health"],
+    queryKey: ["nexora-health"],
     queryFn: async () => {
       const res = await fetch(`${API_BASE}/health`);
       return res.ok;

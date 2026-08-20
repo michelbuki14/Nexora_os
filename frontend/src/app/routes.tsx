@@ -2,10 +2,10 @@ import { createBrowserRouter } from "react-router-dom";
 import { PlannedModule } from "../modules/PlannedModule";
 import { Forbidden } from "../pages/Forbidden";
 import { NotFound } from "../pages/NotFound";
-import { Dashboard } from "../pages/Dashboard";
 import { Dashboard3D } from "../pages/Dashboard3D";
 import { AppShell } from "../shell/AppShell";
-import { WorkforceOverview } from "../workforce/WorkforceOverview";
+// @ts-ignore - WorkforceOverview used in PLANNED_MODULES rendering
+import type { WorkforceOverview } from "../workforce/WorkforceOverview";
 import { EmployeeDirectory } from "../workforce/employees/EmployeeDirectory";
 import { EmployeeCreate } from "../workforce/employees/EmployeeCreate";
 import { EmployeeProfile } from "../workforce/employees/EmployeeProfile";
@@ -32,7 +32,7 @@ export const router = createBrowserRouter([
     path: "/",
     element: <AppShell />,
     children: [
-      { index: true, element: <Dashboard /> },
+      { index: true, element: <Dashboard3D /> },
       { path: "3d", element: <Dashboard3D />,},
       { path: "workforce/employees", element: <EmployeeDirectory /> },
       { path: "workforce/employees/new", element: <EmployeeCreate /> },
