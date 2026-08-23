@@ -1,4 +1,15 @@
 # CD Pipeline - Environment promotion with gates
+#
+# Triggers on successful CI run on main.
+# Promotes images through staging → production with manual approval gates.
+# Uses ArgoCD for production deployment (GitOps).
+#
+# Service inventory (2026-08-23):
+#   - nexora-api-gateway     (port 3000) — single entry point, routing
+#   - nexora-tenant-service  (port 3004) — tenant/organization CRUD
+#   - nexora-workforce-service (port 3002) — employees, contracts, compensation
+#   - nexora-audit-service   (port 3001) — hash-chained audit events
+#   - nexora-payroll-service (port 3003) — DRC payroll engine, payslips
 
 name: CD
 
@@ -10,7 +21,19 @@ on:
 
 env:
   AWS_REGION: us-east-1
+  # ECR registry: <account>.dkr.ecr.<region>.amazonaws.com
   ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+  # Image tag: git short SHA
+  IMAGE_TAG: ${{ github.sha }}
+
+# All services to build and deploy.
+# Each crate builds from the workspace Dockerfile using NEXORA_SERVICE__NAME env var.
+# Image name follows the pattern: nexora-<service>:<tag>
+#
+# NOTE: docker compose builds a single "nexora-services:latest" image with all
+# binaries. For ECR, we tag that same image multiple times (one per service),
+# since each container runs a different entrypoint. Alternatively, use multi-stage
+# Dockerfiles per service — but the workspace Dockerfile is the current approach.
 
 jobs:
   promote-staging:
@@ -20,31 +43,84 @@ jobs:
     environment: staging
     steps:
       - uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsOIDC
           aws-region: ${{ env.AWS_REGION }}
+
       - name: Login to ECR
-        run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
-      - name: Build and push images
         run: |
-          docker compose -f docker-compose.yml build
-          for svc in api-gateway tenant-service audit-service; do
-            docker tag aos-${svc}:latest ${{ env.ECR_REGISTRY }}/aos-${svc}:${{ github.sha }}
-            docker push ${{ env.ECR_REGISTRY }}/aos-${svc}:${{ github.sha }}
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} \
+            | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+
+      - name: Build workspace Docker image
+        # Builds the single nexora-services:latest image containing all binaries.
+        # Each service container runs a different entrypoint at runtime.
+        run: |
+          docker build -t nexora-services:${{ env.IMAGE_TAG }} \
+            --build-arg RUST_VERSION=stable \
+            -f Dockerfile .
+
+      - name: Push images to ECR (one tag per service)
+        # Tag the same image for each service and push.
+        # At runtime, each pod uses a different entrypoint via the Dockerfile CMD override.
+        run: |
+          SERVICES=(
+            nexora-api-gateway
+            nexora-tenant-service
+            nexora-workforce-service
+            nexora-audit-service
+            nexora-payroll-service
+          )
+          for svc in "${SERVICES[@]}"; do
+            docker tag nexora-services:${{ env.IMAGE_TAG }} \
+              ${{ env.ECR_REGISTRY }}/${svc}:${{ env.IMAGE_TAG }}
+            docker push ${{ env.ECR_REGISTRY }}/${svc}:${{ env.IMAGE_TAG }}
           done
-      - name: Deploy to Staging
+
+      - name: Update staging Kubernetes images
+        # Use kubectl to roll out new images on staging.
+        # Assumes staging cluster is configured via AWS IAM OIDC or kubeconfig.
         run: |
-          kubectl set image deployment/aos-api-gateway aos-api-gateway=${{ env.ECR_REGISTRY }}/aos-api-gateway:${{ github.sha }} -n aos-staging
-          kubectl set image deployment/aos-tenant-service aos-tenant-service=${{ env.ECR_REGISTRY }}/aos-tenant-service:${{ github.sha }} -n aos-staging
-          kubectl set image deployment/aos-audit-service aos-audit-service=${{ env.ECR_REGISTRY }}/aos-audit-service:${{ github.sha }} -n aos-staging
-      - name: Run smoke tests
+          SERVICES=(
+            nexora-api-gateway
+            nexora-tenant-service
+            nexora-workforce-service
+            nexora-audit-service
+            nexora-payroll-service
+          )
+          for svc in "${SERVICES[@]}"; do
+            kubectl set image deployment/${svc} \
+              ${svc}=${{ env.ECR_REGISTRY }}/${svc}:${{ env.IMAGE_TAG }} \
+              -n aos-staging
+          done
+
+      - name: Wait for staging rollout
         run: |
+          SERVICES=(
+            nexora-api-gateway
+            nexora-tenant-service
+            nexora-workforce-service
+            nexora-audit-service
+            nexora-payroll-service
+          )
+          for svc in "${SERVICES[@]}"; do
+            kubectl rollout status deployment/${svc} \
+              -n aos-staging --timeout=300s
+          done
+
+      - name: Run staging smoke tests
+        run: |
+          # Replace with actual staging endpoint or use kubectl port-forward
+          STAGING_API="https://staging-api.aos.example.com"
           sleep 30
-          curl -f https://staging-api.aos.example.com/health/live
-          curl -f https://staging-api.aos.example.com/health/ready
-          curl -f https://staging-api.aos.example.com/api/v1/tenants/status
+          curl -f "${STAGING_API}/health/live" || exit 1
+          curl -f "${STAGING_API}/health/ready" || exit 1
+          curl -f "${STAGING_API}/api/v1/tenants/status" || exit 1
+          # Payroll-specific smoke test
+          curl -f "${STAGING_API}/api/v1/payroll/status" || exit 1
 
   promote-production:
     name: Promote to Production
@@ -54,32 +130,72 @@ jobs:
     needs: promote-staging
     steps:
       - uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsOIDC
           aws-region: ${{ env.AWS_REGION }}
+
       - name: Login to ECR
-        run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
-      - name: Deploy to Production (blue/green)
         run: |
-          # ArgoCD manages production; this triggers the sync
-          argocd app sync aos-api-gateway --prune
-          argocd app sync aos-tenant-service --prune
-          argocd app sync aos-audit-service --prune
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} \
+            | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+
+      # Production is managed by ArgoCD (GitOps).
+      # This step updates the image tag in the Helm values file and commits,
+      # which triggers ArgoCD to sync the new version.
+      - name: Update Helm values and trigger ArgoCD sync
+        run: |
+          # Configure argocd CLI
+          argocd login ${{ secrets.ARGOCD_SERVER }} \
+            --username ${{ secrets.ARGOCD_USERNAME }} \
+            --password ${{ secrets.ARGOCD_PASSWORD }} \
+            --grpc-web
+
+          SERVICES=(
+            nexora-api-gateway
+            nexora-tenant-service
+            nexora-workforce-service
+            nexora-audit-service
+            nexora-payroll-service
+          )
+
+          for svc in "${SERVICES[@]}"; do
+            # Set the new image in the ArgoCD application
+            argocd app set ${svc} \
+              --helm-set image.tag=${{ env.IMAGE_TAG }} \
+              --helm-set image.repository=${{ env.ECR_REGISTRY }}/${svc} \
+              --prune
+
+            # Sync the application
+            argocd app sync ${svc} --prune --timeout 300
+          done
+
       - name: Run production smoke tests
         run: |
+          PROD_API="https://api.aos.example.com"
           sleep 60
-          curl -f https://api.aos.example.com/health/live
-          curl -f https://api.aos.example.com/health/ready
+          curl -f "${PROD_API}/health/live" || exit 1
+          curl -f "${PROD_API}/health/ready" || exit 1
+          curl -f "${PROD_API}/api/v1/tenants/status" || exit 1
+          curl -f "${PROD_API}/api/v1/payroll/status" || exit 1
+
       - name: Notify on completion
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "Production deployment successful"
+            echo "✅ Production deployment successful — all 5 services synced"
           else
-            echo "Production deployment failed - initiating rollback"
-            argocd app rollback aos-api-gateway
-            argocd app rollback aos-tenant-service
-            argocd app rollback aos-audit-service
+            echo "❌ Production deployment failed — initiating rollback"
+            SERVICES=(
+              nexora-api-gateway
+              nexora-tenant-service
+              nexora-workforce-service
+              nexora-audit-service
+              nexora-payroll-service
+            )
+            for svc in "${SERVICES[@]}"; do
+              argocd app rollback ${svc} || true
+            done
           fi

@@ -1,8 +1,8 @@
-# ArgoCD Application: Nexora API Gateway.
+# ArgoCD Application: Nexora Payroll Service.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: nexora-api-gateway
+  name: nexora-payroll-service
   namespace: argocd
   labels:
     app.kubernetes.io/part-of: nexora-os
@@ -14,7 +14,7 @@ spec:
     path: helm/aos-chart
     helm:
       valueFiles:
-        - values/api-gateway.yaml
+        - values/payroll.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: nexora-os

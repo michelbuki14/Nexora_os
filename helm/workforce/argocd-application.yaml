@@ -1,13 +1,13 @@
-# ArgoCD Application: AOS Workforce Service.
+# ArgoCD Application: Nexora Workforce Service.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: aos-workforce-service
+  name: nexora-workforce-service
   namespace: argocd
   labels:
-    app.kubernetes.io/part-of: aos
+    app.kubernetes.io/part-of: nexora-os
 spec:
-  project: aos
+  project: nexora-os
   source:
     repoURL: https://github.com/michelbuki14/AFRICA-OPERATING-SYSTEM-AOS-.git
     targetRevision: main
@@ -17,7 +17,7 @@ spec:
         - values/workforce.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: aos
+    namespace: nexora-os
   syncPolicy:
     automated:
       prune: true

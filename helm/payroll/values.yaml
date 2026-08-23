@@ -1,0 +1,56 @@
+# Nexora Payroll Service — Helm values
+# Deployed as part of the aos-chart umbrella chart.
+# This file overrides the defaults for the payroll service specifically.
+
+replicaCount: 2
+
+image:
+  repository: nexora-payroll-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3003
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+env:
+  NEXORA_ENV: production
+  NEXORA_SERVER__PORT: "3003"
+  NEXORA_DATABASE__URL: "postgresql://nexora:***@nexora-postgres:5432/nexora"
+  NEXORA_REDIS__URL: "redis://:nexora_prod_password@nexora-redis:6379/0"
+  NEXORA_AUTH__JWKS_URL: "https://keycloak.nexora-os.example.com/realms/nexora/protocol/openid-connect/certs"
+  NEXORA_AUTH__ISSUER: "https://keycloak.nexora-os.example.com/realms/nexora"
+  NEXORA_TRACING__OTLP_ENDPOINT: "http://otel-collector:4317"
+
+# Payroll-specific configuration
+payroll:
+  # DRC 2025 ruleset versions
+  ipr_ruleset: "ipr-2025"
+  cnss_ruleset: "cnss-2025"
+  smig_ruleset: "smig-2025"
+  # Currency: always CDF for DRC
+  base_currency: "CDF"
+  # Minimum salary floor (SMIG monthly, 26 days × 7,000 CDF/day)
+  smig_floor_cdf: 182000
+
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: 3003
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: 3003
+  initialDelaySeconds: 5
+  periodSeconds: 5
