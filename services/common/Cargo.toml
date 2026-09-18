@@ -18,7 +18,7 @@ hex = "0.4"
 jsonwebtoken = { workspace = true }
 opentelemetry = { version = "0.28", features = ["metrics", "trace"] }
 opentelemetry-otlp = { version = "0.28", features = ["grpc-tonic"] }
-opentelemetry_sdk = { version = "0.28", features = ["metrics", "trace", "rt-tokio-current-thread"] }
+opentelemetry_sdk = { version = "0.32", features = ["metrics", "trace", "rt-tokio-current-thread"] }
 rand = "0.8"
 redis = { version = "0.24", features = ["tokio-comp", "connection-manager"] }
 reqwest = { workspace = true }
