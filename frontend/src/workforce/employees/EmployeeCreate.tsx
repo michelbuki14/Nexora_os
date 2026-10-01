@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { errorMessage } from "../../api/client";
 import {
@@ -47,6 +48,7 @@ export function EmployeeCreate() {
   const canCreate = usePermission("employee.write");
   const toast = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -105,6 +107,7 @@ export function EmployeeCreate() {
       }
       const created = await createEmployee(req as unknown as CreateEmployeeRequest);
       toast.success(`Employee ${created.legal_name} created`);
+      queryClient.invalidateQueries({ queryKey: ["workforce", "employees"] });
       navigate(`/workforce/employees/${created.ulid}`);
     } catch (err) {
       toast.error(errorMessage(err));
@@ -135,7 +138,13 @@ export function EmployeeCreate() {
               <Input id="phone" {...register("phone")} />
             </Field>
             <Field label="Gender" htmlFor="gender">
-              <Input id="gender" {...register("gender")} />
+              <Select id="gender" {...register("gender")}>
+                <option value="">Select…</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="non_binary">Non-binary</option>
+                <option value="undisclosed">Prefer not to say</option>
+              </Select>
             </Field>
             <Field label="Date of birth" htmlFor="date_of_birth">
               <Input id="date_of_birth" type="date" {...register("date_of_birth")} />

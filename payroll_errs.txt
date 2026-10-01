@@ -1,0 +1,142 @@
+lements `sqlx::Decode<'a, sqlx::Any>`
+               `&'r [u8]` implements `sqlx::Decode<'r, Postgres>`
+               `&'r [u8]` implements `sqlx::Decode<'r, sqlx::Any>`
+               `&'r str` implements `sqlx::Decode<'r, Postgres>`
+               `()` implements `sqlx::Decode<'r, Postgres>`
+               `(T1, T2)` implements `sqlx::Decode<'r, Postgres>`
+               `(T1, T2, T3)` implements `sqlx::Decode<'r, Postgres>`
+               `(T1, T2, T3, T4)` implements `sqlx::Decode<'r, Postgres>`
+             and 65 others
+     = note: required for `std::option::Option<Money>` to implement `sqlx::Decode<'_, Postgres>`
+note: required by a bound in `try_get`
+    --> C:\Users\miche\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sqlx-core-0.8.6\src\row.rs:114:12
+     |
+ 111 |     fn try_get<'r, T, I>(&'r self, index: I) -> Result<T, Error>
+     |        ------- required by a bound in this associated function
+...
+ 114 |         T: Decode<'r, Self::Database> + Type<Self::Database>,
+     |            ^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `Row::try_get`
+
+error[E0277]: the trait bound `Money: sqlx::Type<Postgres>` is not satisfied
+    --> services\payroll-service\src\handlers.rs:1629:29
+     |
+1629 |         default_amount: row.try_get("default_amount").unwrap_or(None),
+     |                             ^^^^^^^ the trait `sqlx::Type<Postgres>` is not implemented for `Money`
+     |
+     = help: the following other types implement trait `sqlx::Type<DB>`:
+               ()
+               (T1, T2)
+               (T1, T2, T3)
+               (T1, T2, T3, T4)
+               (T1, T2, T3, T4, T5)
+               (T1, T2, T3, T4, T5, T6)
+               (T1, T2, T3, T4, T5, T6, T7)
+               (T1, T2, T3, T4, T5, T6, T7, T8)
+             and 48 others
+     = note: required for `std::option::Option<Money>` to implement `sqlx::Type<Postgres>`
+note: required by a bound in `try_get`
+    --> C:\Users\miche\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sqlx-core-0.8.6\src\row.rs:114:41
+     |
+ 111 |     fn try_get<'r, T, I>(&'r self, index: I) -> Result<T, Error>
+     |        ------- required by a bound in this associated function
+...
+ 114 |         T: Decode<'r, Self::Database> + Type<Self::Database>,
+     |                                         ^^^^^^^^^^^^^^^^^^^^ required by this bound in `Row::try_get`
+help: use a unary tuple instead
+     |
+1629 |         default_amount: (row,).try_get("default_amount").unwrap_or(None),
+     |                         +   ++
+
+error[E0308]: mismatched types
+    --> services\payroll-service\src\handlers.rs:1686:9
+     |
+1678 |     emit_payroll_event(
+     |     ------------------ arguments to this function are incorrect
+...
+1686 |         ulid,
+     |         ^^^^ expected `Uuid`, found `String`
+     |
+note: function defined here
+    --> services\payroll-service\src\audit_emit.rs:34:14
+     |
+  34 | pub async fn emit_payroll_event(
+     |              ^^^^^^^^^^^^^^^^^^
+...
+  42 |     resource_uuid: uuid::Uuid,
+     |     -------------------------
+
+error[E0382]: borrow of moved value: `items`
+    --> services\payroll-service\src\handlers.rs:1928:20
+     |
+1896 |     let items: Vec<PayrollConfigResponse> = rows
+     |         ----- move occurs because `items` has type `Vec<models::PayrollConfigResponse>`, which does not implement the `Copy` trait
+...
+1925 |         items,
+     |         ----- value moved here
+...
+1928 |         page_size: items.len() as i64,
+     |                    ^^^^^ value borrowed here after move
+     |
+help: consider cloning the value if the performance cost is acceptable
+     |
+1925 |         items: items.clone(),
+     |              +++++++++++++++
+
+warning: unused import: `serde::Deserialize`
+  --> services\payroll-service\src\handlers.rs:27:5
+   |
+27 | use serde::Deserialize;
+   |     ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `config_exists`
+   --> services\payroll-service\src\handlers.rs:118:9
+    |
+118 |     let config_exists: (i64,) = sqlx::query_scalar::<_, (i64,)>(
+    |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_config_exists`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `row`
+   --> services\payroll-service\src\handlers.rs:130:9
+    |
+130 |     let row = sqlx::query(
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_row`
+
+warning: unused variable: `state`
+   --> services\payroll-service\src\handlers.rs:201:11
+    |
+201 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+   --> services\payroll-service\src\handlers.rs:305:11
+    |
+305 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1269:11
+     |
+1269 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1814:11
+     |
+1814 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1875:11
+     |
+1875 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+Some errors have detailed explanations: E0277, E0282, E0283, E0308, E0382, E0425, E0560, E0599, E0609.
+For more information about an error, try `rustc --explain E0277`.
+warning: `nexora-payroll-service` (lib) generated 8 warnings
+error: could not compile `nexora-payroll-service` (lib) due to 26 previous errors; 8 warnings emitted
+
+RC=101

@@ -1,0 +1,12 @@
+# Cargo config for the Nexora OS workspace.
+#
+# The repo lives inside a OneDrive-synced folder. Cargo's default target dir
+# (./target) sits inside the repo, and OneDrive's file-locking makes it
+# non-writable during builds, producing:
+#   "output path is not a writable directory" (autocfg panic)
+#
+# Redirect the build output to a directory OUTSIDE OneDrive so `cargo build`
+# works without extra env vars. Build artifacts are machine-local and must
+# never be committed (already covered by **/target/ in .gitignore).
+[build]
+target-dir = "C:/Users/miche/nexora-target"

@@ -2,6 +2,7 @@ import {
   Banknote,
   Building2,
   Code2,
+  Landmark,
   LayoutGrid,
   LineChart,
   Puzzle,
@@ -10,13 +11,14 @@ import {
   Server,
   Settings,
   ShieldCheck,
+  ShoppingBag,
+  Sparkles,
   Users,
   Wallet,
 } from "lucide-react";
 
 // IA from the master prompt §48. Live modules are gated on real token
-// permissions; planned modules render honest "not enabled in this tenant"
-// states (their backends don't exist yet, so no permission can unlock them).
+// permissions; demo-mode modules render seed-backed interactive pages.
 
 export const WORKFORCE_PERMS = [
   "employee.read",
@@ -54,7 +56,7 @@ export const NAV_GROUPS: NavGroup[] = [
         path: "/",
         icon: LayoutGrid,
         module: "live",
-        description: "AOS system overview",
+        description: "Nexora system overview",
       },
     ],
   },
@@ -63,43 +65,52 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       {
         label: "Workforce",
-        path: "/workforce",
+        path: "/workforce/employees",
         icon: Users,
         module: "live",
         anyPermission: WORKFORCE_PERMS,
         description: "Employees, org structure, compensation, documents",
       },
-      { label: "Payroll", path: "/payroll", icon: Banknote, module: "planned" },
-      { label: "Finance", path: "/finance", icon: Receipt, module: "planned" },
-      { label: "Payments", path: "/payments", icon: Wallet, module: "planned" },
+      { label: "Payroll", path: "/payroll", icon: Banknote, module: "live" },
+      { label: "Finance", path: "/finance", icon: Receipt, module: "live" },
+      { label: "Payments", path: "/payments", icon: Wallet, module: "live" },
     ],
   },
   {
     title: "Intelligence",
     items: [
-      { label: "Analytics", path: "/analytics", icon: LineChart, module: "planned" },
+      { label: "Analytics", path: "/analytics", icon: LineChart, module: "live" },
+      { label: "AI", path: "/ai", icon: Sparkles, module: "live" },
     ],
   },
   {
     title: "Security",
     items: [
-      { label: "Security Center", path: "/security", icon: ShieldCheck, module: "planned" },
+      { label: "Security Center", path: "/security", icon: ShieldCheck, module: "live" },
     ],
   },
   {
     title: "Platform",
     items: [
-      { label: "Infrastructure", path: "/infrastructure", icon: Server, module: "planned" },
-      { label: "Integrations", path: "/integrations", icon: Puzzle, module: "planned" },
-      { label: "Developer / API", path: "/developer", icon: Code2, module: "planned" },
+      { label: "Infrastructure", path: "/infrastructure", icon: Server, module: "live" },
+      { label: "Integrations", path: "/integrations", icon: Puzzle, module: "live" },
+      { label: "Developer / API", path: "/developer", icon: Code2, module: "live" },
+    ],
+  },
+  {
+    title: "Consumers",
+    items: [
+      { label: "Fintech", path: "/fintech", icon: Wallet, module: "live" },
+      { label: "Retail", path: "/retail", icon: ShoppingBag, module: "live" },
+      { label: "Government", path: "/gov", icon: Landmark, module: "live" },
     ],
   },
   {
     title: "Administration",
     items: [
-      { label: "Organizations", path: "/organizations", icon: Building2, module: "planned" },
-      { label: "Audit", path: "/audit", icon: ScrollText, module: "planned" },
-      { label: "Admin", path: "/admin", icon: Settings, module: "planned" },
+      { label: "Organizations", path: "/organizations", icon: Building2, module: "live" },
+      { label: "Audit", path: "/audit", icon: ScrollText, module: "live" },
+      { label: "Admin", path: "/admin", icon: Settings, module: "live" },
     ],
   },
 ];

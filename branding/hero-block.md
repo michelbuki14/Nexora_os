@@ -28,7 +28,7 @@
 | Workforce service — Phase 1 backend | ✅ Live, compiles clean (lib + tests). 9 RLS tables (migration 008), 17 handlers, audit emit, S3 presigned docs, 18 RBAC keys, testcontainers isolation test scaffolded (ignored on Windows pending Linux/CI run) |
 | Platform backbone, design-partner pilot | ✅ Sellable now |
 | Workforce frontend / portal | ❌ Not built — backend-only Phase 1; OpenAPI spec + data-contract/portal-map docs describe the surface |
-| Fintech / retail / gov vertical mains | ❌ 3-line stubs — `println!("boundary reserved")` |
+| Fintech / retail / gov vertical mains | ✅ Compiling — full Axum services with RLS, RBAC, utoipa docs |
 | Gateway audit + workforce routes | ❌ Return `{"status":"planned"}` — both services run standalone on their own ports with their own auth+RLS stack; gateway forwarding not wired |
 | No ledger, KYC, payments, citizen ID, permits | ❌ Does not exist |
 | `audit_events` UPDATE/DELETE DB-REVOKE | ❌ Deferred — append-only currently app-enforced only (incl. workforce history/compensation tables). Must close before production |
@@ -37,4 +37,4 @@
 | Revenue numbers used | $2–5K/mo audit SaaS, $15–25K pilot setup (harden workforce OR build new vertical) — no fabricated ARR |
 | Moving money / issuing ID | ❌ Never claimed |
 
-> Last updated: 2026-08-10 (post-workforce-Phase-1).
+> Last updated: 2026-10-01 (post-consumer-verticals-compile).

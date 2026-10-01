@@ -49,11 +49,12 @@ const columns: ColumnDef<EmployeeResponse, unknown>[] = [
   },
   {
     id: "actions",
-    header: "",
+    header: "Actions",
     cell: (info) => (
       <Link
         to={`/workforce/employees/${info.row.original.ulid}`}
         className="text-xs font-medium text-brand-700 hover:underline"
+        aria-label={`View profile of ${info.row.original.legal_name}`}
       >
         View profile
       </Link>

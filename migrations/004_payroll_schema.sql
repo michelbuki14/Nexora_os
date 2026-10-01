@@ -27,14 +27,26 @@ CREATE TABLE IF NOT EXISTS payroll_configurations (
     CHECK (expiry_date IS NULL OR expiry_date >= effective_date)
 );
 
-CREATE INDEX idx_payroll_configs_tenant_active ON payroll_configurations(tenant_id, is_active DESC)
+CREATE INDEX IF NOT EXISTS idx_payroll_configs_tenant_active ON payroll_configurations(tenant_id, is_active DESC)
     WHERE is_active = TRUE;
-CREATE INDEX idx_payroll_configs_org ON payroll_configurations(org_id);
+CREATE INDEX IF NOT EXISTS idx_payroll_configs_org ON payroll_configurations(org_id);
+
+-- System tenant/org for cross-tenant reference configs (accessed via nexora.is_system GUC)
+INSERT INTO organizations (ulid, name, slug, status, tier)
+VALUES ('01ARZ3FFCHZ00000000000000', 'System', 'system', 'active', 'enterprise')
+ON CONFLICT (slug) DO NOTHING;
+INSERT INTO tenants (ulid, org_id, name, slug, status, tier)
+VALUES ('01ARZ3FFCHZ00000000000000',
+        (SELECT id FROM organizations WHERE slug = 'system'),
+        'System', 'system', 'active', 'enterprise')
+ON CONFLICT (org_id, slug) DO NOTHING;
 
 -- Seed with DRC 2025 config (config_version: ipr-2025)
-INSERT INTO payroll_configurations (config_version, effective_date, is_active)
-VALUES ('ipr-2025', '2025-01-01', TRUE)
-ON CONFLICT (config_version) DO NOTHING;
+INSERT INTO payroll_configurations (tenant_id, org_id, config_version, effective_date, is_active)
+SELECT (SELECT id FROM tenants WHERE slug = 'system'),
+       (SELECT id FROM organizations WHERE slug = 'system'),
+       'ipr-2025', '2025-01-01', TRUE
+ON CONFLICT (tenant_id, config_version) DO NOTHING;
 
 -- =============================================================================
 -- COUNTRY TAX CONFIGURATIONS (IPR progressive brackets, CNSS rates, SMIG)
@@ -44,7 +56,7 @@ CREATE TABLE IF NOT EXISTS country_tax_configs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id),
     org_id UUID NOT NULL REFERENCES organizations(id),
-    country_code CHAR(2) NOT NULL,         -- ISO-2: CDF, USD, etc.
+    country_code CHAR(3) NOT NULL,         -- ISO-2: CDF, USD, etc.
     config_version TEXT NOT NULL,         -- e.g., "ipr-2025"
     ipr_bands JSONB NOT NULL DEFAULT '[]', -- Array of {from, to, rate} brackets
     cnss_employee_rate NUMERIC(5,4) NOT NULL DEFAULT 0.05,   -- 5%
@@ -60,15 +72,18 @@ CREATE TABLE IF NOT EXISTS country_tax_configs (
     UNIQUE (tenant_id, country_code, config_version)
 );
 
-CREATE INDEX idx_country_tax_tenant_active ON country_tax_configs(tenant_id, is_active DESC)
+CREATE INDEX IF NOT EXISTS idx_country_tax_tenant_active ON country_tax_configs(tenant_id, is_active DESC)
     WHERE is_active = TRUE;
-CREATE INDEX idx_country_tax_country ON country_tax_configs(country_code, is_active DESC);
+CREATE INDEX IF NOT EXISTS idx_country_tax_country ON country_tax_configs(country_code, is_active DESC);
 
 -- Seed DRC 2025 IPR brackets (illustrative; actual values require legal review)
-INSERT INTO country_tax_configs (country_code, config_version, ipr_bands, cnss_employee_rate, cnss_employer_rate, cnss_ceiling, smig_daily)
-VALUES ('CDF', 'ipr-2025',
-    '[{"from": 0, "to": 180000, "rate": 0}, {"from": 180001, "to": 480000, "rate": 0.15}, {"from": 480001, "to": 1200000, "rate": 0.25}, {"from": 1200001, "to": 2400000, "rate": 0.30}, {"from": 2400001, "to": 4800000, "rate": 0.35}, {"from": 4800001, "rate": 0.40}]'::jsonb,
-    0.05, 0.105, 1500000.00, 7000.00)
+INSERT INTO country_tax_configs (tenant_id, org_id, country_code, config_version, ipr_bands, cnss_employee_rate, cnss_employer_rate, cnss_ceiling, smig_daily)
+VALUES (
+  (SELECT id FROM tenants WHERE slug = 'system'),
+  (SELECT id FROM organizations WHERE slug = 'system'),
+  'CDF', 'ipr-2025',
+  '[{"from": 0, "to": 180000, "rate": 0}, {"from": 180001, "to": 480000, "rate": 0.15}, {"from": 480001, "to": 1200000, "rate": 0.25}, {"from": 1200001, "to": 2400000, "rate": 0.30}, {"from": 2400001, "to": 4800000, "rate": 0.35}, {"from": 4800001, "rate": 0.40}]'::jsonb,
+  0.05, 0.105, 1500000.00, 7000.00)
 ON CONFLICT (tenant_id, country_code, config_version) DO NOTHING;
 
 -- =============================================================================
@@ -79,7 +94,7 @@ CREATE TABLE IF NOT EXISTS country_statutory_configs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id),
     org_id UUID NOT NULL REFERENCES organizations(id),
-    country_code CHAR(2) NOT NULL,         -- ISO-2
+    country_code CHAR(3) NOT NULL,         -- ISO-2
     config_version TEXT NOT NULL,         -- e.g., "smig-2025"
     smig_daily NUMERIC(19,2) NOT NULL,
     smig_monthly_26 NUMERIC(19,2) NOT NULL,
@@ -97,9 +112,9 @@ CREATE TABLE IF NOT EXISTS country_statutory_configs (
     UNIQUE (tenant_id, country_code, config_version)
 );
 
-CREATE INDEX idx_country_stat_tenant_active ON country_statutory_configs(tenant_id, is_active DESC)
+CREATE INDEX IF NOT EXISTS idx_country_stat_tenant_active ON country_statutory_configs(tenant_id, is_active DESC)
     WHERE is_active = TRUE;
-CREATE INDEX idx_country_stat_country ON country_statutory_configs(country_code, is_active DESC);
+CREATE INDEX IF NOT EXISTS idx_country_stat_country ON country_statutory_configs(country_code, is_active DESC);
 
 -- =============================================================================
 -- PAYROLL RUNS (immutable after confirm)
@@ -129,8 +144,8 @@ CREATE TABLE IF NOT EXISTS payroll_runs (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_payroll_runs_tenant ON payroll_runs(tenant_id, period_start DESC);
-CREATE INDEX idx_payroll_runs_status ON payroll_runs(tenant_id, status);
+CREATE INDEX IF NOT EXISTS idx_payroll_runs_tenant ON payroll_runs(tenant_id, period_start DESC);
+CREATE INDEX IF NOT EXISTS idx_payroll_runs_status ON payroll_runs(tenant_id, status);
 
 -- =============================================================================
 -- PAYSLIPS (immutable, versioned, correction chain)
@@ -157,9 +172,9 @@ CREATE TABLE IF NOT EXISTS payslips (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_payslips_tenant ON payslips(tenant_id, created_at DESC);
-CREATE INDEX idx_payslips_employee ON payslips(employee_id, created_at DESC);
-CREATE INDEX idx_payslips_run ON payslips(payroll_run_id);
+CREATE INDEX IF NOT EXISTS idx_payslips_tenant ON payslips(tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payslips_employee ON payslips(employee_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payslips_run ON payslips(payroll_run_id);
 CREATE UNIQUE INDEX idx_payslips_emp_version ON payslips(employee_id, payroll_run_id, version);
 
 -- =============================================================================
@@ -182,8 +197,8 @@ CREATE TABLE IF NOT EXISTS payroll_items (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_payroll_items_payslip ON payroll_items(payslip_id);
-CREATE INDEX idx_payroll_items_type ON payroll_items(item_type, item_code);
+CREATE INDEX IF NOT EXISTS idx_payroll_items_payslip ON payroll_items(payslip_id);
+CREATE INDEX IF NOT EXISTS idx_payroll_items_type ON payroll_items(item_type, item_code);
 
 -- =============================================================================
 -- ROW-LEVEL SECURITY

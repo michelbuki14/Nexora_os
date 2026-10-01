@@ -65,7 +65,7 @@ export function EmployeeProfile() {
             <p className="text-sm font-medium text-slate-900">
               {employee.preferred_name ?? employee.legal_name}
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-secondary">
               Hired {formatDate(employee.hire_date)} · updated {formatDateTime(employee.updated_at)}
             </p>
           </div>
@@ -110,7 +110,7 @@ function OverviewTab({ employee }: { employee: EmployeeResponse }) {
       <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
         {rows.map(([label, value]) => (
           <div key={label} className="flex items-baseline justify-between gap-4">
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</dt>
+            <dt className="text-xs font-medium uppercase tracking-wide text-secondary">{label}</dt>
             <dd className="text-sm text-slate-800">{value}</dd>
           </div>
         ))}
@@ -269,12 +269,12 @@ function EmploymentTab({ employee }: { employee: EmployeeResponse }) {
       <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-3">
         {rows.map(([label, value]) => (
           <div key={label}>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</dt>
+            <dt className="text-xs font-medium uppercase tracking-wide text-secondary">{label}</dt>
             <dd className="text-sm text-slate-800">{value}</dd>
           </div>
         ))}
       </dl>
-      <p className="mt-3 text-xs text-slate-400">
+      <p className="mt-3 text-xs text-secondary">
         Employment history is a tracked follow-up; Phase 1 shows current assignments.
       </p>
 

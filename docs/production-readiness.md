@@ -8,7 +8,7 @@ This checklist prevents the repository from claiming production readiness before
 - [x] Domain boundaries and extraction criteria documented — `docs/implementation-plan.md`
 - [x] API contracts versioned and reviewed — utoipa OpenAPI on all services
 - [x] Data residency and country launch scope approved — DRC focus, CDF-only
-- [x] Service inventory documented — README.md, 3 compiling + 3 stubs
+- [x] Service inventory documented — README.md, 6 compiling services (audit, tenant, workforce, fintech, retail, gov)
 
 ## Security
 
@@ -53,7 +53,7 @@ This checklist prevents the repository from claiming production readiness before
 
 The technical team may recommend launch only when all mandatory controls are complete. A green build alone is not production readiness.
 
-**Current status (2026-08-23):**
+**Current status (2026-10-01):**
 
 | Gate | Status |
 |------|--------|

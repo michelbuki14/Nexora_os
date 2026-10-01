@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,11 +30,7 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
-/**
- * Compensation is a separate, permission-gated call. This panel never fetches
- * compensation unless the caller holds employee.compensation.read — no
- * "fetch and hide". Changes emit a salary.changed audit event (amount omitted).
- */
+/** Compensation panel — restricted to employees with compensation permissions. */
 export function CompensationPanel({ employeeUlid }: { employeeUlid: string }) {
   const canRead = usePermission("employee.compensation.read");
   const canWrite = usePermission("employee.compensation.write");
@@ -82,7 +78,7 @@ export function CompensationPanel({ employeeUlid }: { employeeUlid: string }) {
   if (!canRead) {
     return (
       <Card className="p-4">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-secondary">
           Compensation is restricted. You need the{" "}
           <code className="rounded bg-slate-100 px-1">employee.compensation.read</code>{" "}
           permission to view salary details.
@@ -107,24 +103,24 @@ export function CompensationPanel({ employeeUlid }: { employeeUlid: string }) {
         )}
       </div>
 
-      {query.isPending && <p className="text-sm text-slate-400">Loading…</p>}
+      {query.isPending && <p className="text-sm text-secondary">Loading…</p>}
       {query.isError && !(query.error instanceof ApiError && query.error.status === 404) && (
         <p className="text-sm text-red-600">Could not load compensation: {errorMessage(query.error)}</p>
       )}
       {query.data ? (
         <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-3">
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">Gross amount</dt>
+            <dt className="text-xs font-medium uppercase tracking-wide text-secondary">Gross amount</dt>
             <dd className="text-sm font-semibold text-slate-900">
               {formatMoney(query.data.gross_amount_minor, query.data.currency_code)}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">Frequency</dt>
+            <dt className="text-xs font-medium uppercase tracking-wide text-secondary">Frequency</dt>
             <dd className="text-sm text-slate-800">{query.data.frequency}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">Effective</dt>
+            <dt className="text-xs font-medium uppercase tracking-wide text-secondary">Effective</dt>
             <dd className="text-sm text-slate-800">{formatDate(query.data.effective_date)}</dd>
           </div>
         </dl>
@@ -167,7 +163,7 @@ export function CompensationPanel({ employeeUlid }: { employeeUlid: string }) {
           <Field label="Change reason" htmlFor="comp-reason">
             <Input id="comp-reason" placeholder="e.g. annual review" {...register("change_reason")} />
           </Field>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-secondary">
             The change is written to the immutable audit trail as{" "}
             <code>salary.changed</code>; the amount itself is omitted from the
             audit event.

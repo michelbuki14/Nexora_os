@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,10 +32,7 @@ function formatBytes(bytes: number | null | undefined): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/**
- * Document bytes are never rendered inline. Downloads use a short-lived
- * presigned GET URL (TTL ≤ 60s). Metadata only; the API stores bytes in MinIO.
- */
+/** Documents panel — list and upload employee documents. */
 export function DocumentsPanel({ employeeUlid }: { employeeUlid: string }) {
   const canRead = usePermission("employee.documents.read");
   const canWrite = usePermission("employee.documents.write");
@@ -76,7 +73,6 @@ export function DocumentsPanel({ employeeUlid }: { employeeUlid: string }) {
     setDownloadError(null);
     try {
       const { presigned_url } = await getDocumentUrl(employeeUlid, docUlid);
-      // The URL is valid for ~60s. We open it directly; nothing is cached client-side.
       window.open(presigned_url, "_blank", "noopener");
       toast.info(`Download started for ${filename}`);
     } catch (err) {
@@ -88,7 +84,7 @@ export function DocumentsPanel({ employeeUlid }: { employeeUlid: string }) {
   if (!canRead) {
     return (
       <Card className="p-4">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-secondary">
           Documents are restricted. You need the{" "}
           <code className="rounded bg-slate-100 px-1">employee.documents.read</code> permission
           to view documents.
@@ -113,9 +109,9 @@ export function DocumentsPanel({ employeeUlid }: { employeeUlid: string }) {
         )}
       </div>
 
-      {downloadError && <Alert kind="danger" >{downloadError}</Alert>}
+      {downloadError && <Alert kind="danger">{downloadError}</Alert>}
 
-      {query.isPending && <p className="text-sm text-slate-400">Loading…</p>}
+      {query.isPending && <p className="text-sm text-secondary">Loading…</p>}
       {query.isError && (
         <p className="text-sm text-red-600">Could not load documents: {errorMessage(query.error)}</p>
       )}
@@ -127,7 +123,7 @@ export function DocumentsPanel({ employeeUlid }: { employeeUlid: string }) {
       )}
       {query.data && query.data.items.length > 0 && (
         <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-secondary">
             <tr>
               <th className="px-3 py-2 font-medium">Filename</th>
               <th className="px-3 py-2 font-medium">Type</th>
@@ -140,16 +136,16 @@ export function DocumentsPanel({ employeeUlid }: { employeeUlid: string }) {
             {query.data.items.map((doc) => (
               <tr key={doc.ulid} className="hover:bg-slate-50">
                 <td className="px-3 py-2 text-slate-800">{doc.filename}</td>
-                <td className="px-3 py-2 text-slate-600">{doc.doc_type}</td>
-                <td className="px-3 py-2 text-slate-600">{formatBytes(doc.size_bytes)}</td>
-                <td className="px-3 py-2 text-slate-600">{formatDate(doc.created_at)}</td>
+                <td className="px-3 py-2 text-secondary">{doc.doc_type}</td>
+                <td className="px-3 py-2 text-secondary">{formatBytes(doc.size_bytes)}</td>
+                <td className="px-3 py-2 text-secondary">{formatDate(doc.created_at)}</td>
                 <td className="px-3 py-2 text-right">
                   {doc.is_active ? (
                     <Button variant="secondary" size="sm" onClick={() => download(doc.ulid, doc.filename)}>
                       Download
                     </Button>
                   ) : (
-                    <span className="text-xs text-slate-400">Inactive</span>
+                    <span className="text-xs text-secondary">Inactive</span>
                   )}
                 </td>
               </tr>
@@ -169,12 +165,12 @@ export function DocumentsPanel({ employeeUlid }: { employeeUlid: string }) {
             </Select>
           </Field>
           {file && (
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-secondary">
               <span className="font-medium">{file.name}</span> · {formatBytes(file.size)}
             </p>
           )}
-          <p className="text-xs text-slate-400">
-            The file is stored in object storage; AOS keeps only metadata and a
+          <p className="text-xs text-secondary">
+            The file is stored in object storage; Nexora keeps only metadata and a
             content hash in the database.
           </p>
           <div className="flex justify-end gap-2 pt-2">

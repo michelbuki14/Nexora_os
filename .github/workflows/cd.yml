@@ -4,12 +4,15 @@
 # Promotes images through staging → production with manual approval gates.
 # Uses ArgoCD for production deployment (GitOps).
 #
-# Service inventory (2026-08-23):
+# Service inventory (2026-08-28):
 #   - nexora-api-gateway     (port 3000) — single entry point, routing
 #   - nexora-tenant-service  (port 3004) — tenant/organization CRUD
 #   - nexora-workforce-service (port 3002) — employees, contracts, compensation
 #   - nexora-audit-service   (port 3001) — hash-chained audit events
 #   - nexora-payroll-service (port 3003) — DRC payroll engine, payslips
+#   - nexora-fintech-service (port 3005) — consumer wallets, transactions, payments
+#   - nexora-retail-service  (port 3006) — catalog, orders, inventory
+#   - nexora-gov-service     (port 3007) — permits, licenses, civil records
 
 name: CD
 
@@ -73,6 +76,9 @@ jobs:
             nexora-workforce-service
             nexora-audit-service
             nexora-payroll-service
+            nexora-fintech-service
+            nexora-retail-service
+            nexora-gov-service
           )
           for svc in "${SERVICES[@]}"; do
             docker tag nexora-services:${{ env.IMAGE_TAG }} \
@@ -90,6 +96,9 @@ jobs:
             nexora-workforce-service
             nexora-audit-service
             nexora-payroll-service
+            nexora-fintech-service
+            nexora-retail-service
+            nexora-gov-service
           )
           for svc in "${SERVICES[@]}"; do
             kubectl set image deployment/${svc} \
@@ -105,6 +114,9 @@ jobs:
             nexora-workforce-service
             nexora-audit-service
             nexora-payroll-service
+            nexora-fintech-service
+            nexora-retail-service
+            nexora-gov-service
           )
           for svc in "${SERVICES[@]}"; do
             kubectl rollout status deployment/${svc} \
@@ -159,6 +171,9 @@ jobs:
             nexora-workforce-service
             nexora-audit-service
             nexora-payroll-service
+            nexora-fintech-service
+            nexora-retail-service
+            nexora-gov-service
           )
 
           for svc in "${SERVICES[@]}"; do
@@ -194,6 +209,9 @@ jobs:
               nexora-workforce-service
               nexora-audit-service
               nexora-payroll-service
+              nexora-fintech-service
+              nexora-retail-service
+              nexora-gov-service
             )
             for svc in "${SERVICES[@]}"; do
               argocd app rollback ${svc} || true

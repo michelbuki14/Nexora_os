@@ -1,0 +1,74 @@
+warning: constant `PENDING_TTL_DAYS` is never used
+  --> services\common\src\idempotency.rs:22:7
+   |
+22 | const PENDING_TTL_DAYS: i64 = 7;
+   |       ^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `update_idempotency_record_status` is never used
+   --> services\common\src\idempotency.rs:361:10
+    |
+361 | async fn update_idempotency_record_status(
+    |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: multiple fields are never read
+   --> services\common\src\idempotency.rs:412:5
+    |
+411 | struct IdempotencyRecord {
+    |        ----------------- fields in this struct
+412 |     id: Uuid,
+    |     ^^
+413 |     tenant_id: Uuid,
+    |     ^^^^^^^^^
+414 |     org_id: Uuid,
+    |     ^^^^^^
+415 |     requestor_id: Uuid,
+    |     ^^^^^^^^^^^^
+416 |     idempotency_key: Uuid,
+    |     ^^^^^^^^^^^^^^^
+417 |     operation: String,
+    |     ^^^^^^^^^
+...
+420 |     response_status_code: Option<i16>,
+    |     ^^^^^^^^^^^^^^^^^^^^
+421 |     created_at: chrono::DateTime<chrono::Utc>,
+    |     ^^^^^^^^^^
+422 |     updated_at: chrono::DateTime<chrono::Utc>,
+    |     ^^^^^^^^^^
+423 |     completed_at: Option<chrono::DateTime<chrono::Utc>>,
+    |     ^^^^^^^^^^^^
+    |
+    = note: `IdempotencyRecord` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: `nexora-common` (lib) generated 3 warnings
+   Compiling nexora-retail-service v0.1.0 (C:\Users\miche\OneDrive\Documents\GitHub\Nexora_os\services\retail-service)
+   Compiling nexora-gov-service v0.1.0 (C:\Users\miche\OneDrive\Documents\GitHub\Nexora_os\services\gov-service)
+   Compiling nexora-fintech-service v0.1.0 (C:\Users\miche\OneDrive\Documents\GitHub\Nexora_os\services\fintech-service)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.24s
+     Running unittests src\main.rs (C:\Users\miche\nexora-target\debug\deps\nexora_fintech_service-9c9fed8e723e0c15.exe)
+
+running 2 tests
+test handlers::tests::wallet_status_validation ... ok
+test handlers::tests::transaction_direction_validation ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\main.rs (C:\Users\miche\nexora-target\debug\deps\nexora_gov_service-156fa40132feae9d.exe)
+
+running 2 tests
+test handlers::tests::license_validation ... ok
+test handlers::tests::permit_validation ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\main.rs (C:\Users\miche\nexora-target\debug\deps\nexora_retail_service-c59154639a74e4bf.exe)
+
+running 2 tests
+test handlers::tests::product_validation ... ok
+test handlers::tests::order_validation ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+RC=0

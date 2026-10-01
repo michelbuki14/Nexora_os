@@ -24,7 +24,7 @@ This is Nexora OS: infrastructure for African commerce, one honest vertical at a
 
 Live now: a tenant-isolated, hash-chained, OIDC-authenticated audit log — **and** a full multi-tenant workforce service (legal entities, departments, positions, employee lifecycle, compensation history, secure document management with presigned GET URLs). Both run on the same Keycloak identity, the same RLS isolation, the same SHA-256 chain. 18 workforce permission keys, money as integer minor units, national IDs hashed with last-4 only.
 
-Designed boundaries, not yet built: fintech, retail, gov, payments, ledger, KYC, citizen ID, permits. Those service mains print `boundary reserved`. We won't sell stubs.
+Designed boundaries, not yet built: payments, ledger, KYC, citizen ID, permits. Those service mains print `boundary reserved`. We won't sell stubs.
 
 The audit chain now ingests workforce lifecycle events — every salary change is a chained, outbox-queued event the future payroll dispatcher will consume. We built the pipe Phase 2 runs through before we built the engine.
 
@@ -103,7 +103,7 @@ Last updated: 2026-08-10 (post-workforce-Phase-1).
 | Workforce service — Phase 1 backend | ✅ Live, compiles clean (lib + tests). 9 RLS tables (migration 008), 17 handlers, audit emit, S3 presigned docs, 18 RBAC keys, testcontainers isolation test scaffolded (ignored on Windows pending Linux/CI run) |
 | Platform backbone, design-partner pilot | ✅ Sellable now |
 | Workforce frontend / portal | ❌ Not built — backend-only Phase 1; OpenAPI spec + data-contract/portal-map docs describe the surface |
-| Fintech / retail / gov vertical mains | ❌ 3-line stubs — `println!("boundary reserved")` |
+| Fintech / retail / gov vertical mains | ✅ Compiling — full Axum services with RLS, RBAC, utoipa docs |
 | Gateway audit + workforce routes | ❌ Return `{"status":"planned"}` — both services run standalone on their own ports with their own auth+RLS stack; gateway forwarding not wired |
 | No ledger, KYC, payments, citizen ID, permits | ❌ Does not exist |
 | `audit_events` UPDATE/DELETE DB-REVOKE | ❌ Deferred — append-only currently app-enforced only (incl. workforce history/compensation tables). Must close before production |

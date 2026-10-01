@@ -1,5 +1,5 @@
 # Build stage
-FROM rust:1.80-slim AS builder
+FROM rust:latest AS builder
 
 WORKDIR /app
 
@@ -11,12 +11,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy workspace manifests (one COPY per member to maximise layer cache hits)
 COPY Cargo.toml Cargo.lock ./
+COPY migrations ./migrations
 COPY services/common/Cargo.toml services/common/Cargo.toml
 COPY services/api-gateway/Cargo.toml services/api-gateway/Cargo.toml
 COPY services/workforce-service/Cargo.toml services/workforce-service/Cargo.toml
 COPY services/tenant-service/Cargo.toml services/tenant-service/Cargo.toml
 COPY services/audit-service/Cargo.toml services/audit-service/Cargo.toml
 COPY services/migrate/Cargo.toml services/migrate/Cargo.toml
+COPY services/payroll-service/Cargo.toml services/payroll-service/Cargo.toml
 COPY services/retail-service/Cargo.toml services/retail-service/Cargo.toml
 COPY services/fintech-service/Cargo.toml services/fintech-service/Cargo.toml
 COPY services/gov-service/Cargo.toml services/gov-service/Cargo.toml
@@ -30,6 +32,7 @@ RUN mkdir -p \
     services/tenant-service/src \
     services/audit-service/src \
     services/migrate/src \
+    services/payroll-service/src \
     services/retail-service/src \
     services/fintech-service/src \
     services/gov-service/src && \
@@ -44,6 +47,7 @@ COPY services/api-gateway/src services/api-gateway/src
 COPY services/workforce-service/src services/workforce-service/src
 COPY services/tenant-service/src services/tenant-service/src
 COPY services/audit-service/src services/audit-service/src
+COPY services/payroll-service/src services/payroll-service/src
 COPY services/migrate/src services/migrate/src
 COPY services/retail-service/src services/retail-service/src
 COPY services/fintech-service/src services/fintech-service/src
@@ -56,7 +60,7 @@ RUN touch services/*/src/main.rs
 RUN cargo build --workspace --release
 
 # Runtime stage
-FROM debian:bookworm-slim AS runtime
+FROM debian:trixie-slim AS runtime
 
 WORKDIR /app
 
@@ -69,18 +73,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN groupadd -r aos && useradd -r -g aos aos
 
 # Copy all service binaries
-COPY --from=builder /app/target/release/aos-api-gateway /usr/local/bin/
-COPY --from=builder /app/target/release/aos-workforce-service /usr/local/bin/
-COPY --from=builder /app/target/release/aos-tenant-service /usr/local/bin/
-COPY --from=builder /app/target/release/aos-audit-service /usr/local/bin/
-COPY --from=builder /app/target/release/aos-migrate /usr/local/bin/
+COPY --from=builder /app/target/release/nexora-api-gateway /usr/local/bin/
+COPY --from=builder /app/target/release/nexora-workforce-service /usr/local/bin/
+COPY --from=builder /app/target/release/nexora-tenant-service /usr/local/bin/
+COPY --from=builder /app/target/release/nexora-audit-service /usr/local/bin/
+COPY --from=builder /app/target/release/nexora-payroll-service /usr/local/bin/
+COPY --from=builder /app/target/release/nexora-fintech-service /usr/local/bin/
+COPY --from=builder /app/target/release/nexora-retail-service /usr/local/bin/
+COPY --from=builder /app/target/release/nexora-gov-service /usr/local/bin/
+COPY --from=builder /app/target/release/nexora-migrate /usr/local/bin/
 
 RUN chown aos:aos \
-    /usr/local/bin/aos-api-gateway \
-    /usr/local/bin/aos-workforce-service \
-    /usr/local/bin/aos-tenant-service \
-    /usr/local/bin/aos-audit-service \
-    /usr/local/bin/aos-migrate
+    /usr/local/bin/nexora-api-gateway \
+    /usr/local/bin/nexora-workforce-service \
+    /usr/local/bin/nexora-tenant-service \
+    /usr/local/bin/nexora-audit-service \
+    /usr/local/bin/nexora-payroll-service \
+    /usr/local/bin/nexora-fintech-service \
+    /usr/local/bin/nexora-retail-service \
+    /usr/local/bin/nexora-gov-service \
+    /usr/local/bin/nexora-migrate
 
 USER aos
 

@@ -71,7 +71,7 @@ export function CommandPalette() {
         />
         <ul className="max-h-72 overflow-y-auto py-1" role="listbox">
           {results.length === 0 && (
-            <li className="px-4 py-3 text-sm text-slate-500">No matches</li>
+            <li className="px-4 py-3 text-sm text-secondary">No matches</li>
           )}
           {results.map((item, i) => {
             const Icon = item.icon;
@@ -89,7 +89,7 @@ export function CommandPalette() {
                   <Icon className="h-4 w-4 shrink-0" />
                   <span>{item.label}</span>
                   {item.module === "planned" && (
-                    <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+                    <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-xs text-secondary">
                       Planned
                     </span>
                   )}

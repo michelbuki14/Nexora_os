@@ -49,7 +49,7 @@
 
 2. **Honesty ledger — open status of what's live vs. roadmap vs. stub**
    - Most players silently upgrade "coming soon" to "live" without acknowledgment
-   - Nexora OS openly maintains the honesty ledger: audit live, workforce backend, 3-line stubs for fintech/retail/gov
+   - Nexora OS openly maintains the honesty ledger: audit live, workforce backend, fintech/retail/gov compiling, payments/ledger/KYC still not built
    - This builds more trust than any marketing claim
 
 3. **Design-partner-to-reference-to-scale model**
@@ -133,7 +133,7 @@
 **In all external copy, at least one** of the following must appear:
 - Handler count: "17 handlers"
 - Migration number: "migration 008", "migration 009"
-- Vertical status: "audit live, workforce backend, 3-line stubs for fintech/retail/gov"
+- Vertical status: "audit live, workforce backend, fintech/retail/gov compiling, payments/ledger/KYC still not built"
 - Pricing honesty: "$2-5K/mo audit SaaS, $15-25K pilot — no fabricated ARR"
 
 ### Positioning Evaluation Checklist

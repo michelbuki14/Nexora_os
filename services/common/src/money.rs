@@ -8,6 +8,8 @@
 //! - The default scale is 4 decimal places (matches `NUMERIC(19,4)`.
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
+use sqlx::postgres::{PgTypeInfo, PgValueRef};
+use sqlx::{Decode, Encode, Type};
 use std::fmt;
 use std::str::FromStr;
 use utoipa::ToSchema;
@@ -294,6 +296,32 @@ impl Money {
                 rhs.currency.to_string(),
             ))
         }
+    }
+}
+
+// --- SQLx support -----------------------------------------------------------
+// `Money` is stored as `NUMERIC(19,4)` in PostgreSQL. We round-trip on the
+// inner `Decimal`; currency is recovered as the tenant base currency (CDF) on
+// decode and carried explicitly on encode.
+impl Type<sqlx::Postgres> for Money {
+    fn type_info() -> PgTypeInfo {
+        <Decimal as Type<sqlx::Postgres>>::type_info()
+    }
+}
+
+impl<'r> Decode<'r, sqlx::Postgres> for Money {
+    fn decode(value: PgValueRef<'r>) -> Result<Self, sqlx::error::BoxDynError> {
+        let amount = Decimal::decode(value)?;
+        Ok(Money::new(amount, CurrencyCode::cdf()))
+    }
+}
+
+impl<'q> Encode<'q, sqlx::Postgres> for Money {
+    fn encode_by_ref(
+        &self,
+        buf: &mut sqlx::postgres::PgArgumentBuffer,
+    ) -> Result<sqlx::encode::IsNull, sqlx::error::BoxDynError> {
+        self.amount.encode_by_ref(buf)
     }
 }
 

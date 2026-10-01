@@ -40,10 +40,12 @@ export function decodeJwt(token: string): SessionClaims {
 }
 
 export const keycloak = new Keycloak({
-  url: import.meta.env.VITE_KEYCLOAK_URL,
-  realm: import.meta.env.VITE_KEYCLOAK_REALM,
-  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
+  url: import.meta.env.VITE_KEYCLOAK_URL || "http://localhost:9090",
+  realm: import.meta.env.VITE_KEYCLOAK_REALM || "nexora_os",
+  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || "nexora-public",
 });
+
+/** Check if Keycloak server is reachable */
 
 /** Return a fresh access token, silently refreshing if near expiry. */
 export async function getValidToken(minValidity = 30): Promise<string | null> {
@@ -59,5 +61,11 @@ export async function getValidToken(minValidity = 30): Promise<string | null> {
 }
 
 export async function logout(): Promise<void> {
-  await keycloak.logout({ redirectUri: window.location.origin });
+  try {
+    if (keycloak.token) {
+      await keycloak.logout({ redirectUri: window.location.origin });
+    }
+  } catch {
+    // Demo mode / Keycloak unreachable — ignore
+  }
 }

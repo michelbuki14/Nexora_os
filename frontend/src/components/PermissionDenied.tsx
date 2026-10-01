@@ -9,7 +9,7 @@ export function PermissionDenied({ permission }: { permission?: string }) {
   return (
     <Card className="mx-auto max-w-md p-8 text-center">
       <p className="text-lg font-semibold text-slate-900">You don’t have access</p>
-      <p className="mt-2 text-sm text-slate-500">
+      <p className="mt-2 text-sm text-secondary">
         This area requires a permission your account does not currently hold.
         {permission && (
           <>
@@ -18,8 +18,8 @@ export function PermissionDenied({ permission }: { permission?: string }) {
           </>
         )}
       </p>
-      <p className="mt-3 text-xs text-slate-400">
-        Access is enforced by the AOS backend — contact your tenant administrator
+      <p className="mt-3 text-xs text-secondary">
+        Access is enforced by the Nexora backend — contact your tenant administrator
         to request the role.
       </p>
     </Card>

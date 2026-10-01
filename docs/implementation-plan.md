@@ -55,14 +55,9 @@ The adversarial review identified **8 critical gaps**. All are resolved.
 | API Gateway | `nexora-api-gateway` | ✅ Compiling | Single entry point, routing, rate limiting |
 | Workforce | `nexora-workforce-service` | ✅ Compiling | Employee lifecycle, contracts, compensation |
 | Payroll | `nexora-payroll-service` | ✅ **Code complete** | DRC payroll engine, payslips, audit |
-
-### Stubbed services (boundary reserved)
-
-| Service | Crate | Status | Purpose |
-|---------|-------|--------|---------|
-| Retail | `nexora-retail-service` | Stub | Retail/consumer vertical |
-| Fintech | `nexora-fintech-service` | Stub | Fintech/payments vertical |
-| Gov | `nexora-gov-service` | Stub | Government/public-sector vertical |
+| Retail | `nexora-retail-service` | ✅ Compiling | Products, orders, inventory with price resolution |
+| Fintech | `nexora-fintech-service` | ✅ Compiling | Wallets, transactions, payments with admin RBAC |
+| Gov | `nexora-gov-service` | ✅ Compiling | Permits, licenses, civil records with admin RBAC |
 
 ### Payroll Service Detail
 

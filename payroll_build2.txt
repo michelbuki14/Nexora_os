@@ -1,0 +1,129 @@
+517:44
+     |
+1517 |             component_type: ComponentType::from_str(&r.get::<String, _>("component_type"))
+     |                                            ^^^^^^^^ variant, associated function, or constant not found in `models::ComponentType`
+     |
+    ::: services\payroll-service\src\models.rs:108:1
+     |
+ 108 | pub enum ComponentType {
+     | ---------------------- variant, associated function, or constant `from_str` not found for this enum
+     |
+     = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+     |
+  14 + use std::str::FromStr;
+     |
+help: there is an associated function `from` with a similar name
+     |
+1517 -             component_type: ComponentType::from_str(&r.get::<String, _>("component_type"))
+1517 +             component_type: ComponentType::from(&r.get::<String, _>("component_type"))
+     |
+
+error[E0599]: no method named `as_str` found for enum `std::option::Option<T>` in the current scope
+    --> services\payroll-service\src\handlers.rs:1580:30
+     |
+1580 |     .bind(req.component_type.as_str())
+     |                              ^^^^^^
+     |
+note: the method `as_str` exists on the type `models::ComponentType`
+    --> services\payroll-service\src\models.rs:114:5
+     |
+ 114 |     pub fn as_str(self) -> &'static str {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: there is a method `attr` with a similar name, but with different arguments
+    --> C:\Users\miche\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yansi-1.0.1\src\macros.rs:95:16
+     |
+  95 |         $($q)* fn $kind(self: $r, value: $A) -> $R;
+     |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+    ::: C:\Users\miche\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yansi-1.0.1\src\paint.rs:130:5
+     |
+ 130 |     properties!(signature(&Self) -> Painted<&Self>);
+     |     ----------------------------------------------- in this macro invocation
+     = note: this error originates in the macro `signature` which comes from the expansion of the macro `properties` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider using `Option::expect` to unwrap the `models::ComponentType` value, panicking if the value is an `Option::None`
+     |
+1580 |     .bind(req.component_type.expect("REASON").as_str())
+     |                             +++++++++++++++++
+
+error[E0599]: no variant, associated function, or constant named `from_str` found for enum `models::ComponentType` in the current scope
+    --> services\payroll-service\src\handlers.rs:1627:40
+     |
+1627 |         component_type: ComponentType::from_str(&row.get::<String, _>("component_type"))
+     |                                        ^^^^^^^^ variant, associated function, or constant not found in `models::ComponentType`
+     |
+    ::: services\payroll-service\src\models.rs:108:1
+     |
+ 108 | pub enum ComponentType {
+     | ---------------------- variant, associated function, or constant `from_str` not found for this enum
+     |
+     = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+     |
+  14 + use std::str::FromStr;
+     |
+help: there is an associated function `from` with a similar name
+     |
+1627 -         component_type: ComponentType::from_str(&row.get::<String, _>("component_type"))
+1627 +         component_type: ComponentType::from(&row.get::<String, _>("component_type"))
+     |
+
+warning: `nexora-common` (lib) generated 4 warnings (run `cargo fix --lib -p nexora-common` to apply 1 suggestion)
+warning: unused import: `serde::Deserialize`
+  --> services\payroll-service\src\handlers.rs:27:5
+   |
+27 | use serde::Deserialize;
+   |     ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `config_exists`
+   --> services\payroll-service\src\handlers.rs:118:9
+    |
+118 |     let config_exists: (i64,) = sqlx::query_scalar::<_, (i64,)>(
+    |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_config_exists`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `row`
+   --> services\payroll-service\src\handlers.rs:130:9
+    |
+130 |     let row = sqlx::query(
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_row`
+
+warning: unused variable: `state`
+   --> services\payroll-service\src\handlers.rs:201:11
+    |
+201 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+   --> services\payroll-service\src\handlers.rs:305:11
+    |
+305 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1269:11
+     |
+1269 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1814:11
+     |
+1814 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1875:11
+     |
+1875 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+Some errors have detailed explanations: E0063, E0277, E0282, E0283, E0308, E0599.
+For more information about an error, try `rustc --explain E0063`.
+warning: `nexora-payroll-service` (lib) generated 8 warnings
+error: could not compile `nexora-payroll-service` (lib) due to 10 previous errors; 8 warnings emitted
+
+RC=101

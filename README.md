@@ -13,9 +13,9 @@ This repository is the production foundation in progress. The current verticals 
 | API Gateway | `nexora-api-gateway` | ✅ Compiling | Single entry point, routing, rate limiting, circuit breaker |
 | Workforce | `nexora-workforce-service` | ✅ Compiling | Employee lifecycle, contracts, compensation, attendance, leave, documents |
 | Payroll | `nexora-payroll-service` | ✅ Code complete (0 errors) | DRC-compliant deterministic payroll engine, payslips, approval workflow |
-| Retail | `nexora-retail-service` | Stub | Boundary reserved for retail/consumer vertical |
-| Fintech | `nexora-fintech-service` | Stub | Boundary reserved for fintech/payments vertical |
-| Gov | `nexora-gov-service` | Stub | Boundary reserved for government/public-sector vertical |
+| Retail | `nexora-retail-service` | ✅ Compiling | Products, orders, inventory with price resolution, RBAC |
+| Fintech | `nexora-fintech-service` | ✅ Compiling | Wallets, transactions, payments with admin RBAC |
+| Gov | `nexora-gov-service` | ✅ Compiling | Permits, licenses, civil records with admin RBAC |
 
 ### Payroll Service — Detailed Status
 
@@ -112,6 +112,66 @@ All under `/api/v1/payroll/`:
 | `POST` | `/payroll-configs` | Create payroll config |
 | `GET` | `/payroll-configs/{id}` | Get config |
 | `GET` | `/payroll-configs` | List configs |
+
+### Fintech API endpoints
+
+All under `/api/v1/commerce/` (proxied to fintech service):
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/wallets` | Create wallet |
+| `GET` | `/wallets` | List wallets |
+| `GET` | `/wallets/{id}` | Get wallet |
+| `POST` | `/transactions` | Create transaction |
+| `GET` | `/transactions` | List transactions |
+| `GET` | `/transactions/{id}` | Get transaction |
+| `GET` | `/payments` | List payments |
+
+**Admin endpoints** (require `fintech.admin` permission):
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/admin/wallets` | Create wallet (admin) |
+
+### Retail API endpoints
+
+All under `/api/v1/finance/` (proxied to retail service):
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/products` | Create product |
+| `GET` | `/products` | List products |
+| `GET` | `/products/{id}` | Get product |
+| `POST` | `/orders` | Create order |
+| `GET` | `/orders` | List orders |
+| `GET` | `/orders/{id}` | Get order |
+| `GET` | `/inventory` | List inventory |
+
+**Admin endpoints** (require `retail.admin` permission):
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/admin/products` | Create product (admin) |
+
+### Government API endpoints
+
+All under `/api/v1/government/` (proxied to gov service):
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/permits` | Create permit |
+| `GET` | `/permits` | List permits |
+| `GET` | `/permits/{id}` | Get permit |
+| `POST` | `/licenses` | Create license |
+| `GET` | `/licenses` | List licenses |
+| `GET` | `/licenses/{id}` | Get license |
+| `GET` | `/records` | List civil records |
+
+**Admin endpoints** (require `gov.admin` permission):
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/admin/permits` | Create permit (admin) |
 
 ### Production deployment
 

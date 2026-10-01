@@ -1,0 +1,741 @@
+{
+  "info": {
+    "name": "Nexora OS \u2014 Employee (Workforce) API",
+    "description": "Employee-centric endpoints of the Nexora OS Workforce service, proxied via the API gateway at {{base_url}} (http://localhost:3000). A pre-request script auto-fetches a Keycloak token (realm `nexora`, client `nexora-developer-portal`). Requires the user `mkasongo@myyahoo.com`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "keycloak_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "<auto-acquired>",
+      "type": "string"
+    },
+    {
+      "key": "user_password",
+      "value": "200300Bk@",
+      "type": "string"
+    },
+    {
+      "key": "employee_ulid",
+      "value": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+      "type": "string"
+    },
+    {
+      "key": "doc_ulid",
+      "value": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Employees",
+      "item": [
+        {
+          "name": "GET /api/v1/workforce/employees",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "employees"
+              ]
+            },
+            "description": "List all employees (paginated)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/workforce/employees",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "employees"
+              ]
+            },
+            "description": "Create a new employee",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"legal_entity_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\",\n  \"employee_number\": \"EMP-0001\",\n  \"first_name\": \"Amina\",\n  \"last_name\": \"Kasongo\",\n  \"email\": \"amina.kasongo@example.com\",\n  \"job_title\": \"Software Engineer\",\n  \"department_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\",\n  \"hire_date\": \"2026-01-15\",\n  \"employment_type\": \"permanent\",\n  \"currency\": \"CDF\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/workforce/employees/{employee_ulid}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/employees/{employee_ulid}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "employees",
+                "{employee_ulid}"
+              ]
+            },
+            "description": "Get employee by ULID"
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /api/v1/workforce/employees/{employee_ulid}/employment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/employees/{employee_ulid}/employment",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "employees",
+                "{employee_ulid}",
+                "employment"
+              ]
+            },
+            "description": "Update employment details",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_title\": \"Senior Software Engineer\",\n  \"department_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\",\n  \"employment_type\": \"permanent\",\n  \"reports_to_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /api/v1/workforce/employees/{employee_ulid}/status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/employees/{employee_ulid}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "employees",
+                "{employee_ulid}",
+                "status"
+              ]
+            },
+            "description": "Update employment status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\",\n  \"reason\": \"Onboarding complete\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/workforce/employees/{employee_ulid}/compensation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/employees/{employee_ulid}/compensation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "employees",
+                "{employee_ulid}",
+                "compensation"
+              ]
+            },
+            "description": "Get compensation for employee"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/workforce/employees/{employee_ulid}/compensation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/employees/{employee_ulid}/compensation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "employees",
+                "{employee_ulid}",
+                "compensation"
+              ]
+            },
+            "description": "Create compensation record",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"legal_entity_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\",\n  \"employee_number\": \"EMP-0001\",\n  \"first_name\": \"Amina\",\n  \"last_name\": \"Kasongo\",\n  \"email\": \"amina.kasongo@example.com\",\n  \"job_title\": \"Software Engineer\",\n  \"department_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\",\n  \"hire_date\": \"2026-01-15\",\n  \"employment_type\": \"permanent\",\n  \"currency\": \"CDF\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/workforce/employees/{employee_ulid}/documents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/employees/{employee_ulid}/documents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "employees",
+                "{employee_ulid}",
+                "documents"
+              ]
+            },
+            "description": "List employee documents"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/workforce/employees/{employee_ulid}/documents",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/employees/{employee_ulid}/documents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "employees",
+                "{employee_ulid}",
+                "documents"
+              ]
+            },
+            "description": "Upload/attach a document",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"legal_entity_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\",\n  \"employee_number\": \"EMP-0001\",\n  \"first_name\": \"Amina\",\n  \"last_name\": \"Kasongo\",\n  \"email\": \"amina.kasongo@example.com\",\n  \"job_title\": \"Software Engineer\",\n  \"department_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\",\n  \"hire_date\": \"2026-01-15\",\n  \"employment_type\": \"permanent\",\n  \"currency\": \"CDF\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/workforce/employees/{employee_ulid}/documents/{doc_ulid}/url",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/employees/{employee_ulid}/documents/{doc_ulid}/url",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "employees",
+                "{employee_ulid}",
+                "documents",
+                "{doc_ulid}",
+                "url"
+              ]
+            },
+            "description": "Get signed URL for a document"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Workforce Reference Data",
+      "item": [
+        {
+          "name": "GET /api/v1/workforce/departments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "departments"
+              ]
+            },
+            "description": "List departments"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/workforce/departments",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "departments"
+              ]
+            },
+            "description": "Create department",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Engineering\",\n  \"code\": \"ENG\",\n  \"legal_entity_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\",\n  \"cost_center\": \"CC-ENG\",\n  \"manager_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/workforce/legal-entities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/legal-entities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "legal-entities"
+              ]
+            },
+            "description": "List legal entities"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/workforce/legal-entities",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/legal-entities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "legal-entities"
+              ]
+            },
+            "description": "Create legal entity",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nexora RDC SARL\",\n  \"registration_number\": \"CD-2026-001\",\n  \"country_code\": \"CD\",\n  \"tax_id\": \"TIN123456\",\n  \"entity_type\": \"subsidiary\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/workforce/locations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/locations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "locations"
+              ]
+            },
+            "description": "List locations"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/workforce/locations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/locations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "locations"
+              ]
+            },
+            "description": "Create location",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Kinshasa HQ\",\n  \"country_code\": \"CD\",\n  \"city\": \"Kinshasa\",\n  \"address_line\": \"123 Ave de la Lib\\u00e9ration\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/workforce/positions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/positions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "positions"
+              ]
+            },
+            "description": "List positions"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/workforce/positions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/positions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "positions"
+              ]
+            },
+            "description": "Create position",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Software Engineer\",\n  \"department_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\",\n  \"level\": \"L4\",\n  \"job_family\": \"engineering\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/workforce/teams",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/teams",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "teams"
+              ]
+            },
+            "description": "List teams"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/workforce/teams",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/workforce/teams",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "workforce",
+                "teams"
+              ]
+            },
+            "description": "Create team",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Platform\",\n  \"department_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\",\n  \"lead_ulid\": \"01ARZ3NDEKTSV4RRFFQ69G5FAW\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth / Health",
+      "item": [
+        {
+          "name": "Gateway health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-fetch a Keycloak access token (password grant) and store as {{token}}.",
+          "// Runs before every request. Override by setting token manually if desired.",
+          "const kc = pm.collectionVariables.get('keycloak_url') || 'http://localhost:8080';",
+          "const url = kc + '/realms/nexora/protocol/openid-connect/token';",
+          "const body = {",
+          "  grant_type: 'password',",
+          "  client_id: 'nexora-developer-portal',",
+          "  username: 'mkasongo@myyahoo.com',",
+          "  password: pm.collectionVariables.get('user_password') || '200300Bk@'",
+          "};",
+          "pm.sendRequest({",
+          "  url: url, method: 'POST',",
+          "  header: {'Content-Type':'application/x-www-form-urlencoded'},",
+          "  body: { mode: 'urlencoded', urlencoded: Object.keys(body).map(k=>({key:k,value:body[k],type:'text'})) }",
+          "}, (err, res) => {",
+          "  if (err || res.code !== 200) { console.log('Token fetch failed', err || res.text()); return; }",
+          "  const t = res.json().access_token;",
+          "  pm.collectionVariables.set('token', t);",
+          "  console.log('Token acquired, len', t.length);",
+          "});",
+          ""
+        ]
+      }
+    }
+  ]
+}

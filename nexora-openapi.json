@@ -1,0 +1,1486 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Nexora OS API",
+    "version": "1.0.0",
+    "description": "Nexora OS microservices. Served via API gateway at http://localhost:3000. Bearer token (Keycloak realm `nexora`)."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local gateway"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/api/v1/workforce/departments": {
+      "get": {
+        "summary": "GET /api/v1/workforce/departments",
+        "operationId": "get__api_v1_workforce_departments",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/workforce/departments",
+        "operationId": "post__api_v1_workforce_departments",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/workforce/employees": {
+      "get": {
+        "summary": "GET /api/v1/workforce/employees",
+        "operationId": "get__api_v1_workforce_employees",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/workforce/employees",
+        "operationId": "post__api_v1_workforce_employees",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/workforce/employees/{employee_ulid}": {
+      "get": {
+        "summary": "GET /api/v1/workforce/employees/{employee_ulid}",
+        "operationId": "get__api_v1_workforce_employees_employee_ulid",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/workforce/employees/{employee_ulid}/compensation": {
+      "get": {
+        "summary": "GET /api/v1/workforce/employees/{employee_ulid}/compensation",
+        "operationId": "get__api_v1_workforce_employees_employee_ulid_compensation",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/workforce/employees/{employee_ulid}/compensation",
+        "operationId": "post__api_v1_workforce_employees_employee_ulid_compensation",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/workforce/employees/{employee_ulid}/documents": {
+      "get": {
+        "summary": "GET /api/v1/workforce/employees/{employee_ulid}/documents",
+        "operationId": "get__api_v1_workforce_employees_employee_ulid_documents",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/workforce/employees/{employee_ulid}/documents",
+        "operationId": "post__api_v1_workforce_employees_employee_ulid_documents",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/workforce/employees/{employee_ulid}/documents/{doc_ulid}/url": {
+      "get": {
+        "summary": "GET /api/v1/workforce/employees/{employee_ulid}/documents/{doc_ulid}/url",
+        "operationId": "get__api_v1_workforce_employees_employee_ulid_documents_doc_ulid_url",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/workforce/legal-entities": {
+      "get": {
+        "summary": "GET /api/v1/workforce/legal-entities",
+        "operationId": "get__api_v1_workforce_legal-entities",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/workforce/legal-entities",
+        "operationId": "post__api_v1_workforce_legal-entities",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/workforce/locations": {
+      "get": {
+        "summary": "GET /api/v1/workforce/locations",
+        "operationId": "get__api_v1_workforce_locations",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/workforce/locations",
+        "operationId": "post__api_v1_workforce_locations",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/workforce/positions": {
+      "get": {
+        "summary": "GET /api/v1/workforce/positions",
+        "operationId": "get__api_v1_workforce_positions",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/workforce/positions",
+        "operationId": "post__api_v1_workforce_positions",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/workforce/teams": {
+      "get": {
+        "summary": "GET /api/v1/workforce/teams",
+        "operationId": "get__api_v1_workforce_teams",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/workforce/teams",
+        "operationId": "post__api_v1_workforce_teams",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/workforce/employees/{employee_ulid}/employment": {
+      "patch": {
+        "summary": "PATCH /api/v1/workforce/employees/{employee_ulid}/employment",
+        "operationId": "patch__api_v1_workforce_employees_employee_ulid_employment",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/workforce/employees/{employee_ulid}/status": {
+      "patch": {
+        "summary": "PATCH /api/v1/workforce/employees/{employee_ulid}/status",
+        "operationId": "patch__api_v1_workforce_employees_employee_ulid_status",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/audit/events": {
+      "get": {
+        "summary": "GET /api/v1/audit/events",
+        "operationId": "get__api_v1_audit_events",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/audit/events",
+        "operationId": "post__api_v1_audit_events",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/audit/events/verify/{id}": {
+      "get": {
+        "summary": "GET /api/v1/audit/events/verify/{id}",
+        "operationId": "get__api_v1_audit_events_verify_id",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/audit/events/{id}": {
+      "get": {
+        "summary": "GET /api/v1/audit/events/{id}",
+        "operationId": "get__api_v1_audit_events_id",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/tenants": {
+      "get": {
+        "summary": "GET /api/v1/tenants",
+        "operationId": "get__api_v1_tenants",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{id}": {
+      "get": {
+        "summary": "GET /api/v1/tenants/{id}",
+        "operationId": "get__api_v1_tenants_id",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tenants": {
+      "post": {
+        "summary": "POST /api/v1/admin/tenants",
+        "operationId": "post__api_v1_admin_tenants",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/commerce/payments": {
+      "get": {
+        "summary": "GET /api/v1/commerce/payments",
+        "operationId": "get__api_v1_commerce_payments",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/commerce/transactions": {
+      "get": {
+        "summary": "GET /api/v1/commerce/transactions",
+        "operationId": "get__api_v1_commerce_transactions",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/commerce/transactions",
+        "operationId": "post__api_v1_commerce_transactions",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/commerce/transactions/{id}": {
+      "get": {
+        "summary": "GET /api/v1/commerce/transactions/{id}",
+        "operationId": "get__api_v1_commerce_transactions_id",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/commerce/wallets": {
+      "get": {
+        "summary": "GET /api/v1/commerce/wallets",
+        "operationId": "get__api_v1_commerce_wallets",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/commerce/wallets",
+        "operationId": "post__api_v1_commerce_wallets",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/commerce/wallets/{id}": {
+      "get": {
+        "summary": "GET /api/v1/commerce/wallets/{id}",
+        "operationId": "get__api_v1_commerce_wallets_id",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/finance/inventory": {
+      "get": {
+        "summary": "GET /api/v1/finance/inventory",
+        "operationId": "get__api_v1_finance_inventory",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/finance/orders": {
+      "get": {
+        "summary": "GET /api/v1/finance/orders",
+        "operationId": "get__api_v1_finance_orders",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/finance/orders",
+        "operationId": "post__api_v1_finance_orders",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/finance/orders/{id}": {
+      "get": {
+        "summary": "GET /api/v1/finance/orders/{id}",
+        "operationId": "get__api_v1_finance_orders_id",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/finance/products": {
+      "get": {
+        "summary": "GET /api/v1/finance/products",
+        "operationId": "get__api_v1_finance_products",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/finance/products",
+        "operationId": "post__api_v1_finance_products",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/finance/products/{id}": {
+      "get": {
+        "summary": "GET /api/v1/finance/products/{id}",
+        "operationId": "get__api_v1_finance_products_id",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/government/licenses": {
+      "get": {
+        "summary": "GET /api/v1/government/licenses",
+        "operationId": "get__api_v1_government_licenses",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/government/licenses",
+        "operationId": "post__api_v1_government_licenses",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/government/licenses/{id}": {
+      "get": {
+        "summary": "GET /api/v1/government/licenses/{id}",
+        "operationId": "get__api_v1_government_licenses_id",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/government/permits": {
+      "get": {
+        "summary": "GET /api/v1/government/permits",
+        "operationId": "get__api_v1_government_permits",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/government/permits",
+        "operationId": "post__api_v1_government_permits",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/government/permits/{id}": {
+      "get": {
+        "summary": "GET /api/v1/government/permits/{id}",
+        "operationId": "get__api_v1_government_permits_id",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/government/records": {
+      "get": {
+        "summary": "GET /api/v1/government/records",
+        "operationId": "get__api_v1_government_records",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/components/{ulid}": {
+      "delete": {
+        "summary": "DELETE /api/v1/payroll/components/{ulid}",
+        "operationId": "delete__api_v1_payroll_components_ulid",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "summary": "GET /api/v1/payroll/components/{ulid}",
+        "operationId": "get__api_v1_payroll_components_ulid",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "summary": "PUT /api/v1/payroll/components/{ulid}",
+        "operationId": "put__api_v1_payroll_components_ulid",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/components": {
+      "get": {
+        "summary": "GET /api/v1/payroll/components",
+        "operationId": "get__api_v1_payroll_components",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/payroll/components",
+        "operationId": "post__api_v1_payroll_components",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/configs": {
+      "get": {
+        "summary": "GET /api/v1/payroll/configs",
+        "operationId": "get__api_v1_payroll_configs",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/payroll/configs",
+        "operationId": "post__api_v1_payroll_configs",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/configs/{version}": {
+      "get": {
+        "summary": "GET /api/v1/payroll/configs/{version}",
+        "operationId": "get__api_v1_payroll_configs_version",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/payslips/{ulid}": {
+      "get": {
+        "summary": "GET /api/v1/payroll/payslips/{ulid}",
+        "operationId": "get__api_v1_payroll_payslips_ulid",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/payslips/{ulid}/pdf": {
+      "get": {
+        "summary": "GET /api/v1/payroll/payslips/{ulid}/pdf",
+        "operationId": "get__api_v1_payroll_payslips_ulid_pdf",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/runs": {
+      "get": {
+        "summary": "GET /api/v1/payroll/runs",
+        "operationId": "get__api_v1_payroll_runs",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/v1/payroll/runs",
+        "operationId": "post__api_v1_payroll_runs",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/runs/{run_ulid}/payslips": {
+      "get": {
+        "summary": "GET /api/v1/payroll/runs/{run_ulid}/payslips",
+        "operationId": "get__api_v1_payroll_runs_run_ulid_payslips",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/runs/{ulid}": {
+      "get": {
+        "summary": "GET /api/v1/payroll/runs/{ulid}",
+        "operationId": "get__api_v1_payroll_runs_ulid",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/runs/{run_ulid}/generate-payslips": {
+      "post": {
+        "summary": "POST /api/v1/payroll/runs/{run_ulid}/generate-payslips",
+        "operationId": "post__api_v1_payroll_runs_run_ulid_generate-payslips",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/runs/{ulid}/approve": {
+      "post": {
+        "summary": "POST /api/v1/payroll/runs/{ulid}/approve",
+        "operationId": "post__api_v1_payroll_runs_ulid_approve",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/runs/{ulid}/calculate": {
+      "post": {
+        "summary": "POST /api/v1/payroll/runs/{ulid}/calculate",
+        "operationId": "post__api_v1_payroll_runs_ulid_calculate",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/runs/{ulid}/cancel": {
+      "post": {
+        "summary": "POST /api/v1/payroll/runs/{ulid}/cancel",
+        "operationId": "post__api_v1_payroll_runs_ulid_cancel",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/runs/{ulid}/lock": {
+      "post": {
+        "summary": "POST /api/v1/payroll/runs/{ulid}/lock",
+        "operationId": "post__api_v1_payroll_runs_ulid_lock",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/payroll/runs/{ulid}/review": {
+      "post": {
+        "summary": "POST /api/v1/payroll/runs/{ulid}/review",
+        "operationId": "post__api_v1_payroll_runs_ulid_review",
+        "tags": [
+          "v1"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

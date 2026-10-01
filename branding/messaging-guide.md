@@ -62,7 +62,7 @@
 ### About Page Copy
 Nexora OS is infrastructure for African commerce, providing tenant isolation, security features, and compliance capabilities for B2B SaaS. The product addresses regulated industries (fintech, payment service providers, savings cooperatives) with a SaaS model at $2-5K/tenant/month. The technical foundation is solid with proper CI/CD pipelines and appropriate test coverage.
 
-Two verticals are live today: audit/compliance log and workforce backend. The roadmap includes payroll, payments, fintech, retail, and government verticals — each funded through a paid design-partner pilot. The core differentiator: actually built and demonstrable, not roadware. The honesty ledger is open: what's live, what's roadmap, what's stub. No fabricated ARR.
+Two verticals are live today: audit/compliance log and workforce backend. The roadmap includes payroll, payments, fintech, retail, and government verticals — each funded through a paid design-partner pilot. The core differentiator: actually built and demonstrable, not roadware. The honesty ledger is open: what's live, what's roadmap, what's still not built. No fabricated ARR.
 
 Revenue numbers used: $2–5K/mo audit SaaS, $15–25K pilot setup (harden workforce OR build new vertical) — no fabricated ARR.
 
@@ -73,7 +73,7 @@ Moving money / issuing ID: Never claimed.
 - **Tenancy at DB level**: PostgreSQL RLS, fail-closed; one tenant cannot see another's rows
 - **Tamper-evident by construction**: SHA-256 hash chains; verify-hash-chain endpoint replays the full chain
 - **OIDC-authenticated end to end**: Real Keycloak JWT, JWKS-validated; live token returns 201
-- **Honesty ledger**: Open status table — what's live, what's roadmap, what's stub. No fabricated ARR.
+- **Honesty ledger**: Open status table — what's live, what's roadmap, what's still not built. No fabricated ARR.
 - **Modular monolith**: Single deployment, single database, single tracing context. Extraction to independent services is documented and reversible.
 - **Design-partner model**: Fund one vertical → become reference → scale. The only honest growth curve for early-stage infrastructure.
 
@@ -82,13 +82,13 @@ Moving money / issuing ID: Never claimed.
 2. **Tenant isolation** — DB-level RLS, fail-closed; one tenant cannot see another's rows.
 3. **Hash-chained audit** — SHA-256 hash chains; verify-hash-chain endpoint replays the full chain.
 4. **OIDC-authenticated** — Real Keycloak JWT, JWKS-validated; live token returns 201.
-5. **Honesty ledger** — Open status table — what's live, what's roadmap, what's stub. No fabricated ARR.
+5. **Honesty ledger** — Open status table — what's live, what's roadmap, what's still not built. No fabricated ARR.
 
 ### Proof Points (5-7 concrete system details)
 1. **Live Keycloak OIDC token → Rust/Axum 201 audit event → SHA-256 hash chain under PostgreSQL Row-Level Security** — regulator-grade, demonstrable
 2. **9 RLS tables (migration 008), 17 handlers, compiles clean** — workforce backend is live, not vaporware
 3. **Two verticals live on the same core: audit + workforce** — proves primitives are reusable
-4. **Honesty ledger openly states: audit live, workforce backend, 3-line stubs for fintech/retail/gov** — no fabricated ARR
+4. **Honesty ledger openly states: audit live, workforce backend, fintech/retail/gov compiling, payments/ledger/KYC still not built** — no fabricated ARR
 5. **$2-5K/mo audit SaaS, $15-25K pilot setup (harden workforce OR build new vertical) — no fabricated ARR** — honest about pricing and status
 
 ### Proof Points (Expanded — for marketing materials)
@@ -98,7 +98,7 @@ Moving money / issuing ID: Never claimed.
 
 > **Two verticals live on the same core: audit + workforce.** Both run on the same Keycloak identity, the same RLS isolation, and the same SHA-256 chain. Money stored as integer minor units, never floats. National IDs are SHA-256-hashed with only last-4 exposed. Contracts and identity documents live in object storage under tenant-and-employee namespaced keys, served only via short-lived presigned GET URLs, never public.
 
-> **Honesty ledger openly states: audit live, workforce backend, 3-line stubs for fintech/retail/gov.** No fabricated ARR. Revenue numbers used: $2–5K/mo audit SaaS, $15–25K pilot setup (harden workforce OR build new vertical) — no fabricated ARR. Moving money / issuing ID: Never claimed.
+> **Honesty ledger openly states: audit live, workforce backend, fintech/retail/gov compiling, payments/ledger/KYC still not built.** No fabricated ARR. Revenue numbers used: $2–5K/mo audit SaaS, $15–25K pilot setup (harden workforce OR build new vertical) — no fabricated ARR. Moving money / issuing ID: Never claimed.
 
 > **$2-5K/mo audit SaaS, $15-25K pilot setup (harden workforce OR build new vertical).** No hidden fees. No fabricated ARR. Pilot: ~$15–25K setup to fund closing production gates (database-level append-only REVOKE, restore test via migration 009, frontend portal) or building a new vertical. Design partner → reference → scale. No invented ARR.
 
@@ -107,9 +107,9 @@ Moving money / issuing ID: Never claimed.
 2. **Book a 20-min demo →** — walk through Keycloak token → 201 audit event → hash-chain verify
 3. **DM for a walkthrough →** — informal discussion of compliance infrastructure needs
 4. **Design-partner inquiries welcome →** — "seeking one design partner, not ten customers"
-5. **Download the honesty ledger PDF →** — status table of what's live vs. roadmap vs. stub
+5. **Download the honesty ledger PDF →** — status table of what's live vs. roadmap vs. still not built
 6. **Book a design-partner pilot →** — $15-25K setup to harden one vertical or build new one
-7. **View the roadmap →** — what's live, what's roadmap, what's stub (honesty ledger overview)
+7. **View the roadmap →** — what's live, what's roadmap, what's still not built (honesty ledger overview)
 
 ### Messaging by Channel
 
@@ -131,9 +131,9 @@ Moving money / issuing ID: Never claimed.
 
 **Website** (page sections):
 - **Hero**: Tagline + subhead + CTA button
-- **Honesty ledger**: Status table (what's live/roadmap/stub)
+- **Honesty ledger**: Status table (what's live/roadmap/still not built)
 - **Proof points**: 3-4 blocks with actual system details (9 RLS tables, 17 handlers, hash chain)
-- **Verticals**: Live (audit + workforce) vs. Roadmap (fintech/retail/gov) vs. Stub (3-line println)
+- **Verticals**: Live (audit + workforce) vs. Compiling (fintech/retail/gov) vs. Still not built (payments/ledger/KYC)
 - **Pricing**: $2-5K/mo audit SaaS, $15-25K pilot — no hidden fees, no fabricated ARR
 - **Design partner**: "Seeking one design partner, not ten customers"
 - **Demo CTA**: "Book a 20-min demo →"
@@ -254,13 +254,13 @@ Nexora OS — we actually built it, not just decked it. 🧵
 
 **Twitter/X — Thread 2**:
 ```
-2/ The honesty ledger — open status of what's live vs. roadmap vs. stub:
+2/ The honesty ledger — open status of what's live vs. roadmap vs. still not built:
 
 ✅ Audit/compliance log SaaS — live, demonstrable, compiles clean
 ✅ Workforce service — Phase 1 backend, compiles clean (9 RLS tables, 17 handlers, audit emit, S3 presigned docs)
 ✅ Platform backbone, design-partner pilot — sellable now
+✅ Fintech / retail / gov vertical mains — compiling: full Axum services with RLS, RBAC, utoipa docs
 ❌ Workforce frontend / portal — not built (backend-only Phase 1)
-❌ Fintech / retail / gov vertical mains — 3-line stubs: println!("boundary reserved")
 ❌ Gateway audit + workforce routes — return {"status":"planned"}
 ❌ No ledger, KYC, payments, citizen ID, permits — does not exist
 ❌ audit_events UPDATE/DELETE DB-REVOKE — deferred
@@ -280,7 +280,7 @@ No fabricated ARR. $2-5K/mo audit SaaS, $15-25K pilot setup — honest about wha
 
 > Seeking one design partner to harden one vertical. Pilot: ~$15-25K setup over 12 weeks.
 
-> The core differentiator: actually built and demonstrable, not roadware. The honesty ledger is open: what's live, what's roadmap, what's stub.
+> The core differentiator: actually built and demonstrable, not roadware. The honesty ledger is open: what's live, what's roadmap, what's still not built.
 
 > #NexoraOS #AfricanInfra #Compliance #Audit #Workforce #DesignPartner #SaaS
 
@@ -299,7 +299,7 @@ No fabricated ARR. $2-5K/mo audit SaaS, $15-25K pilot setup — honest about wha
 ### How to Use This Guide
 1. **Before creating any public copy**, run through the vocabulary quick reference
 2. **Always include** the tagline or one-liner in every external communication
-3. **Reference the honesty ledger** when discussing status (what's live vs. roadmap vs. stub)
+3. **Reference the honesty ledger** when discussing status (what's live vs. roadmap vs. still not built)
 4. **Use proof points** (9 RLS tables, 17 handlers, hash chain) to build technical credibility
 5. **Mention the design-partner model** when discussing growth (not ARR projections)
 6. **Keep sentences short** — one idea per sentence; no AI vocabulary; no em dashes

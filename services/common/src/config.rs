@@ -93,14 +93,21 @@ pub struct Config {
 /// and IDOR checks pass. The bucket must be created with no public policy.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct S3Config {
+    #[serde(default)]
     pub endpoint: String,
+    #[serde(default)]
     pub region: String,
+    #[serde(default)]
     pub bucket: String,
+    #[serde(default)]
     pub access_key_id: RedactedSecret,
+    #[serde(default)]
     pub secret_access_key: RedactedSecret,
     /// Presigned URL TTL in seconds. Keep short — 60s is the default.
+    #[serde(default = "default_presign_ttl_secs")]
     pub presign_ttl_secs: u64,
     /// Use path-style addressing (required for MinIO; AWS prefers virtual-hosted).
+    #[serde(default)]
     pub force_path_style: bool,
 }
 
@@ -121,8 +128,11 @@ impl Default for S3Config {
 /// Service identification and metadata.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ServiceConfig {
+    #[serde(default)]
     pub name: String,
+    #[serde(default)]
     pub version: String,
+    #[serde(default)]
     pub environment: Environment,
     /// Auto-generated per-process ULID; omit from config files.
     #[serde(default = "crate::ulid::new_ulid")]
@@ -159,11 +169,17 @@ impl Environment {
 /// HTTP server configuration.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ServerConfig {
+    #[serde(default = "default_server_host")]
     pub host: String,
+    #[serde(default = "default_server_port")]
     pub port: u16,
+    #[serde(default)]
     pub workers: Option<usize>,
+    #[serde(default = "default_request_timeout_secs")]
     pub request_timeout_secs: u64,
+    #[serde(default = "default_body_limit_bytes")]
     pub body_limit_bytes: usize,
+    #[serde(default = "default_graceful_shutdown_secs")]
     pub graceful_shutdown_secs: u64,
 }
 
@@ -183,12 +199,19 @@ impl Default for ServerConfig {
 /// Database connection configuration.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DatabaseConfig {
+    #[serde(default)]
     pub url: RedactedSecret,
+    #[serde(default = "default_max_connections")]
     pub max_connections: u32,
+    #[serde(default = "default_min_connections")]
     pub min_connections: u32,
+    #[serde(default = "default_connect_timeout_secs")]
     pub connect_timeout_secs: u64,
+    #[serde(default = "default_idle_timeout_secs")]
     pub idle_timeout_secs: u64,
+    #[serde(default = "default_max_lifetime_secs")]
     pub max_lifetime_secs: u64,
+    #[serde(default)]
     pub enable_logging: bool,
 }
 
@@ -209,9 +232,13 @@ impl Default for DatabaseConfig {
 /// Redis configuration.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct RedisConfig {
+    #[serde(default)]
     pub url: RedactedSecret,
+    #[serde(default = "default_redis_max_connections")]
     pub max_connections: u32,
+    #[serde(default = "default_redis_connection_timeout_secs")]
     pub connection_timeout_secs: u64,
+    #[serde(default = "default_redis_command_timeout_secs")]
     pub command_timeout_secs: u64,
 }
 
@@ -229,11 +256,17 @@ impl Default for RedisConfig {
 /// Authentication and authorization configuration.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct AuthConfig {
+    #[serde(default)]
     pub jwks_url: String,
+    #[serde(default)]
     pub issuer: String,
+    #[serde(default)]
     pub audience: String,
+    #[serde(default = "default_jwks_cache_ttl_secs")]
     pub jwks_cache_ttl_secs: u64,
+    #[serde(default)]
     pub require_https: bool,
+    #[serde(default)]
     pub allowed_algorithms: Vec<String>,
 }
 
@@ -254,10 +287,15 @@ impl Default for AuthConfig {
 /// OpenTelemetry tracing configuration.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct TracingConfig {
+    #[serde(default)]
     pub enabled: bool,
+    #[serde(default)]
     pub otlp_endpoint: String,
+    #[serde(default)]
     pub service_name: String,
+    #[serde(default = "default_sample_rate")]
     pub sample_rate: f64,
+    #[serde(default = "default_export_timeout_secs")]
     pub export_timeout_secs: u64,
 }
 
@@ -278,6 +316,7 @@ impl Default for TracingConfig {
 pub struct AuditConfig {
     /// Signing secret for HMAC hash chain. In production, this should be
     /// loaded from a vault/HSM. Minimum 32 bytes for HMAC-SHA-256.
+    #[serde(default)]
     pub signing_secret: RedactedSecret,
 }
 
@@ -293,9 +332,20 @@ impl Default for AuditConfig {
 /// Gateway proxy configuration for upstream service URLs.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct GatewayConfig {
+    #[serde(default)]
     pub workforce_base_url: String,
+    #[serde(default)]
     pub audit_base_url: String,
+    #[serde(default)]
     pub tenant_base_url: String,
+    #[serde(default)]
+    pub fintech_base_url: String,
+    #[serde(default)]
+    pub retail_base_url: String,
+    #[serde(default)]
+    pub gov_base_url: String,
+    #[serde(default)]
+    pub payroll_base_url: String,
 }
 
 impl Default for GatewayConfig {
@@ -304,6 +354,10 @@ impl Default for GatewayConfig {
             workforce_base_url: "http://localhost:3001".to_string(),
             audit_base_url: "http://localhost:3002".to_string(),
             tenant_base_url: "http://localhost:3003".to_string(),
+            fintech_base_url: "http://localhost:3005".to_string(),
+            retail_base_url: "http://localhost:3006".to_string(),
+            gov_base_url: "http://localhost:3007".to_string(),
+            payroll_base_url: "http://localhost:3008".to_string(),
         }
     }
 }
@@ -352,3 +406,25 @@ pub fn duration_to_string(d: Duration) -> String {
         format!("{}s", d.as_secs())
     }
 }
+
+
+// Field-level defaults used by `#[serde(default = "...")]` so that partial
+// environment overrides (e.g. `NEXORA_DATABASE__URL` alone) merge with the
+// real non-zero defaults instead of `FieldType::default()` (which is 0 for u32).
+pub fn default_max_connections() -> u32 { 20 }
+pub fn default_min_connections() -> u32 { 5 }
+pub fn default_connect_timeout_secs() -> u64 { 10 }
+pub fn default_idle_timeout_secs() -> u64 { 300 }
+pub fn default_max_lifetime_secs() -> u64 { 1800 }
+pub fn default_server_host() -> String { "0.0.0.0".to_string() }
+pub fn default_server_port() -> u16 { 3000 }
+pub fn default_request_timeout_secs() -> u64 { 30 }
+pub fn default_body_limit_bytes() -> usize { 10 * 1024 * 1024 }
+pub fn default_graceful_shutdown_secs() -> u64 { 30 }
+pub fn default_redis_max_connections() -> u32 { 50 }
+pub fn default_redis_connection_timeout_secs() -> u64 { 5 }
+pub fn default_redis_command_timeout_secs() -> u64 { 5 }
+pub fn default_jwks_cache_ttl_secs() -> u64 { 300 }
+pub fn default_sample_rate() -> f64 { 1.0 }
+pub fn default_export_timeout_secs() -> u64 { 10 }
+pub fn default_presign_ttl_secs() -> u64 { 60 }

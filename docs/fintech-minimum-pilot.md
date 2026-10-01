@@ -18,20 +18,22 @@ Rules that govern all issues:
   need a live postgres run on Linux/CI (Windows npipe is broken for
   testcontainers — see `services/common/tests/tenant_isolation.rs` module docs).
 
-Current state to build on: gateway serves placeholder routers only
-(`api-gateway/src/main.rs`); `fintech-service` is a `println!` stub; schema has
-tenants/orgs/users/roles/memberships/audit (all RLS) but **no fintech tables**.
+Current state to build on: `fintech-service` is a full Axum service with RLS,
+RBAC, and utoipa docs; gateway routes `/api/v1/commerce` → fintech are wired;
+schema has tenants/orgs/users/roles/memberships/audit (all RLS) **plus** fintech
+tables (merchants, wallets, ledger_entries, payouts, collections) via
+migration `010_fintech_schema.sql`.
 
 ---
 
 ## Phase 0 — Make fintech-service real (week 1)
 
-### Issue 1: Turn fintech-service into an Axum service on the common stack
-- **What:** Replace the `println!` stub in `services/fintech-service/src/main.rs`
-  with an Axum binary wired exactly like `tenant-service` (Config::load, db pool,
-  RLS middleware, auth middleware, health, tracing, graceful shutdown).
+### Issue 1: Fintech-service is already an Axum service on the common stack
+- **What:** Confirm `services/fintech-service/src/main.rs` is wired exactly like
+  `tenant-service` (Config::load, db pool, RLS middleware, auth middleware, health,
+  tracing, graceful shutdown) and that the full service compiles clean.
 - **Why:** Nothing else in this set is possible until the service can talk to
-  postgres under tenant isolation.
+  postgres under tenant isolation — and that wiring already exists.
 - **Done when:** `cargo run -p nexora-fintech-service` serves `/health` 200 and a
   placeholder `/api/v1/finance` route; `cargo check --workspace` clean.
 - **Verification (DRC):** none needed — pure wiring.

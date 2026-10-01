@@ -5,14 +5,18 @@ import { create } from "zustand";
 
 interface UiState {
   sidebarCollapsed: boolean;
+  mobileOpen: boolean;
   commandPaletteOpen: boolean;
   toggleSidebar: () => void;
+  setMobileOpen: (open: boolean) => void;
   setCommandPaletteOpen: (open: boolean) => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
   sidebarCollapsed: false,
+  mobileOpen: false,
   commandPaletteOpen: false,
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+  setMobileOpen: (open) => set({ mobileOpen: open }),
   setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
 }));

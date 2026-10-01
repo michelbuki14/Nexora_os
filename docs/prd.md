@@ -73,9 +73,9 @@
 //!
 //! | Service | Crate | Status | Purpose |
 //! |---------|-------|--------|---------|
-//! | Retail | `nexora-retail-service` | Stub | Retail/consumer vertical |
-//! | Fintech | `nexora-fintech-service` | Stub | Fintech/payments vertical |
-//! | Gov | `nexora-gov-service` | Stub | Government/public-sector vertical |
+//! | Retail | `nexora-retail-service` | ✅ Compiling | Products, orders, inventory |
+//! | Fintech | `nexora-fintech-service` | ✅ Compiling | Wallets, transactions, payments |
+//! | Gov | `nexora-gov-service` | ✅ Compiling | Permits, licenses, civil records |
 //!
 //! ### Payroll service detail
 //!

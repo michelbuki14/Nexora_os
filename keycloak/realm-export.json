@@ -1,5 +1,5 @@
 {
-  "realm": "aos",
+  "realm": "nexora",
   "enabled": true,
   "displayName": "Africa Operating System",
   "registrationAllowed": false,
@@ -38,14 +38,14 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids": [],
   "clients": [
     {
-      "clientId": "aos-api-gateway",
+      "clientId": "nexora-api-gateway",
       "name": "AOS API Gateway",
       "description": "Backend service for token validation",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "REPLACE_WITH_GENERATED_SECRET",
-      "redirectUris": ["https://api.aos.example.com/*"],
-      "webOrigins": ["https://api.aos.example.com"],
+      "redirectUris": ["https://api.nexora.example.com/*"],
+      "webOrigins": ["https://api.nexora.example.com"],
       "notBefore": 0,
       "bearerOnly": true,
       "consentRequired": false,
@@ -94,7 +94,7 @@
       ]
     },
     {
-      "clientId": "aos-developer-portal",
+      "clientId": "nexora-developer-portal",
       "name": "AOS Developer Portal",
       "description": "Frontend application for developers (public SPA, PKCE)",
       "enabled": true,
@@ -143,12 +143,12 @@
           }
         },
         {
-          "name": "audience-aos-api",
+          "name": "audience-nexora-api",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "config": {
-            "included.client.audience": "aos-api",
-            "included.custom.audience": "aos-api",
+            "included.client.audience": "nexora-api",
+            "included.custom.audience": "nexora-api",
             "access.token.claim": "true",
             "id.token.claim": "false"
           }

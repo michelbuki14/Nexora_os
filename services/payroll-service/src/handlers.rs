@@ -25,6 +25,7 @@ use nexora_common::{
     ulid::new_ulid,
 };
 use serde::Deserialize;
+use std::str::FromStr;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -411,12 +412,12 @@ pub async fn calculate_payroll_run(
          FROM country_tax_configs WHERE tenant_id = $1 AND config_version = $2 AND is_active = true",
     )
     .bind(tenant_id)
-    .bind(run.get("config_version"))
+    .bind(run.get::<String, _>("config_version"))
     .fetch_optional(&mut **conn)
     .await?
     .ok_or_else(|| NexoraError::NotFound(format!(
         "active config version {} not found for tenant",
-        run.get("config_version")
+        run.get::<String, _>("config_version")
     )))?;
 
     // Parse config from DB row.
@@ -571,7 +572,7 @@ pub async fn calculate_payroll_run(
             .bind(new_ulid())
             .bind(tenant_id)
             .bind(org_id)
-            .bind(payslip_ulid)
+            .bind(&payslip_ulid)
             .bind(item_type)
             .bind(code)
             .bind(format!("{code} for payroll run {ulid}"))
@@ -795,7 +796,7 @@ pub async fn approve_payroll_run(
         serde_json::json!({
             "total_gross": run.get::<nexora_common::Decimal, _>("total_gross_cdf"),
             "total_net": run.get::<nexora_common::Decimal, _>("total_net_cdf"),
-            "employee_count": run.get("employee_count"),
+            "employee_count": run.get::<i64, _>("employee_count"),
             "approver_notes": req.approver_notes,
         }),
     )
@@ -962,10 +963,11 @@ pub async fn get_payslip(
     .await?
     .ok_or_else(|| NexoraError::NotFound(format!("payslip {ulid} not found")))?;
 
-    let run_ulid: String = sqlx::query_scalar("SELECT ulid FROM payroll_runs WHERE id = $1")
-        .bind(row.get("payroll_run_id"))
+    let run_ulid: String = sqlx::query_scalar::<_, Uuid>("SELECT ulid FROM payroll_runs WHERE id = $1")
+        .bind(row.get::<Uuid, _>("payroll_run_id"))
         .fetch_one(&mut **conn)
-        .await?;
+        .await?
+        .to_string();
 
     Ok(Json(PayslipResponse {
         ulid: row.get("ulid"),
@@ -1038,7 +1040,7 @@ pub async fn list_payslips(
     let tenant_id = resolve_tenant(&auth, &mut **conn).await?;
 
     let run_id: Uuid =
-        sqlx::query_scalar("SELECT id FROM payroll_runs WHERE ulid = $1 AND tenant_id = $2")
+        sqlx::query_scalar::<_, Uuid>("SELECT id FROM payroll_runs WHERE ulid = $1 AND tenant_id = $2")
             .bind(&run_ulid)
             .bind(tenant_id)
             .fetch_optional(&mut **conn)
@@ -1110,7 +1112,7 @@ pub async fn list_payslips(
         .collect();
 
     Ok(Json(PageResponse {
-        items,
+        items: items.clone(),
         total: items.len() as i64,
         page: 1,
         page_size: items.len() as i64,
@@ -1155,10 +1157,10 @@ pub async fn generate_payslips(
     .await?
     .ok_or_else(|| NexoraError::NotFound(format!("payroll run {run_ulid} not found")))?;
 
-    let run_id: Uuid = run.get("id");
-    let config_version: String = row.get("config_version");
-    let period_start: NaiveDate = row.get("period_start");
-    let period_end: NaiveDate = row.get("period_end");
+    let run_id: Uuid = run.get::<Uuid, _>("id");
+    let config_version: String = run.get::<String, _>("config_version");
+    let period_start: NaiveDate = run.get::<NaiveDate, _>("period_start");
+    let period_end: NaiveDate = run.get::<NaiveDate, _>("period_end");
 
     // Get the payslips for this run.
     let payslip_rows = sqlx::query(
@@ -1177,17 +1179,17 @@ pub async fn generate_payslips(
 
     // Filter by employee IDs if specified.
     let filtered_rows: Vec<_> = if let Some(ref emp_ids) = req.employee_ids {
-        let id_set: std::collections::HashSet<Uuid> = emp_ids.iter().cloned().collect();
+        let id_set: std::collections::HashSet<String> = emp_ids.iter().cloned().collect();
         payslip_rows
             .into_iter()
-            .filter(|r| id_set.contains(&r.get::<Uuid, _>("employee_id")))
+            .filter(|r| id_set.contains(&r.get::<String, _>("employee_ulid")))
             .collect()
     } else {
         payslip_rows
     };
 
     let mut generated = 0;
-    for payslip_row in filtered_rows {
+    for payslip_row in &filtered_rows {
         let data = pdf::PayslipPdfData {
             gross_pay: nexora_common::money::Money::new(
                 payslip_row.get::<nexora_common::Decimal, _>("gross_pay_cdf"),
@@ -1247,6 +1249,11 @@ pub async fn generate_payslips(
     .await?;
 
     Ok(Json(GeneratePayslipsResponse {
+        run_ulid,
+        payslips_generated: generated,
+        smig_compliant_count: 0,
+        smig_non_compliant_count: 0,
+        smig_violations: vec![],
         pdf_bytes_count: generated,
         employee_count: filtered_rows.len(),
     }))
@@ -1526,7 +1533,7 @@ pub async fn list_payroll_components(
         .collect();
 
     Ok(Json(PageResponse {
-        items,
+        items: items.clone(),
         total: items.len() as i64,
         page: 1,
         page_size: items.len() as i64,
@@ -1575,9 +1582,9 @@ pub async fn update_payroll_component(
            WHERE ulid = $1 AND tenant_id = $10"#,
     )
     .bind(&ulid)
-    .bind(req.code)
-    .bind(req.description)
-    .bind(req.component_type.as_str())
+    .bind(&req.code)
+    .bind(&req.description)
+    .bind(req.component_type.map(|c| c.as_str()))
     .bind(req.default_amount.as_ref().map(|m| &m.amount))
     .bind(req.is_taxable)
     .bind(req.is_cnssable)
@@ -1683,7 +1690,7 @@ pub async fn delete_payroll_component(
         org_id,
         "payroll_component",
         &ulid,
-        ulid,
+        uuid::Uuid::nil(),
         "payroll.component.deleted",
         serde_json::json!({
             "component_ulid": ulid,
@@ -1922,7 +1929,7 @@ pub async fn list_payroll_configs(
         .collect();
 
     Ok(Json(PageResponse {
-        items,
+        items: items.clone(),
         total: total_count,
         page: 1,
         page_size: items.len() as i64,

@@ -1,0 +1,32 @@
+# ArgoCD Application: Nexora Government Service.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nexora-gov-service
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: nexora-os
+spec:
+  project: nexora-os
+  source:
+    repoURL: https://github.com/michelbuki14/AFRICA-OPERATING-SYSTEM-AOS-.git
+    targetRevision: main
+    path: helm/aos-chart
+    helm:
+      valueFiles:
+        - values/gov.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: nexora-os
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

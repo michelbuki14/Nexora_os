@@ -273,7 +273,7 @@ Using the dimensions framework:
 - "Live Keycloak OIDC token → Rust/Axum 201 audit event → SHA-256 hash chain under PostgreSQL Row-Level Security"
 - "9 RLS tables (migration 008), 17 handlers, compiles clean"
 - "Two verticals live on the same core: audit + workforce"
-- "Honesty ledger openly states: audit live, workforce backend, 3-line stubs for fintech/retail/gov"
+- "Honesty ledger openly states: audit live, workforce backend, fintech/retail/gov compiling, payments/ledger/KYC still not built"
 - "$2-5K/mo audit SaaS, $15-25K pilot setup — no fabricated ARR"
 
 **Call-to-Action Library**:
@@ -328,14 +328,14 @@ Moving money / issuing ID: Never claimed.
 - **Tenancy at DB level**: PostgreSQL RLS, fail-closed; one tenant cannot see another's rows
 - **Tamper-evident by construction**: SHA-256 hash chains; verify-hash-chain endpoint replays the full chain
 - **OIDC-authenticated end to end**: Real Keycloak JWT, JWKS-validated; live token returns 201
-- **Honesty ledger**: Open status table — what's live, what's roadmap, what's stub. No fabricated ARR.
+- **Honesty ledger**: Open status table — what's live, what's roadmap, what's still not built. No fabricated ARR.
 - **Modular monolith**: Single deployment, single database, single tracing context. Extraction to independent services is documented and reversible.
 
 ### Proof Points (for marketing)
 1. **Live Keycloak OIDC token → Rust/Axum 201 audit event → SHA-256 hash chain under PostgreSQL Row-Level Security** — regulator-grade, demonstrable
 2. **9 RLS tables (migration 008), 17 handlers, compiles clean** — workforce backend is live, not vaporware
 3. **Two verticals live on the same core: audit + workforce** — proves primitives are reusable
-4. **Honesty ledger openly states: audit live, workforce backend, 3-line stubs for fintech/retail/gov** — no fabricated ARR
+4. **Honesty ledger openly states: audit live, workforce backend, fintech/retail/gov compiling, payments/ledger/KYC still not built** — no fabricated ARR
 5. **$2–5K/mo audit SaaS, $15–25K pilot setup (harden workforce OR build new vertical) — no fabricated ARR** — honest about pricing and status
 
 ### Marketing Hooks
@@ -347,9 +347,9 @@ Moving money / issuing ID: Never claimed.
 
 ### Website Structure Recommendations
 1. **Hero**: Tagline + subhead + CTA ("See the live audit chain →")
-2. **Honesty Ledger**: Status table (what's live, roadmap, stub)
+2. **Honesty Ledger**: Status table (what's live, roadmap, still not built)
 3. **Proof Points**: 3-4 bullet blocks with actual system details
-4. **Verticals**: Live (audit + workforce) vs. Roadmap (fintech/retail/gov) vs. Stub (3-line println)
+4. **Verticals**: Live (audit + workforce) vs. Compiling (fintech/retail/gov) vs. Still not built (payments/ledger/KYC)
 5. **Pricing**: $2-5K/mo audit SaaS, $15-25K pilot — no hidden fees, no fabricated ARR
 6. **Design Partner**: "Seeking one design partner, not ten customers"
 7. **Book a 20-min demo**: Walk through Keycloak token → 201 audit event → hash-chain verify
@@ -564,7 +564,7 @@ Moving money / issuing ID: Never claimed.
 
 ### Authority
 - **Technical details** that demonstrate expertise: "9 RLS tables (migration 008), 17 handlers"
-- **Honesty about gaps** — "These two are live; these three are 3-line stubs" builds more authority than pretending everything is perfect
+- **Honesty about gaps** — "These two are live; these three compile but aren't customer-facing yet; these four don't exist at all" builds more authority than pretending everything is perfect
 - **Miche Kasongo as founder** — visible, accountable, direct in outreach
 
 ### Scarcity (Ethical)
@@ -783,7 +783,7 @@ Every recommendation in this strategy is:
 - [x] **Strategically justified**: Each element serves the purpose of differentiating Nexora OS as actually built, not roadware
 - [x] **Differentiated**: Owns the "actually built + tenant-isolated + hash-chained + OIDC-authenticated on same core" territory
 - [x] **Consistent**: Voice, visuals, messaging all aligned across touchpoints
-- [x] **Practical**: Based on actual system state (9 RLS tables, 17 handlers, 2 live verticals, 3-line stubs for 3 verticals)
+- [x] **Practical**: Based on actual system state (9 RLS tables, 17 handlers, 2 live verticals, 3 consumer verticals compiling, payments/ledger/KYC not built)
 - [x] **Scalable**: Growth recommendations work from 1 design partner to multiple verticals
 - [x] **Market-aware**: References actual market conditions: African regulated finance, B2B SaaS at $2-5K/tenant/mo, design-partner model
 - [x] **Memorable**: Tagline "Honest infrastructure for African commerce — built, not decked." is distinctive and repeatable

@@ -24,7 +24,7 @@ export function PaginationBar({
   const canPrev = page > 1;
   const canNext = page < pageCount;
   return (
-    <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2 text-sm text-slate-500">
+    <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2 text-sm text-secondary">
       <span>{total} total</span>
       <div className="flex items-center gap-2">
         <Button variant="secondary" size="sm" disabled={!canPrev} onClick={() => onPageChange(page - 1)}>
@@ -107,7 +107,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
     <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-secondary">
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>
                 {hg.headers.map((h) => (

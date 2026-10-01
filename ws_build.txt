@@ -1,0 +1,171 @@
+RC=0
+=== STDOUT (tail 9000) ===
+=== STDERR (tail 9000) ===
+warning: unused import: `Database`
+  --> services\common\src\money.rs:12:12
+   |
+12 | use sqlx::{Database, Decode, Encode, Type};
+   |            ^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `PENDING_TTL_DAYS` is never used
+  --> services\common\src\idempotency.rs:22:7
+   |
+22 | const PENDING_TTL_DAYS: i64 = 7;
+   |       ^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `update_idempotency_record_status` is never used
+   --> services\common\src\idempotency.rs:361:10
+    |
+361 | async fn update_idempotency_record_status(
+    |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: multiple fields are never read
+   --> services\common\src\idempotency.rs:412:5
+    |
+411 | struct IdempotencyRecord {
+    |        ----------------- fields in this struct
+412 |     id: Uuid,
+    |     ^^
+413 |     tenant_id: Uuid,
+    |     ^^^^^^^^^
+414 |     org_id: Uuid,
+    |     ^^^^^^
+415 |     requestor_id: Uuid,
+    |     ^^^^^^^^^^^^
+416 |     idempotency_key: Uuid,
+    |     ^^^^^^^^^^^^^^^
+417 |     operation: String,
+    |     ^^^^^^^^^
+...
+420 |     response_status_code: Option<i16>,
+    |     ^^^^^^^^^^^^^^^^^^^^
+421 |     created_at: chrono::DateTime<chrono::Utc>,
+    |     ^^^^^^^^^^
+422 |     updated_at: chrono::DateTime<chrono::Utc>,
+    |     ^^^^^^^^^^
+423 |     completed_at: Option<chrono::DateTime<chrono::Utc>>,
+    |     ^^^^^^^^^^^^
+    |
+    = note: `IdempotencyRecord` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: `nexora-common` (lib) generated 4 warnings (run `cargo fix --lib -p nexora-common` to apply 1 suggestion)
+warning: unused import: `serde::Deserialize`
+  --> services\payroll-service\src\handlers.rs:27:5
+   |
+27 | use serde::Deserialize;
+   |     ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `config_exists`
+   --> services\payroll-service\src\handlers.rs:119:9
+    |
+119 |     let config_exists: (i64,) = sqlx::query_scalar::<_, (i64,)>(
+    |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_config_exists`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `row`
+   --> services\payroll-service\src\handlers.rs:131:9
+    |
+131 |     let row = sqlx::query(
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_row`
+
+warning: unused variable: `state`
+   --> services\payroll-service\src\handlers.rs:202:11
+    |
+202 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+   --> services\payroll-service\src\handlers.rs:306:11
+    |
+306 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+   --> services\payroll-service\src\handlers.rs:939:11
+    |
+939 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1031:11
+     |
+1031 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `pdf_bytes`
+    --> services\payroll-service\src\handlers.rs:1225:13
+     |
+1225 |         let pdf_bytes = pdf::generate_payslip_pdf(&data)
+     |             ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_pdf_bytes`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1276:11
+     |
+1276 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1450:11
+     |
+1450 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1500:11
+     |
+1500 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1821:11
+     |
+1821 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1882:11
+     |
+1882 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: function `resolve_ulid` is never used
+  --> services\payroll-service\src\handlers.rs:70:10
+   |
+70 | async fn resolve_ulid(db: &mut sqlx::PgConnection, table: &str, ulid: &str) -> NexoraResult<Uuid> {
+   |          ^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `NexoraError`
+  --> services\workforce-service\src\audit_emit.rs:22:13
+   |
+22 |     error::{NexoraError, NexoraResult},
+   |             ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `state`
+   --> services\workforce-service\src\handlers.rs:106:11
+    |
+106 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `config`
+    --> services\workforce-service\src\handlers.rs:1085:15
+     |
+1085 |     Extension(config): Extension<Config>,
+     |               ^^^^^^ help: if this is intentional, prefix it with an underscore: `_config`
+
+warning: `nexora-payroll-service` (lib) generated 14 warnings (run `cargo fix --lib -p nexora-payroll-service` to apply 12 suggestions)
+warning: `nexora-workforce-service` (lib) generated 3 warnings (run `cargo fix --lib -p nexora-workforce-service` to apply 3 suggestions)
+   Compiling nexora-payroll-service v0.1.0 (C:\Users\miche\OneDrive\Documents\GitHub\Nexora_os\services\payroll-service)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.07s

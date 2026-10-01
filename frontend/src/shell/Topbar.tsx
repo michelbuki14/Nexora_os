@@ -7,7 +7,7 @@ import { StatusPill } from "./StatusPill";
 import { useUiStore } from "./uiStore";
 
 export function Topbar() {
-  const toggleSidebar = useUiStore((s) => s.toggleSidebar);
+  const setMobileOpen = useUiStore((s) => s.setMobileOpen);
   const setCommandPaletteOpen = useUiStore((s) => s.setCommandPaletteOpen);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -32,18 +32,18 @@ export function Topbar() {
   };
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4">
-      <Button variant="ghost" size="sm" onClick={toggleSidebar} aria-label="Toggle sidebar">
+    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4" aria-label="Top">
+      <Button variant="ghost" size="sm" onClick={() => setMobileOpen(true)} aria-label="Open menu">
         <Menu className="h-4 w-4" />
       </Button>
 
       <button
         onClick={() => setCommandPaletteOpen(true)}
-        className="flex w-full max-w-xs items-center gap-2 rounded-md border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm text-slate-400 hover:border-slate-400"
+        className="flex w-full max-w-xs items-center gap-2 rounded-md border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm text-secondary hover:border-slate-400"
       >
         <Search className="h-4 w-4" />
         <span className="flex-1 text-left">Search…</span>
-        <kbd className="rounded border border-slate-300 bg-white px-1 text-xs text-slate-500">
+        <kbd className="rounded border border-slate-300 bg-white px-1 text-xs text-secondary">
           ⌘K
         </kbd>
       </button>
@@ -61,9 +61,9 @@ export function Topbar() {
           {menuOpen && (
             <div className="absolute right-0 z-40 mt-1 w-56 rounded-md border border-slate-200 bg-white py-1 shadow-lg">
               <div className="border-b border-slate-100 px-3 py-2">
-                <p className="truncate text-sm font-medium text-slate-900">{name ?? "AOS user"}</p>
+                <p className="truncate text-sm font-medium text-slate-900">{name ?? "Nexora user"}</p>
                 {tenantId && (
-                  <p className="truncate text-xs text-slate-500">Tenant {tenantId.slice(0, 8)}…</p>
+                  <p className="truncate text-xs text-secondary">Tenant {tenantId.slice(0, 8)}…</p>
                 )}
               </div>
               <button

@@ -1,18 +1,18 @@
-import { createBrowserRouter } from "react-router-dom";
-import { PlannedModule } from "../modules/PlannedModule";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import { DemoModule } from "../modules/DemoModule";
 import { Forbidden } from "../pages/Forbidden";
 import { NotFound } from "../pages/NotFound";
 import { Dashboard3D } from "../pages/Dashboard3D";
 import { AppShell } from "../shell/AppShell";
-// @ts-ignore - WorkforceOverview used in PLANNED_MODULES rendering
-import type { WorkforceOverview } from "../workforce/WorkforceOverview";
 import { EmployeeDirectory } from "../workforce/employees/EmployeeDirectory";
 import { EmployeeCreate } from "../workforce/employees/EmployeeCreate";
 import { EmployeeProfile } from "../workforce/employees/EmployeeProfile";
 import { OrgListView } from "../workforce/org/OrgListView";
 
-/** Planned modules render the honest "not enabled in this tenant" state. */
-const PLANNED_MODULES = [
+/** Demo-backed modules. These render seed-backed, interactive pages in demo
+ *  mode so the whole product is explorable; the real backend services replace
+ *  them transparently via VITE_API_URL when available. */
+const MODULE_ROUTES = [
   "payroll",
   "finance",
   "payments",
@@ -25,6 +25,9 @@ const PLANNED_MODULES = [
   "organizations",
   "audit",
   "admin",
+  "fintech",
+  "retail",
+  "gov",
 ];
 
 export const router = createBrowserRouter([
@@ -35,12 +38,13 @@ export const router = createBrowserRouter([
       { index: true, element: <Dashboard3D /> },
       { path: "3d", element: <Dashboard3D />,},
       { path: "workforce/employees", element: <EmployeeDirectory /> },
+      { path: "workforce", element: <Navigate to="/workforce/employees" replace /> },
       { path: "workforce/employees/new", element: <EmployeeCreate /> },
       { path: "workforce/employees/:ulid", element: <EmployeeProfile /> },
       { path: "workforce/:resource", element: <OrgListView /> },
-      ...PLANNED_MODULES.map((module) => ({
+      ...MODULE_ROUTES.map((module) => ({
         path: module,
-        element: <PlannedModule module={module} />,
+        element: <DemoModule module={module} />,
       })),
       { path: "403", element: <Forbidden /> },
       { path: "404", element: <NotFound /> },

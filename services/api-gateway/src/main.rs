@@ -224,6 +224,54 @@ async fn tenant_proxy(State(state): State<AppState>, req: Request<Body>) -> Resp
     .await
 }
 
+/// `/api/v1/payroll/*` -> payroll service (bare paths: /runs, /payslips, /components, /configs).
+async fn payroll_proxy(State(state): State<AppState>, req: Request<Body>) -> Response {
+    proxy_to(
+        &state.http,
+        &state.config.gateway.payroll_base_url,
+        "/api/v1/payroll",
+        state.body_limit,
+        req,
+    )
+    .await
+}
+
+/// `/api/v1/commerce/*` -> fintech service (bare paths: /wallets, /transactions, /payments).
+async fn fintech_proxy(State(state): State<AppState>, req: Request<Body>) -> Response {
+    proxy_to(
+        &state.http,
+        &state.config.gateway.fintech_base_url,
+        "/api/v1/commerce",
+        state.body_limit,
+        req,
+    )
+    .await
+}
+
+/// `/api/v1/finance/*` -> retail service (bare paths: /products, /orders, /inventory).
+async fn retail_proxy(State(state): State<AppState>, req: Request<Body>) -> Response {
+    proxy_to(
+        &state.http,
+        &state.config.gateway.retail_base_url,
+        "/api/v1/finance",
+        state.body_limit,
+        req,
+    )
+    .await
+}
+
+/// `/api/v1/government/*` -> government service (bare paths: /permits, /licenses, /records).
+async fn gov_proxy(State(state): State<AppState>, req: Request<Body>) -> Response {
+    proxy_to(
+        &state.http,
+        &state.config.gateway.gov_base_url,
+        "/api/v1/government",
+        state.body_limit,
+        req,
+    )
+    .await
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Fail closed: a misconfigured gateway must not start silently against
@@ -280,9 +328,10 @@ async fn main() -> anyhow::Result<()> {
             "/api/v1/admin/tenants",
             Router::new().fallback(tenant_proxy),
         )
-        .nest("/api/v1/commerce", placeholder_router("commerce"))
-        .nest("/api/v1/finance", placeholder_router("finance"))
-        .nest("/api/v1/government", placeholder_router("government"));
+        .nest("/api/v1/commerce", Router::new().fallback(fintech_proxy))
+        .nest("/api/v1/finance", Router::new().fallback(retail_proxy))
+        .nest("/api/v1/government", Router::new().fallback(gov_proxy))
+        .nest("/api/v1/payroll", Router::new().fallback(payroll_proxy));
 
     let app = health_routes
         .merge(api_routes.with_state(state))

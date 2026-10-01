@@ -25,7 +25,7 @@ export function Tabs({
             className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
               active === t.key
                 ? "border-brand-600 text-brand-700"
-                : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                : "border-transparent text-secondary hover:border-slate-300 hover:text-slate-700"
             }`}
           >
             {t.label}

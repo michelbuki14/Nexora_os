@@ -11,6 +11,7 @@ use axum::{
 use utoipa::OpenApi;
 
 use crate::handlers;
+use crate::{models::*, AppState};
 
 /// OpenAPI documentation for the payroll service.
 ///
@@ -67,10 +68,6 @@ use crate::handlers;
         (name = "components", description = "Reusable payroll allowance/deduction definitions"),
         (name = "configs", description = "Country tax/statutory configuration versions"),
     ),
-    contact(
-        name = "Nexora OS Platform Team",
-        email = "platform@nexora.local",
-    ),
 )]
 pub struct PayrollApiDoc;
 
@@ -83,81 +80,63 @@ pub struct PayrollApiDoc;
 pub fn router() -> Router<AppState> {
     Router::new()
         // --- Payroll runs ---
-        .route("/api/v1/payroll/runs", post(handlers::create_payroll_run))
-        .route("/api/v1/payroll/runs", get(handlers::list_payroll_runs))
-        .route(
-            "/api/v1/payroll/runs/{ulid}",
+        .route("/runs", post(handlers::create_payroll_run))
+        .route("/runs", get(handlers::list_payroll_runs))
+        .route("/runs/{ulid}",
             get(handlers::get_payroll_run),
         )
-        .route(
-            "/api/v1/payroll/runs/{ulid}/calculate",
+        .route("/runs/{ulid}/calculate",
             post(handlers::calculate_payroll_run),
         )
-        .route(
-            "/api/v1/payroll/runs/{ulid}/review",
+        .route("/runs/{ulid}/review",
             post(handlers::review_payroll_run),
         )
-        .route(
-            "/api/v1/payroll/runs/{ulid}/approve",
+        .route("/runs/{ulid}/approve",
             post(handlers::approve_payroll_run),
         )
-        .route(
-            "/api/v1/payroll/runs/{ulid}/lock",
+        .route("/runs/{ulid}/lock",
             post(handlers::lock_payroll_run),
         )
-        .route(
-            "/api/v1/payroll/runs/{ulid}/cancel",
+        .route("/runs/{ulid}/cancel",
             post(handlers::cancel_payroll_run),
         )
         // --- Payslips ---
-        .route(
-            "/api/v1/payroll/payslips/{ulid}",
+        .route("/payslips/{ulid}",
             get(handlers::get_payslip),
         )
-        .route(
-            "/api/v1/payroll/runs/{run_ulid}/payslips",
+        .route("/runs/{run_ulid}/payslips",
             get(handlers::list_payslips),
         )
-        .route(
-            "/api/v1/payroll/runs/{run_ulid}/generate-payslips",
+        .route("/runs/{run_ulid}/generate-payslips",
             post(handlers::generate_payslips),
         )
-        .route(
-            "/api/v1/payroll/payslips/{ulid}/pdf",
+        .route("/payslips/{ulid}/pdf",
             get(handlers::download_payslip_pdf),
         )
         // --- Payroll components (allowances/deductions) ---
-        .route(
-            "/api/v1/payroll/components",
+        .route("/components",
             post(handlers::create_payroll_component),
         )
-        .route(
-            "/api/v1/payroll/components",
+        .route("/components",
             get(handlers::list_payroll_components),
         )
-        .route(
-            "/api/v1/payroll/components/{ulid}",
+        .route("/components/{ulid}",
             get(handlers::get_payroll_component),
         )
-        .route(
-            "/api/v1/payroll/components/{ulid}",
+        .route("/components/{ulid}",
             put(handlers::update_payroll_component),
         )
-        .route(
-            "/api/v1/payroll/components/{ulid}",
+        .route("/components/{ulid}",
             delete(handlers::delete_payroll_component),
         )
         // --- Payroll configurations (country tax/statutory settings) ---
-        .route(
-            "/api/v1/payroll/configs",
+        .route("/configs",
             post(handlers::create_payroll_config),
         )
-        .route(
-            "/api/v1/payroll/configs",
+        .route("/configs",
             get(handlers::list_payroll_configs),
         )
-        .route(
-            "/api/v1/payroll/configs/{version}",
+        .route("/configs/{version}",
             get(handlers::get_payroll_config),
         )
 }

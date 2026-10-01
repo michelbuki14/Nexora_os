@@ -1,0 +1,303 @@
+warning: unused import: `Database`
+  --> services\common\src\money.rs:12:12
+   |
+12 | use sqlx::{Database, Decode, Encode, Type};
+   |            ^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `PENDING_TTL_DAYS` is never used
+  --> services\common\src\idempotency.rs:22:7
+   |
+22 | const PENDING_TTL_DAYS: i64 = 7;
+   |       ^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `update_idempotency_record_status` is never used
+   --> services\common\src\idempotency.rs:361:10
+    |
+361 | async fn update_idempotency_record_status(
+    |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: multiple fields are never read
+   --> services\common\src\idempotency.rs:412:5
+    |
+411 | struct IdempotencyRecord {
+    |        ----------------- fields in this struct
+412 |     id: Uuid,
+    |     ^^
+413 |     tenant_id: Uuid,
+    |     ^^^^^^^^^
+414 |     org_id: Uuid,
+    |     ^^^^^^
+415 |     requestor_id: Uuid,
+    |     ^^^^^^^^^^^^
+416 |     idempotency_key: Uuid,
+    |     ^^^^^^^^^^^^^^^
+417 |     operation: String,
+    |     ^^^^^^^^^
+...
+420 |     response_status_code: Option<i16>,
+    |     ^^^^^^^^^^^^^^^^^^^^
+421 |     created_at: chrono::DateTime<chrono::Utc>,
+    |     ^^^^^^^^^^
+422 |     updated_at: chrono::DateTime<chrono::Utc>,
+    |     ^^^^^^^^^^
+423 |     completed_at: Option<chrono::DateTime<chrono::Utc>>,
+    |     ^^^^^^^^^^^^
+    |
+    = note: `IdempotencyRecord` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: `nexora-common` (lib) generated 4 warnings (run `cargo fix --lib -p nexora-common` to apply 1 suggestion)
+   Compiling nexora-payroll-service v0.1.0 (C:\Users\miche\OneDrive\Documents\GitHub\Nexora_os\services\payroll-service)
+error: unexpected attribute, expected any of: handlers, components, modifiers, security, tags, external_docs, servers, nest
+  --> services\payroll-service\src\routes.rs:70:5
+   |
+70 |     contact(
+   |     ^^^^^^^
+
+error[E0283]: type annotations needed
+   --> services\payroll-service\src\handlers.rs:419:13
+    |
+419 |         run.get("config_version")
+    |             ^^^ cannot infer type of the type parameter `T` declared on the method `get`
+    |
+    = note: the type must implement `sqlx::Decode<'_, Postgres>`
+    = help: the following types implement trait `sqlx::Decode<'r, DB>`:
+              `&'a str` implements `sqlx::Decode<'a, sqlx::Any>`
+              `&'r [u8]` implements `sqlx::Decode<'r, Postgres>`
+              `&'r [u8]` implements `sqlx::Decode<'r, sqlx::Any>`
+              `&'r str` implements `sqlx::Decode<'r, Postgres>`
+              `()` implements `sqlx::Decode<'r, Postgres>`
+              `(T1, T2)` implements `sqlx::Decode<'r, Postgres>`
+              `(T1, T2, T3)` implements `sqlx::Decode<'r, Postgres>`
+              `(T1, T2, T3, T4)` implements `sqlx::Decode<'r, Postgres>`
+            and 66 others
+note: required by a bound in `sqlx::Row::get`
+   --> C:\Users\miche\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sqlx-core-0.8.6\src\row.rs:71:12
+    |
+ 68 |     fn get<'r, T, I>(&'r self, index: I) -> T
+    |        --- required by a bound in this associated function
+...
+ 71 |         T: Decode<'r, Self::Database> + Type<Self::Database>,
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `Row::get`
+help: consider specifying the generic arguments
+    |
+419 |         run.get::<T, &str>("config_version")
+    |                +++++++++++
+
+error[E0308]: `?` operator has incompatible types
+   --> services\payroll-service\src\handlers.rs:965:28
+    |
+965 |       let run_ulid: String = sqlx::query_scalar::<_, Uuid>("SELECT ulid FROM payroll_runs WHERE id = $1")
+    |  ____________________________^
+966 | |         .bind(row.get::<Uuid, _>("payroll_run_id"))
+967 | |         .fetch_one(&mut **conn)
+968 | |         .await?;
+    | |_______________^ expected `String`, found `Uuid`
+    |
+    = note: `?` operator cannot convert from `uuid::Uuid` to `std::string::String`
+help: try using a conversion method
+    |
+968 |         .await?.to_string();
+    |                ++++++++++++
+
+error[E0282]: type annotations needed
+    --> services\payroll-service\src\handlers.rs:1041:9
+     |
+1041 |         sqlx::query_scalar("SELECT id FROM payroll_runs WHERE ulid = $1 AND tenant_id = $2")
+     |         ^^^^^^^^^^^^^^^^^^ cannot infer type of the type parameter `O` declared on the function `query_scalar`
+     |
+help: consider specifying the generic arguments
+     |
+1041 |         sqlx::query_scalar::<Postgres, O>("SELECT id FROM payroll_runs WHERE ulid = $1 AND tenant_id = $2")
+     |                           +++++++++++++++
+
+error[E0277]: a value of type `HashSet<uuid::Uuid>` cannot be built from an iterator over elements of type `std::string::String`
+    --> services\payroll-service\src\handlers.rs:1180:79
+     |
+1180 |         let id_set: std::collections::HashSet<Uuid> = emp_ids.iter().cloned().collect();
+     |                                                                               ^^^^^^^ value of type `HashSet<uuid::Uuid>` cannot be built from `std::iter::Iterator<Item=std::string::String>`
+     |
+help: the trait `FromIterator<std::string::String>` is not implemented for `HashSet<uuid::Uuid>`
+      but trait `FromIterator<uuid::Uuid>` is implemented for it
+    --> C:\Users\miche\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust\library\std\src\collections\hash\set.rs:1182:1
+     |
+1182 | / impl<T, S> FromIterator<T> for HashSet<T, S>
+1183 | | where
+1184 | |     T: Eq + Hash,
+1185 | |     S: BuildHasher + Default,
+     | |_____________________________^
+     = help: for that trait implementation, expected `uuid::Uuid`, found `std::string::String`
+note: the method call chain might not have had the expected associated types
+    --> services\payroll-service\src\handlers.rs:1180:70
+     |
+1180 |         let id_set: std::collections::HashSet<Uuid> = emp_ids.iter().cloned().collect();
+     |                                                       ------- ------ ^^^^^^^^ `Iterator::Item` changed to `String` here
+     |                                                       |       |
+     |                                                       |       `Iterator::Item` is `&String` here
+     |                                                       this expression has type `&Vec<String>`
+note: required by a bound in `collect`
+    --> C:\Users\miche\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust\library\core\src\iter\traits\iterator.rs:2077:19
+     |
+2077 |     fn collect<B: FromIterator<Self::Item>>(self) -> B
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `Iterator::collect`
+
+error[E0063]: missing fields `payslips_generated`, `run_ulid`, `smig_compliant_count` and 2 other fields in initializer of `models::GeneratePayslipsResponse`
+    --> services\payroll-service\src\handlers.rs:1249:13
+     |
+1249 |     Ok(Json(GeneratePayslipsResponse {
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^ missing `payslips_generated`, `run_ulid`, `smig_compliant_count` and 2 other fields
+
+error[E0599]: no variant, associated function, or constant named `from_str` found for enum `models::ComponentType` in the current scope
+    --> services\payroll-service\src\handlers.rs:1469:40
+     |
+1469 |         component_type: ComponentType::from_str(&row.get::<String, _>("component_type"))
+     |                                        ^^^^^^^^ variant, associated function, or constant not found in `models::ComponentType`
+     |
+    ::: services\payroll-service\src\models.rs:108:1
+     |
+ 108 | pub enum ComponentType {
+     | ---------------------- variant, associated function, or constant `from_str` not found for this enum
+     |
+     = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+     |
+  14 + use std::str::FromStr;
+     |
+help: there is an associated function `from` with a similar name
+     |
+1469 -         component_type: ComponentType::from_str(&row.get::<String, _>("component_type"))
+1469 +         component_type: ComponentType::from(&row.get::<String, _>("component_type"))
+     |
+
+error[E0599]: no variant, associated function, or constant named `from_str` found for enum `models::ComponentType` in the current scope
+    --> services\payroll-service\src\handlers.rs:1517:44
+     |
+1517 |             component_type: ComponentType::from_str(&r.get::<String, _>("component_type"))
+     |                                            ^^^^^^^^ variant, associated function, or constant not found in `models::ComponentType`
+     |
+    ::: services\payroll-service\src\models.rs:108:1
+     |
+ 108 | pub enum ComponentType {
+     | ---------------------- variant, associated function, or constant `from_str` not found for this enum
+     |
+     = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+     |
+  14 + use std::str::FromStr;
+     |
+help: there is an associated function `from` with a similar name
+     |
+1517 -             component_type: ComponentType::from_str(&r.get::<String, _>("component_type"))
+1517 +             component_type: ComponentType::from(&r.get::<String, _>("component_type"))
+     |
+
+error[E0599]: no method named `as_str` found for enum `std::option::Option<T>` in the current scope
+    --> services\payroll-service\src\handlers.rs:1580:30
+     |
+1580 |     .bind(req.component_type.as_str())
+     |                              ^^^^^^
+     |
+note: the method `as_str` exists on the type `models::ComponentType`
+    --> services\payroll-service\src\models.rs:114:5
+     |
+ 114 |     pub fn as_str(self) -> &'static str {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: there is a method `attr` with a similar name, but with different arguments
+    --> C:\Users\miche\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yansi-1.0.1\src\macros.rs:95:16
+     |
+  95 |         $($q)* fn $kind(self: $r, value: $A) -> $R;
+     |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+    ::: C:\Users\miche\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yansi-1.0.1\src\paint.rs:130:5
+     |
+ 130 |     properties!(signature(&Self) -> Painted<&Self>);
+     |     ----------------------------------------------- in this macro invocation
+     = note: this error originates in the macro `signature` which comes from the expansion of the macro `properties` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider using `Option::expect` to unwrap the `models::ComponentType` value, panicking if the value is an `Option::None`
+     |
+1580 |     .bind(req.component_type.expect("REASON").as_str())
+     |                             +++++++++++++++++
+
+error[E0599]: no variant, associated function, or constant named `from_str` found for enum `models::ComponentType` in the current scope
+    --> services\payroll-service\src\handlers.rs:1627:40
+     |
+1627 |         component_type: ComponentType::from_str(&row.get::<String, _>("component_type"))
+     |                                        ^^^^^^^^ variant, associated function, or constant not found in `models::ComponentType`
+     |
+    ::: services\payroll-service\src\models.rs:108:1
+     |
+ 108 | pub enum ComponentType {
+     | ---------------------- variant, associated function, or constant `from_str` not found for this enum
+     |
+     = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+     |
+  14 + use std::str::FromStr;
+     |
+help: there is an associated function `from` with a similar name
+     |
+1627 -         component_type: ComponentType::from_str(&row.get::<String, _>("component_type"))
+1627 +         component_type: ComponentType::from(&row.get::<String, _>("component_type"))
+     |
+
+warning: unused import: `serde::Deserialize`
+  --> services\payroll-service\src\handlers.rs:27:5
+   |
+27 | use serde::Deserialize;
+   |     ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `config_exists`
+   --> services\payroll-service\src\handlers.rs:118:9
+    |
+118 |     let config_exists: (i64,) = sqlx::query_scalar::<_, (i64,)>(
+    |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_config_exists`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `row`
+   --> services\payroll-service\src\handlers.rs:130:9
+    |
+130 |     let row = sqlx::query(
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_row`
+
+warning: unused variable: `state`
+   --> services\payroll-service\src\handlers.rs:201:11
+    |
+201 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+   --> services\payroll-service\src\handlers.rs:305:11
+    |
+305 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1269:11
+     |
+1269 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1814:11
+     |
+1814 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+    --> services\payroll-service\src\handlers.rs:1875:11
+     |
+1875 |     State(state): State<AppState>,
+     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+Some errors have detailed explanations: E0063, E0277, E0282, E0283, E0308, E0599.
+For more information about an error, try `rustc --explain E0063`.
+warning: `nexora-payroll-service` (lib) generated 8 warnings
+error: could not compile `nexora-payroll-service` (lib) due to 10 previous errors; 8 warnings emitted
+
+RC=101

@@ -119,6 +119,17 @@ impl ComponentType {
     }
 }
 
+impl std::str::FromStr for ComponentType {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "allowance" => Ok(Self::Allowance),
+            "deduction" => Ok(Self::Deduction),
+            other => Err(format!("invalid component type: {other}")),
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Requests
 // ---------------------------------------------------------------------------
@@ -259,7 +270,7 @@ pub struct PageResponse<T> {
 }
 
 /// Pagination query parameters.
-#[derive(Debug, Clone, Deserialize, utoipa::IntoParams)]
+#[derive(Debug, Clone, Deserialize, utoipa::IntoParams, utoipa::ToSchema)]
 pub struct PageQuery {
     #[serde(default)]
     pub page: Option<i64>,
@@ -321,6 +332,9 @@ pub struct GeneratePayslipsRequest {
     /// Override the default days worked for SMIG calculation.
     #[serde(default)]
     pub default_days_worked: Option<u32>,
+    /// Optional explicit employee ULID scope. `None` = every payslip in the run.
+    #[serde(default)]
+    pub employee_ids: Option<Vec<String>>,
 }
 
 /// Response returned by `POST /runs/:ulid/generate-payslips`.
@@ -331,6 +345,10 @@ pub struct GeneratePayslipsResponse {
     pub smig_compliant_count: usize,
     pub smig_non_compliant_count: usize,
     pub smig_violations: Vec<String>,
+    /// Number of payslip PDFs successfully rendered.
+    pub pdf_bytes_count: usize,
+    /// Number of employees in scope for this generation.
+    pub employee_count: usize,
 }
 
 /// Request body for creating a payroll component (allowance/deduction).
@@ -341,7 +359,7 @@ pub struct CreatePayrollComponentRequest {
     pub component_type: ComponentType,
     /// Default amount in CDF (minor units).
     #[serde(default)]
-    pub default_amount: Option<Decimal>,
+    pub default_amount: Option<Money>,
     #[serde(default)]
     pub is_taxable: bool,
     #[serde(default)]
@@ -357,7 +375,7 @@ pub struct UpdatePayrollComponentRequest {
     pub description: Option<String>,
     pub component_type: Option<ComponentType>,
     #[serde(default)]
-    pub default_amount: Option<Decimal>,
+    pub default_amount: Option<Money>,
     #[serde(default)]
     pub is_taxable: Option<bool>,
     #[serde(default)]

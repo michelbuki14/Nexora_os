@@ -16,7 +16,8 @@ export interface Session {
   preferredUsername: string | null;
   email: string | null;
   name: string | null;
-  setSession: (token: string, claims: SessionClaims) => void;
+  demo: boolean;
+  setSession: (token: string, claims: SessionClaims, demo?: boolean) => void;
   setToken: (token: string) => void;
   clear: () => void;
 }
@@ -38,8 +39,9 @@ export const useSessionStore = create<Session>((set) => ({
   preferredUsername: null,
   email: null,
   name: null,
+  demo: false,
 
-  setSession: (token, claims) =>
+  setSession: (token, claims, demo = false) =>
     set({
       authenticated: true,
       token,
@@ -52,6 +54,7 @@ export const useSessionStore = create<Session>((set) => ({
       preferredUsername: claims.preferred_username ?? null,
       email: claims.email ?? null,
       name: claims.name ?? null,
+      demo,
     }),
 
   setToken: (token) => set({ token }),
@@ -69,5 +72,6 @@ export const useSessionStore = create<Session>((set) => ({
       preferredUsername: null,
       email: null,
       name: null,
+      demo: false,
     }),
 }));

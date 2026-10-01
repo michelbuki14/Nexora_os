@@ -49,7 +49,7 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: keycloak_dev_password
-      KC_HOSTNAME: localhost
+      KC_HOSTNAME: keycloak
       KC_HOSTNAME_PORT: "8080"
       KC_HTTP_ENABLED: "true"
       # KC_PROXY: edge was removed in KC 24; use KC_PROXY_HEADERS instead
@@ -64,11 +64,12 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health/ready || exit 1"]
+      # The keycloak image ships no curl/wget; use a dependency-free bash TCP probe.
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8080' || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 10
-      start_period: 30s
+      start_period: 40s
     networks:
       - nexora-network
 
@@ -143,6 +144,7 @@ services:
       NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
       NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
       NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__AUDIENCE: nexora-api
       NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
       NEXORA_S3__ENDPOINT: "http://minio:9000"
       NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
@@ -175,6 +177,7 @@ services:
       NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
       NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
       NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__AUDIENCE: nexora-api
       NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
       NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
     ports:
@@ -204,10 +207,129 @@ services:
       NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
       NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
       NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__AUDIENCE: nexora-api
       NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
       NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
     ports:
       - "3004:3004"
+    depends_on:
+      nexora-workforce-service:
+        condition: service_started
+      nexora-audit-service:
+        condition: service_started
+    networks:
+      - nexora-network
+    restart: unless-stopped
+
+  nexora-fintech-service:
+    image: nexora-services:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexora-fintech-service
+    entrypoint: ["nexora-fintech-service"]
+    environment:
+      NEXORA_ENV: docker
+      NEXORA_SERVICE__NAME: nexora-fintech-service
+      NEXORA_SERVER__PORT: "3005"
+      NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
+      NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
+      NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__AUDIENCE: nexora-api
+      NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
+      NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
+    ports:
+      - "3005:3005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      nexora-migrate:
+        condition: service_completed_successfully
+    networks:
+      - nexora-network
+    restart: unless-stopped
+
+  nexora-retail-service:
+    image: nexora-services:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexora-retail-service
+    entrypoint: ["nexora-retail-service"]
+    environment:
+      NEXORA_ENV: docker
+      NEXORA_SERVICE__NAME: nexora-retail-service
+      NEXORA_SERVER__PORT: "3006"
+      NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
+      NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
+      NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__AUDIENCE: nexora-api
+      NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
+      NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
+    ports:
+      - "3006:3006"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      nexora-migrate:
+        condition: service_completed_successfully
+    networks:
+      - nexora-network
+    restart: unless-stopped
+
+  nexora-gov-service:
+    image: nexora-services:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexora-gov-service
+    entrypoint: ["nexora-gov-service"]
+    environment:
+      NEXORA_ENV: docker
+      NEXORA_SERVICE__NAME: nexora-gov-service
+      NEXORA_SERVER__PORT: "3007"
+      NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
+      NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
+      NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__AUDIENCE: nexora-api
+      NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
+      NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
+    ports:
+      - "3007:3007"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      nexora-migrate:
+        condition: service_completed_successfully
+    networks:
+      - nexora-network
+    restart: unless-stopped
+
+  nexora-payroll-service:
+    image: nexora-services:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexora-payroll-service
+    entrypoint: ["nexora-payroll-service"]
+    environment:
+      NEXORA_ENV: docker
+      NEXORA_SERVICE__NAME: nexora-payroll-service
+      NEXORA_SERVER__PORT: "3008"
+      NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
+      NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
+      NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__AUDIENCE: nexora-api
+      NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
+      NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
+    ports:
+      - "3008:3008"
     depends_on:
       postgres:
         condition: service_healthy
@@ -233,10 +355,15 @@ services:
       NEXORA_DATABASE__URL: "postgresql://nexora:nexora_dev_password@postgres:5432/nexora"
       NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
       NEXORA_AUTH__JWKS_URL: "http://keycloak:8080/realms/nexora/protocol/openid-connect/certs"
+      NEXORA_AUTH__AUDIENCE: nexora-api
       NEXORA_AUTH__ISSUER: "http://keycloak:8080/realms/nexora"
       NEXORA_GATEWAY__WORKFORCE_BASE_URL: "http://nexora-workforce-service:3002"
       NEXORA_GATEWAY__AUDIT_BASE_URL: "http://nexora-audit-service:3001"
       NEXORA_GATEWAY__TENANT_BASE_URL: "http://nexora-tenant-service:3004"
+      NEXORA_GATEWAY__FINTECH_BASE_URL: "http://nexora-fintech-service:3005"
+      NEXORA_GATEWAY__RETAIL_BASE_URL: "http://nexora-retail-service:3006"
+      NEXORA_GATEWAY__GOV_BASE_URL: "http://nexora-gov-service:3007"
+      NEXORA_GATEWAY__PAYROLL_BASE_URL: "http://nexora-payroll-service:3008"
       NEXORA_TRACING__OTLP_ENDPOINT: "http://jaeger:4317"
     ports:
       - "3000:3000"
@@ -246,6 +373,14 @@ services:
       nexora-audit-service:
         condition: service_started
       nexora-tenant-service:
+        condition: service_started
+      nexora-fintech-service:
+        condition: service_started
+      nexora-retail-service:
+        condition: service_started
+      nexora-gov-service:
+        condition: service_started
+      nexora-payroll-service:
         condition: service_started
     networks:
       - nexora-network
