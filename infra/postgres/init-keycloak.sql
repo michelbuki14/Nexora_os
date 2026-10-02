@@ -1,6 +1,6 @@
 -- Runs once on first Postgres container start (docker-entrypoint-initdb.d).
 -- Keycloak's compose config points at a separate DB/user that the default
--- POSTGRES_DB=aos init does not create. Without this, Keycloak never becomes ready.
+-- POSTGRES_DB=nexora init does not create. Without this, Keycloak never becomes ready.
 
 DO $$
 BEGIN

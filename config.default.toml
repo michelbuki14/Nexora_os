@@ -1,6 +1,6 @@
 # Default configuration for Nexora OS services.
 # This file provides default values loaded before service-specific configs.
-# Overridden by config.<AOS_ENV>.toml and AOS_ environment variables.
+# Overridden by config.<NEXORA_ENV>.toml and NEXORA_ environment variables.
 
 [server]
 host = "0.0.0.0"

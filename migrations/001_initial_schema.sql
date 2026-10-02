@@ -160,39 +160,39 @@ ALTER TABLE audit_events ENABLE ROW LEVEL SECURITY;
 -- Application middleware must call SELECT set_config('nexora.current_tenant_id', <tenant_ulid>, false)
 
 CREATE POLICY tenant_isolation_organizations ON organizations
-    USING (ulid = current_setting('nexora.current_tenant_id', true) OR current_setting('aos.is_system', true) = 'true')
-    WITH CHECK (ulid = current_setting('nexora.current_tenant_id', true) OR current_setting('aos.is_system', true) = 'true');
+    USING (ulid = current_setting('nexora.current_tenant_id', true) OR current_setting('nexora.is_system', true) = 'true')
+    WITH CHECK (ulid = current_setting('nexora.current_tenant_id', true) OR current_setting('nexora.is_system', true) = 'true');
 
 CREATE POLICY tenant_isolation_tenants ON tenants
-    USING (ulid = current_setting('nexora.current_tenant_id', true) OR current_setting('aos.is_system', true) = 'true');
+    USING (ulid = current_setting('nexora.current_tenant_id', true) OR current_setting('nexora.is_system', true) = 'true');
 
 CREATE POLICY tenant_isolation_users ON users
     USING (
         tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
-        OR current_setting('aos.is_system', true) = 'true'
+        OR current_setting('nexora.is_system', true) = 'true'
     );
 
 CREATE POLICY tenant_isolation_roles ON roles
     USING (
         org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
-        OR current_setting('aos.is_system', true) = 'true'
+        OR current_setting('nexora.is_system', true) = 'true'
     );
 
 CREATE POLICY tenant_isolation_memberships ON memberships
     USING (
         tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
         OR org_id = (SELECT org_id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
-        OR current_setting('aos.is_system', true) = 'true'
+        OR current_setting('nexora.is_system', true) = 'true'
     );
 
 CREATE POLICY tenant_isolation_features ON tenant_features
     USING (
         tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
-        OR current_setting('aos.is_system', true) = 'true'
+        OR current_setting('nexora.is_system', true) = 'true'
     );
 
 CREATE POLICY tenant_isolation_audit ON audit_events
     USING (
         tenant_id = (SELECT id FROM tenants WHERE ulid = current_setting('nexora.current_tenant_id', true))
-        OR current_setting('aos.is_system', true) = 'true'
+        OR current_setting('nexora.is_system', true) = 'true'
     );

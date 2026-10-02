@@ -12,15 +12,15 @@ SECRET="${MINIO_ROOT_PASSWORD:-minioadmin}"
 BUCKET="${MINIO_BUCKET:-nexora-workforce-documents}"
 
 echo "Setting up MinIO alias '$ALIAS' -> $ENDPOINT"
-docker run --rm --network aos-network minio/mc:latest \
+docker run --rm --network nexora-network minio/mc:latest \
     alias set "$ALIAS" "$ENDPOINT" "$ACCESS" "$SECRET" >/dev/null
 
 echo "Creating bucket '$BUCKET' (private)"
-docker run --rm --network aos-network minio/mc:latest \
+docker run --rm --network nexora-network minio/mc:latest \
     mb --ignore-existing "$ALIAS/$BUCKET"
 
 echo "Verifying bucket exists"
-docker run --rm --network aos-network minio/mc:latest \
+docker run --rm --network nexora-network minio/mc:latest \
     ls "$ALIAS/$BUCKET"
 
 echo "Bucket '$BUCKET' ready at $ENDPOINT"

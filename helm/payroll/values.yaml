@@ -1,5 +1,5 @@
 # Nexora Payroll Service — Helm values
-# Deployed as part of the aos-chart umbrella chart.
+# Deployed as part of the nexora-chart umbrella chart.
 # This file overrides the defaults for the payroll service specifically.
 
 replicaCount: 2

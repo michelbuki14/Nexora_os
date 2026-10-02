@@ -40,12 +40,12 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: aos
-          POSTGRES_PASSWORD: aos_test_password
-          POSTGRES_DB: aos
+          POSTGRES_USER: nexora
+          POSTGRES_PASSWORD: nexora_test_password
+          POSTGRES_DB: nexora
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U aos -d aos"
+          --health-cmd "pg_isready -U nexora -d nexora"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -59,9 +59,9 @@ jobs:
       - name: Run tests
         run: cargo test --workspace --all-targets
         env:
-          DATABASE_URL: postgres://aos:aos_test_password@localhost:5432/aos
+          DATABASE_URL: postgres://nexora:nexora_test_password@localhost:5432/nexora
           REDIS_URL: redis://localhost:6379
-          AOS_ENV: test
+          NEXORA_ENV: test
 
   audit:
     name: Security Audit
@@ -102,7 +102,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Generate OpenAPI
-        run: cargo run -p aos-api-gateway --example generate-openapi
+        run: cargo run -p nexora-api-gateway --example generate-openapi
       - name: Validate OpenAPI spec
         run: npx @apidevtools/swagger-cli validate openapi.json || echo "swagger-cli not available; skipping"
 

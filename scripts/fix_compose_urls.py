@@ -40,13 +40,13 @@ redis_url = read_toml_value('config.workforce-dev.toml', 'url')
 with open('docker-compose.yml', 'r', encoding='utf-8') as f:
     content = f.read()
 
-print(f"Original AOS_DATABASE__URL occurrences: {content.count('AOS_DATABASE__URL:')}")
+print(f"Original NEXORA_DATABASE__URL occurrences: {content.count('NEXORA_DATABASE__URL:')}")
 
-# Replace the AOS_DATABASE__URL lines with the real URL
-# Pattern: AOS_DATABASE__URL: "anything"
+# Replace the NEXORA_DATABASE__URL lines with the real URL
+# Pattern: NEXORA_DATABASE__URL: "anything"
 new_content = re.sub(
-    r'AOS_DATABASE__URL:\s*"[^"]*"',
-    f'AOS_DATABASE__URL: "{docker_db_url}"',
+    r'NEXORA_DATABASE__URL:\s*"[^"]*"',
+    f'NEXORA_DATABASE__URL: "{docker_db_url}"',
     content
 )
 
@@ -61,4 +61,4 @@ with open('docker-compose.yml', 'w', encoding='utf-8') as f:
     f.write(new_content)
 
 print("docker-compose.yml patched successfully")
-print(f"Replaced {content.count('AOS_DATABASE__URL:')} DATABASE URL(s)")
+print(f"Replaced {content.count('NEXORA_DATABASE__URL:')} DATABASE URL(s)")

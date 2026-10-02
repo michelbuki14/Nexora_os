@@ -21,7 +21,7 @@
     "file": "services/common/src/config.rs",
     "line": 301,
     "summary": "Repeated environment variable parsing on every Config::load() call",
-    "failure_scenario": "Config::load() merges Env::prefixed("AOS_").split("__") on every call (line 301). This parses all AOS_ environment variables and splits on double-underscore on every invocation. If config is loaded multiple times during startup or in test harnesses, this is redundant computation. The env var parsing includes string allocation for prefix stripping and key normalization. Fix: load environment variables once at startup, cache the parsed config, or use a one-time initialization pattern (lazy_static/OnceLock) to ensure config is extracted only once."
+    "failure_scenario": "Config::load() merges Env::prefixed(\"NEXORA_\").split(\"__\") on every call (line 301). This parses all NEXORA_ environment variables and splits on double-underscore on every invocation. If config is loaded multiple times during startup or in test harnesses, this is redundant computation. The env var parsing includes string allocation for prefix stripping and key normalization. Fix: load environment variables once at startup, cache the parsed config, or use a one-time initialization pattern (lazy_static/OnceLock) to ensure config is extracted only once."
   },
   {
     "file": "services/api-gateway/src/main.rs",
@@ -32,7 +32,7 @@
   {
     "file": "services/common/src/config.rs",
     "line": 110,
-    "summary": "S3Config default bucket name not updated with aos→nexora rename",
-    "failure_scenario": "S3Config::default() hardcodes bucket: \"aos-workforce-documents\".to_string() (line 110). After the workspace rename from aos- to nexora-, if the default config is used without overriding the bucket name via config file or environment variable, the service resolves to the old aos- bucket name. This causes either a miss (nonexistent bucket) or silently wrong behavior if an aos- bucket still exists. The mismatch can trigger repeated failed config loads or fallback code paths, introducing wasted I/O and computation. Fix: update the default to \"nexora-workforce-documents\" to match the renamed configuration, or make the bucket name fully configurable via environment variable with no hardcoded default."
+    "summary": "S3Config default bucket name not updated with nexora rename",
+    "failure_scenario": "S3Config::default() hardcodes bucket: \"nexora-workforce-documents\".to_string() (line 110). After the workspace rename from the old name to nexora-, if the default config is used without overriding the bucket name via config file or environment variable, the service resolves to the old bucket name. This causes either a miss (nonexistent bucket) or silently wrong behavior if an old bucket still exists. The mismatch can trigger repeated failed config loads or fallback code paths, introducing wasted I/O and computation. Fix: update the default to \"nexora-workforce-documents\" to match the renamed configuration, or make the bucket name fully configurable via environment variable with no hardcoded default."
   }
 ]

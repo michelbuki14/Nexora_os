@@ -8,8 +8,8 @@ to get a token quickly, then exercises the full workforce + audit path:
 """
 import json, hashlib, urllib.parse, urllib.request, sys, base64
 
-KC_TOKEN = "http://localhost:8080/realms/aos/protocol/openid-connect/token"
-CLIENT_ID = "aos-developer-portal"
+KC_TOKEN = "http://localhost:8080/realms/nexora/protocol/openid-connect/token"
+CLIENT_ID = "nexora-developer-portal"
 
 def decode_jwt(tok):
     payload = tok.split(".")[1]
@@ -55,7 +55,7 @@ perms = claims.get("permissions", [])
 print(f"    aud: {aud}")
 print(f"    permissions ({len(perms)}): {perms[:8]}{'...' if len(perms)>8 else ''}")
 print(f"    roles: {claims.get('roles', [])}")
-print(f"    aud contains aos-api: {'aos-api' in (aud if isinstance(aud, list) else [aud])}")
+print(f"    aud contains nexora-api: {'nexora-api' in (aud if isinstance(aud, list) else [aud])}")
 
 auth_hdr = f"Bearer {token}"
 hdrs = {"Authorization": auth_hdr, "Accept": "application/json"}
@@ -114,11 +114,11 @@ if status == 200:
 
 # ---- Document upload: JSON metadata line + \n + raw bytes ----
 print(f"\n[5] Document upload (JSON\\nbytes contract)")
-test_bytes = b"AOS Live Walk test document - employee " + emp_ulid.encode()
+test_bytes = b"Nexora Live Walk test document - employee " + emp_ulid.encode()
 sha256 = hashlib.sha256(test_bytes).hexdigest()
 meta = {
     "doc_type": "contract",
-    "filename": "aos-live-walk.pdf",
+    "filename": "nexora-live-walk.pdf",
     "mime_type": "application/pdf",
     "size_bytes": len(test_bytes),
     "sha256": sha256,

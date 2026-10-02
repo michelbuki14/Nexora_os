@@ -1,12 +1,12 @@
 # Writes config.audit-dev.toml for the audit service (port 3001).
 # Run: powershell -ExecutionPolicy Bypass -File scripts\write_audit_config.ps1
 
-$db   = "postgresql://aos:aos_dev_password@localhost:5432/aos"
-$redis = "redis://:aos_dev_password@localhost:6379/0"
+$db   = "postgresql://nexora:nexora_dev_password@localhost:5432/nexora"
+$redis = "redis://:nexora_dev_password@localhost:6379/0"
 
 $toml = @"
 [service]
-name = "aos-audit-service"
+name = "nexora-audit-service"
 version = "0.1.0"
 environment = "development"
 
@@ -33,9 +33,9 @@ connection_timeout_secs = 5
 command_timeout_secs = 5
 
 [auth]
-jwks_url = "http://localhost:8080/realms/aos/protocol/openid-connect/certs"
-issuer = "http://localhost:8080/realms/aos"
-audience = "aos-api"
+jwks_url = "http://localhost:8080/realms/nexora/protocol/openid-connect/certs"
+issuer = "http://localhost:8080/realms/nexora"
+audience = "nexora-api"
 jwks_cache_ttl_secs = 300
 require_https = false
 allowed_algorithms = ["RS256"]
@@ -43,7 +43,7 @@ allowed_algorithms = ["RS256"]
 [tracing]
 enabled = false
 otlp_endpoint = "http://localhost:4317"
-service_name = "aos-audit-service"
+service_name = "nexora-audit-service"
 sample_rate = 1.0
 export_timeout_secs = 10
 "@

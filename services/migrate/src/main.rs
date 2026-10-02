@@ -108,7 +108,7 @@ async fn verify(pool: &PgPool) -> anyhow::Result<()> {
     } else {
         error!(
             count = pending.len(),
-            "database has pending migrations — run `aos-migrate run`"
+            "database has pending migrations — run `nexora-migrate run`"
         );
         for m in &pending {
             error!(version = %m.version, description = %m.description, "pending");

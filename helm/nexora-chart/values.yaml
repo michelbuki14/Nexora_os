@@ -1,12 +1,12 @@
-# Shared defaults for an AOS service. Override per-service via values/*.yaml.
+# Shared defaults for a Nexora OS service. Override per-service via values/*.yaml.
 # Config model (services/common/src/config.rs): figment merges config.*.toml
-# files with AOS_-prefixed env vars (double-underscore = nesting). In-cluster we
+# files with NEXORA_-prefixed env vars (double-underscore = nesting). In-cluster we
 # drive everything through env vars so no config file needs mounting.
 
 replicaCount: 2
 
 image:
-  repository: ghcr.io/michelbuki14/aos
+  repository: ghcr.io/michelbuki14/nexora
   tag: "0.1.0"
   pullPolicy: IfNotPresent
 
@@ -32,48 +32,48 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-# AOS config. `service.name` is overridden per service.
+# Nexora config. `service.name` is overridden per service.
 # External infra (Keycloak, MinIO, Tempo) is deployed OUTSIDE this chart — it
-# ships only the four AOS services. The env values below use short DNS names
+# ships only the Nexora services. The env values below use short DNS names
 # that must resolve inside the cluster; override per-service (values/*.yaml)
 # with FQDNs if infra lives in another namespace.
 # Monitoring configuration added for platform observability
 env:
-  AOS_SERVICE__ENVIRONMENT: production
-  AOS_SERVER__HOST: 0.0.0.0
-  AOS_SERVER__PORT: "3000"
-  AOS_DATABASE__MAX_CONNECTIONS: "20"
-  AOS_REDIS__MAX_CONNECTIONS: "50"
-  AOS_AUTH__JWKS_URL: http://keycloak:8080/realms/aos/protocol/openid-connect/certs
-  AOS_AUTH__ISSUER: http://keycloak:8080/realms/aos
-  AOS_AUTH__AUDIENCE: aos-api
-  AOS_AUTH__JWKS_CACHE_TTL_SECS: "300"
-  AOS_AUTH__REQUIRE_HTTPS: "false"
-  AOS_TRACING__ENABLED: "true"
-  AOS_TRACING__OTLP_ENDPOINT: http://aos-grafana-tempo:4317
-  AOS_TRACING__SAMPLE_RATE: "0.1"
+  NEXORA_SERVICE__ENVIRONMENT: production
+  NEXORA_SERVER__HOST: 0.0.0.0
+  NEXORA_SERVER__PORT: "3000"
+  NEXORA_DATABASE__MAX_CONNECTIONS: "20"
+  NEXORA_REDIS__MAX_CONNECTIONS: "50"
+  NEXORA_AUTH__JWKS_URL: http://keycloak:8080/realms/nexora/protocol/openid-connect/certs
+  NEXORA_AUTH__ISSUER: http://keycloak:8080/realms/nexora
+  NEXORA_AUTH__AUDIENCE: nexora-api
+  NEXORA_AUTH__JWKS_CACHE_TTL_SECS: "300"
+  NEXORA_AUTH__REQUIRE_HTTPS: "false"
+  NEXORA_TRACING__ENABLED: "true"
+  NEXORA_TRACING__OTLP_ENDPOINT: http://nexora-grafana-tempo:4317
+  NEXORA_TRACING__SAMPLE_RATE: "0.1"
   # Monitoring endpoints
-  AOS_METRICS__ENABLED: "true"
-  AOS_METRICS__SCRAPE_INTERVAL: "15s"
-  AOS_HEALTH__PATH: "/health/ready"
+  NEXORA_METRICS__ENABLED: "true"
+  NEXORA_METRICS__SCRAPE_INTERVAL: "15s"
+  NEXORA_HEALTH__PATH: "/health/ready"
 
 # Secret values (DB URL, Redis URL, S3 creds). Referenced via secretKeyRef so
 # they never land in the chart. ESO (External Secrets Operator) syncs
-# AWS Secrets Manager entries into a cluster Secret named `aos-runtime`.
-existingSecret: aos-runtime
+# AWS Secrets Manager entries into a cluster Secret named `nexora-runtime`.
+existingSecret: nexora-runtime
 
 # Bootstrap fallback (DEV ONLY): used when externalSecret.enabled=false so a
 # fresh cluster actually starts. Override these in production or enable ESO.
 runtimeSecret:
-  AOS_DATABASE__URL: "postgres://aos:aos_dev_password@postgres:5432/aos"
-  AOS_REDIS__URL: "redis://:aos_dev_password@redis:6379/0"
-  AOS_S3__ACCESS_KEY_ID: "minioadmin"
-  AOS_S3__SECRET_ACCESS_KEY: "minioadmin"
+  NEXORA_DATABASE__URL: "postgres://nexora:nexora_dev_password@postgres:5432/nexora"
+  NEXORA_REDIS__URL: "redis://:nexora_dev_password@redis:6379/0"
+  NEXORA_S3__ACCESS_KEY_ID: "minioadmin"
+  NEXORA_S3__SECRET_ACCESS_KEY: "minioadmin"
 
 # External Secrets Operator source (opt-in; see templates/externalsecret.yaml).
 # The cluster Secret it targets must contain keys matching the env var names,
-# e.g. AOS_DATABASE__URL, AOS_REDIS__URL, AOS_S3__ACCESS_KEY_ID,
-# AOS_S3__SECRET_ACCESS_KEY.
+# e.g. NEXORA_DATABASE__URL, NEXORA_REDIS__URL, NEXORA_S3__ACCESS_KEY_ID,
+# NEXORA_S3__SECRET_ACCESS_KEY.
 externalSecret:
   enabled: false
   refreshInterval: 1h
@@ -81,21 +81,21 @@ externalSecret:
     name: aws-secretsmanager
     kind: SecretStore
   remoteKeys:
-    - secretKey: AOS_DATABASE__URL
-      remoteKey: aos/production/database-url
-    - secretKey: AOS_REDIS__URL
-      remoteKey: aos/production/redis-url
-    - secretKey: AOS_S3__ACCESS_KEY_ID
-      remoteKey: aos/production/s3-access-key-id
-    - secretKey: AOS_S3__SECRET_ACCESS_KEY
-      remoteKey: aos/production/s3-secret-access-key
+    - secretKey: NEXORA_DATABASE__URL
+      remoteKey: nexora/production/database-url
+    - secretKey: NEXORA_REDIS__URL
+      remoteKey: nexora/production/redis-url
+    - secretKey: NEXORA_S3__ACCESS_KEY_ID
+      remoteKey: nexora/production/s3-access-key-id
+    - secretKey: NEXORA_S3__SECRET_ACCESS_KEY
+      remoteKey: nexora/production/s3-secret-access-key
 
-# Container port the app listens on (must match AOS_SERVER__PORT).
+# Container port the app listens on (must match NEXORA_SERVER__PORT).
 service:
   port: 3000
   targetPort: http
 
-# HTTP probes. All AOS services expose /health, /health/live, /health/ready.
+# HTTP probes. All Nexora services expose /health, /health/live, /health/ready.
 # These probes are used by Kubernetes for liveness/readiness detection
 # and by Prometheus for service discovery.
 probes:
@@ -141,24 +141,6 @@ autoscaling:
   targetCPUUtilizationPercentage: 70
 
 # Pod disruption budget for high availability
-podDisruptionBudget:
-  enabled: true
-  minAvailable: 1
-
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
-
-autoscaling:
-  enabled: false
-  minReplicas: 2
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 70
-
 podDisruptionBudget:
   enabled: true
   minAvailable: 1

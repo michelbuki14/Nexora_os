@@ -14,7 +14,7 @@
 //!
 //! ## Windows note — same as common suite
 //! Tests are `#[ignore]`d on Windows (testcontainers npipe bug).
-//! Run on Linux/CI: `cargo test -p aos-workforce-service --test workforce_isolation -- --ignored`.
+//! Run on Linux/CI: `cargo test -p nexora-workforce-service --test workforce_isolation -- --ignored`.
 //! MUST run against a real PostgreSQL — vacuous passes are a false-green security risk.
 
 use nexora_common::{
@@ -215,7 +215,7 @@ async fn test_cross_tenant_employee_read_returns_empty() {
     let cl = cluster().await;
     let (ta, _tb, _emp_a, _emp_b) = seed_two_tenants(&cl.super_pool).await;
 
-    // Connect as aos_app with tenant_b's GUC → should see 0 employees even
+    // Connect as nexora_app with tenant_b's GUC → should see 0 employees even
     // though emp_a belongs to tenant_a.
     let auth_b = make_auth(
         &ta,
@@ -297,7 +297,7 @@ async fn test_guc_does_not_leak_between_queries() {
         row.0.parse().unwrap()
     };
     let single_conn_url =
-        format!("postgres://{APP_ROLE}:{APP_ROLE_PASSWORD}@localhost:{port}/aos_test");
+        format!("postgres://{APP_ROLE}:{APP_ROLE_PASSWORD}@localhost:{port}/nexora_test");
     let single_pool = PgPoolOptions::new()
         .max_connections(1)
         .connect(&single_conn_url)

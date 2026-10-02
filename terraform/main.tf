@@ -243,7 +243,7 @@ resource "kubernetes_deployment" "api-gateway" {
         container {
           # Image repository and tag are set per-environment
           # Images are built and pushed to:
-          # - AWS: ghcr.io/michelbuki14/aos or ECR
+          # - AWS: ghcr.io/michelbuki14/nexora or ECR
           # - Azure: mcr.microsoft.com/azure-dev/integraz or ACR
           # - GCP: us-docker.pkg.dev/gcp-project/images or GCR
           # - On-prem: self-hosted registry
@@ -292,57 +292,57 @@ resource "kubernetes_deployment" "api-gateway" {
         }
 
         # Environment variables from config
-        # All env vars use the AOS_ prefix convention
+        # All env vars use the NEXORA_ prefix convention
         # Sensitive values (DB URLs, keys) are referenced via secretKeyRef
         # from secrets managed by External Secrets Operator or Vault
         env {
           # Service identification
-          name  = "AOS_SERVICE__ENVIRONMENT"
+          name  = "NEXORA_SERVICE__ENVIRONMENT"
           value = var.environment
 
           # Server configuration
-          name  = "AOS_SERVER__HOST"
+          name  = "NEXORA_SERVER__HOST"
           value = "0.0.0.0"
 
-          name  = "AOS_SERVER__PORT"
+          name  = "NEXORA_SERVER__PORT"
           value = "3000"
 
           # Database configuration - referenced from secrets
           # In production, these are populated by ESO from cloud secret managers
           # or from Vault via the sidecar injector
-          # name  = "AOS_DATABASE__URL"
+          # name  = "NEXORA_DATABASE__URL"
           # value = var.database_url
 
           # Redis configuration
-          # name  = "AOS_REDIS__URL"
+          # name  = "NEXORA_REDIS__URL"
           # value = var.redis_url
 
           # Authentication - Keycloak configuration
           # These are populated from Vault or cloud secret managers
-          # name  = "AOS_AUTH__JWKS_URL"
+          # name  = "NEXORA_AUTH__JWKS_URL"
           # value = var.keycloak_jwks_url
 
-          # name  = "AOS_AUTH__ISSUER"
+          # name  = "NEXORA_AUTH__ISSUER"
           # value = var.keycloak_issuer
 
-          # name  = "AOS_AUTH__AUDIENCE"
+          # name  = "NEXORA_AUTH__AUDIENCE"
           # value = var.keycloak_audience
 
           # Tracing - OpenTelemetry
-          # name  = "AOS_TRACING__OTLP_ENDPOINT"
+          # name  = "NEXORA_TRACING__OTLP_ENDPOINT"
           # value = var.otlp_endpoint
 
-          # name  = "AOS_TRACING__SAMPLE_RATE"
+          # name  = "NEXORA_TRACING__SAMPLE_RATE"
           # value = "0.1"
 
           # S3/MinIO configuration
-          # name  = "AOS_S3__ENDPOINT"
+          # name  = "NEXORA_S3__ENDPOINT"
           # value = var.s3_endpoint
 
-          # name  = "AOS_S3__ACCESS_KEY_ID"
+          # name  = "NEXORA_S3__ACCESS_KEY_ID"
           # (referenced via secretKeyRef, not inline)
 
-          # name  = "AOS_S3__SECRET_ACCESS_KEY"
+          # name  = "NEXORA_S3__SECRET_ACCESS_KEY"
           # (referenced via secretKeyRef, not inline)
         }
 

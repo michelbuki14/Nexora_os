@@ -64,4 +64,4 @@ ingress:
   tls:
     - hosts:
         - api.nexora.example.com
-      secretName: aos-api-tls
+      secretName: nexora-api-tls

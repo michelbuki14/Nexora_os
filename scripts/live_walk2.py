@@ -1,8 +1,8 @@
 """AOS live walk part 2: compensation write + termination + audit verification."""
 import json, urllib.parse, urllib.request, sys, base64, http.client
 
-KC_TOKEN = "http://localhost:8080/realms/aos/protocol/openid-connect/token"
-CLIENT_ID = "aos-developer-portal"
+KC_TOKEN = "http://localhost:8080/realms/nexora/protocol/openid-connect/token"
+CLIENT_ID = "nexora-developer-portal"
 EMP_ULID = "01ARZ3NDEKTSV4RRFFQ69G5FB5"  # Amina Mukendi, from part 1
 
 def decode_jwt(tok):

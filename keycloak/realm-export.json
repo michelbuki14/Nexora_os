@@ -32,7 +32,7 @@
   "oauth2DevicePollingInterval": 5,
   "webAuthnPolicyAcceptableAaguids": [],
   "webAuthnPolicyRpEntityName": "Africa Operating System",
-  "webAuthnPolicyRpId": "aos.example.com",
+  "webAuthnPolicyRpId": "nexora.example.com",
   "webAuthnPolicyCreateTimeout": 0,
   "webAuthnPolicyAvoidSameAuthenticatorRegister": false,
   "webAuthnPolicyPasswordlessAcceptableAaguids": [],
@@ -100,12 +100,12 @@
       "enabled": true,
       "publicClient": true,
       "redirectUris": [
-        "https://developers.aos.example.com/callback",
+        "https://developers.nexora.example.com/callback",
         "http://localhost:3000/callback",
         "http://localhost:4000/callback"
       ],
       "webOrigins": [
-        "https://developers.aos.example.com",
+        "https://developers.nexora.example.com",
         "http://localhost:3000",
         "http://localhost:4000"
       ],
@@ -183,8 +183,8 @@
   ],
   "roles": {
     "realm": [
-      { "name": "aos_admin", "description": "Platform administrator" },
-      { "name": "aos_operator", "description": "Platform operator" },
+      { "name": "nexora_admin", "description": "Platform administrator" },
+      { "name": "nexora_operator", "description": "Platform operator" },
       { "name": "PLATFORM_ADMIN", "description": "Platform administrator (legacy)" },
       { "name": "SUPER_ADMIN", "description": "Super administrator (legacy)" },
       { "name": "HR_ADMIN", "description": "Human Resources administrator" },

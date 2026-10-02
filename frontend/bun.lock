@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "aos-frontend",
+      "name": "nexora-frontend",
       "dependencies": {
         "@hookform/resolvers": "^5.9.0",
         "@react-three/drei": "^10.7.8",

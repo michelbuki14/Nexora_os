@@ -12,7 +12,7 @@ Rules that govern all issues:
 - Every money-mutating endpoint is **idempotent** (client-supplied `Idempotency-Key`,
   unique constraint) — a retry must never double-credit or double-debit.
 - Every table ships with RLS enabled + a policy mirroring `migrations/001`, and
-  grants to `aos_app` (pattern in `migrations/007`).
+  grants to `nexora_app` (pattern in `migrations/007`).
 - Every mutation writes one `audit_events` row.
 - "Done" includes a unit test for the money/state logic. Integration tests that
   need a live postgres run on Linux/CI (Windows npipe is broken for
@@ -63,7 +63,7 @@ migration `010_fintech_schema.sql`.
 - **Why:** Double-entry via `ledger_entries` is the primitive everything else
   reads. `version` on wallets prevents lost updates.
 - **Done when:** `cargo run -p nexora-migrate -- run` applies it; ledger table has
-  a new success row; RLS blocks cross-tenant reads when run as `aos_app`.
+  a new success row; RLS blocks cross-tenant reads when run as `nexora_app`.
 
 ---
 

@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/michelbuki14/AFRICA-OPERATING-SYSTEM-AOS-.git
     targetRevision: main
-    path: helm/aos-chart
+    path: helm/nexora-chart
     helm:
       valueFiles:
         - values/payroll.yaml

@@ -4,7 +4,7 @@
 -- Date: 2026-08-18
 
 -- This migration runs as a superuser (the migration runner or container bootstrap).
--- It revokes UPDATE and DELETE privileges from the application role 'aos_app'
+-- It revokes UPDATE and DELETE privileges from the application role 'nexora_app'
 -- on tables that must be append-only for audit/compliance:
 --   - audit_events: tamper-evident audit log
 --   - wf_employment_records: employment history (payroll reproducibility)
@@ -21,36 +21,36 @@ BEGIN
     ELSE
         -- Revoke UPDATE and DELETE on audit_events
         IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'audit_events') THEN
-            REVOKE UPDATE, DELETE ON audit_events FROM aos_app;
-            RAISE NOTICE 'REVOKEd UPDATE, DELETE on audit_events from aos_app';
+            REVOKE UPDATE, DELETE ON audit_events FROM nexora_app;
+            RAISE NOTICE 'REVOKEd UPDATE, DELETE on audit_events from nexora_app';
         END IF;
 
         -- Revoke UPDATE and DELETE on workforce history tables
         IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'wf_employment_records') THEN
-            REVOKE UPDATE, DELETE ON wf_employment_records FROM aos_app;
-            RAISE NOTICE 'REVOKEd UPDATE, DELETE on wf_employment_records from aos_app';
+            REVOKE UPDATE, DELETE ON wf_employment_records FROM nexora_app;
+            RAISE NOTICE 'REVOKEd UPDATE, DELETE on wf_employment_records from nexora_app';
         END IF;
 
         IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'wf_compensation_records') THEN
-            REVOKE UPDATE, DELETE ON wf_compensation_records FROM aos_app;
-            RAISE NOTICE 'REVOKEd UPDATE, DELETE on wf_compensation_records from aos_app';
+            REVOKE UPDATE, DELETE ON wf_compensation_records FROM nexora_app;
+            RAISE NOTICE 'REVOKEd UPDATE, DELETE on wf_compensation_records from nexora_app';
         END IF;
 
         IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'wf_documents') THEN
-            REVOKE UPDATE, DELETE ON wf_documents FROM aos_app;
-            RAISE NOTICE 'REVOKEd UPDATE, DELETE on wf_documents from aos_app';
+            REVOKE UPDATE, DELETE ON wf_documents FROM nexora_app;
+            RAISE NOTICE 'REVOKEd UPDATE, DELETE on wf_documents from nexora_app';
         END IF;
 
         -- Revoke UPDATE and DELETE on outbox_events
         IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'outbox_events') THEN
-            REVOKE UPDATE, DELETE ON outbox_events FROM aos_app;
-            RAISE NOTICE 'REVOKEd UPDATE, DELETE on outbox_events from aos_app';
+            REVOKE UPDATE, DELETE ON outbox_events FROM nexora_app;
+            RAISE NOTICE 'REVOKEd UPDATE, DELETE on outbox_events from nexora_app';
         END IF;
 
         -- Revoke UPDATE and DELETE on idempotency_records
         IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'idempotency_records') THEN
-            REVOKE UPDATE, DELETE ON idempotency_records FROM aos_app;
-            RAISE NOTICE 'REVOKEd UPDATE, DELETE on idempotency_records from aos_app';
+            REVOKE UPDATE, DELETE ON idempotency_records FROM nexora_app;
+            RAISE NOTICE 'REVOKEd UPDATE, DELETE on idempotency_records from nexora_app';
         END IF;
 
         -- Note: We do NOT revoke on wf_employees, wf_departments, etc. because those

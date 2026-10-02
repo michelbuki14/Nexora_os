@@ -9,8 +9,8 @@
   {
     "file": "docker-compose.yml",
     "line": 132-138,
-    "summary": "The `AOS_SERVICE__NAME` environment variable is redundant — it mirrors the `container_name` field that Docker already sets. The service name is derivable from the container name, so explicitly setting it via env var adds derivable state that could go out of sync with the actual container name.",
-    "failure_scenario": "If a contributor updates `container_name` but forgets `AOS_SERVICE__NAME` (or vice versa), the service name environment variable becomes inconsistent with the container identity, potentially breaking service discovery or config resolution that depends on the env var value.",
+    "summary": "The `NEXORA_SERVICE__NAME` environment variable is redundant — it mirrors the `container_name` field that Docker already sets. The service name is derivable from the container name, so explicitly setting it via env var adds derivable state that could go out of sync with the actual container name.",
+    "failure_scenario": "If a contributor updates `container_name` but forgets `NEXORA_SERVICE__NAME` (or vice versa), the service name environment variable becomes inconsistent with the container identity, potentially breaking service discovery or config resolution that depends on the env var value.",
     "id": "candidate-2"
   },
   {
@@ -23,21 +23,21 @@
   {
     "file": "services/common/Cargo.toml",
     "line": 3-4,
-    "summary": "The workspace dependency `aos-common` → `nexora-common` is renamed identically in 8 service Cargo.toml files plus the root workspace Cargo.toml. This is pure copy-paste variation with no logical difference between any two instances — the rename is mechanically identical across all files.",
+    "summary": "The workspace dependency `nexora-common` is renamed identically in 8 service Cargo.toml files plus the root workspace Cargo.toml. This is pure copy-paste variation with no logical difference between any two instances — the rename is mechanically identical across all files.",
     "failure_scenario": "If a developer accidentally skips one service's Cargo.toml during the rename, that service will fail to compile with a missing dependency error while all others succeed, creating an inconsistent workspace state.",
     "id": "candidate-4"
   },
   {
     "file": "config.workforce-dev.toml",
     "line": 45,
-    "summary": "The S3 bucket name `aos-workforce-documents` → `nexora-workforce-documents` is an example of derivable state — the bucket name follows the deterministic pattern `{service-name}-documents` and could be computed from the service name rather than stored explicitly in every config file.",
+    "summary": "The S3 bucket name `nexora-workforce-documents` is an example of derivable state — the bucket name follows the deterministic pattern `{service-name}-documents` and could be computed from the service name rather than stored explicitly in every config file.",
     "failure_scenario": "If the service rename happens but the bucket name is missed or set to a different value, MinIO/S3 access breaks for that service while other services work fine, creating a partial outage that's easy to miss until the specific service is used.",
     "id": "candidate-5"
   },
   {
     "file": "config.audit-docker.toml",
     "line": 17-37,
-    "summary": "The Keycloak auth configuration (jwks_url, issuer, audience) is duplicated nearly identically across 6 config files (audit, tenant-dev, tenant-docker, workforce-dev, workforce-docker, gateway-docker). Each file has the same structure with only the realm name (`aos` → `nexora`) differing — this is copy-paste with slight variation that creates unnecessary maintenance surface.",
+    "summary": "The Keycloak auth configuration (jwks_url, issuer, audience) is duplicated nearly identically across 6 config files (audit, tenant-dev, tenant-docker, workforce-dev, workforce-docker, gateway-docker). Each file has the same structure with only the realm name (`nexora`) differing — this is copy-paste with slight variation that creates unnecessary maintenance surface.",
     "failure_scenario": "A developer updating the Keycloak realm configuration in one file but missing another means some services authenticate against the old realm while others use the new one, causing authentication failures for users of the missed service without clear error messages about which service is misconfigured.",
     "id": "candidate-6"
     }

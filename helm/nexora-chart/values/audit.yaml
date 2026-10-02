@@ -1,0 +1,42 @@
+# Audit Service — writes hash-chained audit events. Connects to Postgres.
+replicaCount: 2
+
+image:
+  repository: ghcr.io/michelbuki14/nexora-audit-service
+  tag: "0.1.0"
+
+env:
+  NEXORA_SERVICE__NAME: nexora-audit-service
+  NEXORA_SERVICE__ENVIRONMENT: production
+  NEXORA_SERVER__HOST: 0.0.0.0
+  NEXORA_SERVER__PORT: "3001"
+  NEXORA_DATABASE__MAX_CONNECTIONS: "10"
+  NEXORA_REDIS__MAX_CONNECTIONS: "10"
+  NEXORA_AUTH__JWKS_URL: http://keycloak:8080/realms/nexora/protocol/openid-connect/certs
+  NEXORA_AUTH__ISSUER: http://keycloak:8080/realms/nexora
+  NEXORA_AUTH__AUDIENCE: nexora-api
+  NEXORA_AUTH__JWKS_CACHE_TTL_SECS: "300"
+  NEXORA_AUTH__REQUIRE_HTTPS: "false"
+  NEXORA_TRACING__ENABLED: "true"
+  NEXORA_TRACING__OTLP_ENDPOINT: http://nexora-grafana-tempo:4317
+  NEXORA_TRACING__SAMPLE_RATE: "0.1"
+
+existingSecret: nexora-runtime
+
+service:
+  port: 3001
+  targetPort: http
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70

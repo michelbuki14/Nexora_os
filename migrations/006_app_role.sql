@@ -12,38 +12,38 @@
 -- to every query it runs.
 --
 -- The block is idempotent and self-guarding: it only acts when run by a superuser
--- (the initial container bootstrap or `aos-migrate`). When a migration run is
+-- (the initial container bootstrap or `nexora-migrate`). When a migration run is
 -- invoked as `nexora_app` itself (role already bootstrapped), the block no-ops, so
 -- running migrations does not require superuser credentials post-bootstrap.
 
 DO $$
 BEGIN
     IF NOT (SELECT rolsuper FROM pg_roles WHERE rolname = current_user) THEN
-        RAISE NOTICE 'aos_app bootstrap skipped: current_user (%) is not a superuser', current_user;
+        RAISE NOTICE 'nexora_app bootstrap skipped: current_user (%) is not a superuser', current_user;
     ELSE
-        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'aos_app') THEN
-            CREATE ROLE aos_app LOGIN PASSWORD 'aos_app_dev_password'
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'nexora_app') THEN
+            CREATE ROLE nexora_app LOGIN PASSWORD 'nexora_app_dev_password'
                 NOSUPERUSER NOCREATEDB NOCREATEROLE;
-            RAISE NOTICE 'created application role aos_app';
+            RAISE NOTICE 'created application role nexora_app';
         END IF;
 
-        EXECUTE format('GRANT CONNECT ON DATABASE %I TO aos_app', current_database());
-        GRANT USAGE ON SCHEMA public TO aos_app;
-        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO aos_app;
-        GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO aos_app;
+        EXECUTE format('GRANT CONNECT ON DATABASE %I TO nexora_app', current_database());
+        GRANT USAGE ON SCHEMA public TO nexora_app;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO nexora_app;
+        GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO nexora_app;
     END IF;
 END
 $$;
 
 -- Default privileges apply to objects created by the migration user *after* this
--- migration runs; guarded the same way so post-bootstrap runs by aos_app no-op.
+-- migration runs; guarded the same way so post-bootstrap runs by nexora_app no-op.
 DO $$
 BEGIN
     IF (SELECT rolsuper FROM pg_roles WHERE rolname = current_user) THEN
         ALTER DEFAULT PRIVILEGES IN SCHEMA public
-            GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO aos_app;
+            GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO nexora_app;
         ALTER DEFAULT PRIVILEGES IN SCHEMA public
-            GRANT USAGE, SELECT ON SEQUENCES TO aos_app;
+            GRANT USAGE, SELECT ON SEQUENCES TO nexora_app;
     END IF;
 END
 $$;

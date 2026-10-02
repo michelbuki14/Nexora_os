@@ -103,7 +103,7 @@ jobs:
           for svc in "${SERVICES[@]}"; do
             kubectl set image deployment/${svc} \
               ${svc}=${{ env.ECR_REGISTRY }}/${svc}:${{ env.IMAGE_TAG }} \
-              -n aos-staging
+              -n nexora-staging
           done
 
       - name: Wait for staging rollout
@@ -120,13 +120,13 @@ jobs:
           )
           for svc in "${SERVICES[@]}"; do
             kubectl rollout status deployment/${svc} \
-              -n aos-staging --timeout=300s
+              -n nexora-staging --timeout=300s
           done
 
       - name: Run staging smoke tests
         run: |
           # Replace with actual staging endpoint or use kubectl port-forward
-          STAGING_API="https://staging-api.aos.example.com"
+          STAGING_API="https://staging-api.nexora.example.com"
           sleep 30
           curl -f "${STAGING_API}/health/live" || exit 1
           curl -f "${STAGING_API}/health/ready" || exit 1
@@ -189,7 +189,7 @@ jobs:
 
       - name: Run production smoke tests
         run: |
-          PROD_API="https://api.aos.example.com"
+          PROD_API="https://api.nexora.example.com"
           sleep 60
           curl -f "${PROD_API}/health/live" || exit 1
           curl -f "${PROD_API}/health/ready" || exit 1

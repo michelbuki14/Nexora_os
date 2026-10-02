@@ -70,7 +70,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Non-root user
-RUN groupadd -r aos && useradd -r -g aos aos
+RUN groupadd -r nexora && useradd -r -g nexora nexora
 
 # Copy all service binaries
 COPY --from=builder /app/target/release/nexora-api-gateway /usr/local/bin/
@@ -83,7 +83,7 @@ COPY --from=builder /app/target/release/nexora-retail-service /usr/local/bin/
 COPY --from=builder /app/target/release/nexora-gov-service /usr/local/bin/
 COPY --from=builder /app/target/release/nexora-migrate /usr/local/bin/
 
-RUN chown aos:aos \
+RUN chown nexora:nexora \
     /usr/local/bin/nexora-api-gateway \
     /usr/local/bin/nexora-workforce-service \
     /usr/local/bin/nexora-tenant-service \
@@ -94,7 +94,7 @@ RUN chown aos:aos \
     /usr/local/bin/nexora-gov-service \
     /usr/local/bin/nexora-migrate
 
-USER aos
+USER nexora
 
 EXPOSE 3000
 
